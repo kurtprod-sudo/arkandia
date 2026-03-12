@@ -2,26 +2,142 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================================
+   ARKANDIA — Design System Variables
+   ========================================================================== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Backgrounds */
+  --color-bg-primary: #0A0608;
+  --color-bg-secondary: #120D0F;
+  --color-bg-tertiary: #1C1418;
+
+  /* Wine accent */
+  --color-wine-dark: #3D0F1C;
+  --color-wine-mid: #6B1F35;
+  --color-wine-light: #9B3452;
+  --color-wine-glow: #C4415E;
+
+  /* Bronze / Gold accent */
+  --color-bronze-dark: #4A3218;
+  --color-bronze-mid: #8B6330;
+  --color-bronze-light: #C49A4A;
+  --color-bronze-glow: #E8C06A;
+  --color-gold-pure: #F5D485;
+
+  /* Text */
+  --color-text-primary: #F0E6D3;
+  --color-text-secondary: #A89880;
+  --color-text-muted: #6B5D52;
+
+  /* Status */
+  --color-status-alive: #4CAF82;
+  --color-status-injured: #E8A020;
+  --color-status-dead: #8B2020;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* ==========================================================================
+   Base resets
+   ========================================================================== */
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
 }
 
+/* Subtle noise texture on cards */
+.ark-texture {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23120D0F'/%3E%3Crect width='1' height='1' fill='%23150F12' opacity='0.4'/%3E%3C/svg%3E");
+}
+
+/* ==========================================================================
+   Glow effects
+   ========================================================================== */
+
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .glow-wine {
+    box-shadow: 0 0 20px rgba(196, 65, 94, 0.3), 0 0 40px rgba(196, 65, 94, 0.1);
   }
+
+  .glow-bronze {
+    box-shadow: 0 0 20px rgba(196, 154, 74, 0.3), 0 0 40px rgba(196, 154, 74, 0.1);
+  }
+
+  .glow-gold {
+    box-shadow: 0 0 20px rgba(245, 212, 133, 0.35), 0 0 50px rgba(245, 212, 133, 0.15);
+  }
+
+  .text-glow-bronze {
+    text-shadow: 0 0 12px rgba(232, 192, 106, 0.5), 0 0 30px rgba(232, 192, 106, 0.2);
+  }
+
+  .text-glow-wine {
+    text-shadow: 0 0 12px rgba(196, 65, 94, 0.5), 0 0 30px rgba(196, 65, 94, 0.2);
+  }
+
+  /* Shimmer — for rare / legendary items */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(245, 212, 133, 0.08) 40%,
+      rgba(245, 212, 133, 0.15) 50%,
+      rgba(245, 212, 133, 0.08) 60%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  /* Pulse glow — for active / alive elements */
+  .pulse-glow {
+    animation: pulse-glow 2.5s ease-in-out infinite;
+  }
+
+  /* Float — for archetype icons */
+  .particle-float {
+    animation: particle-float 4s ease-in-out infinite;
+  }
+
+  /* Ornamental border (used on ArkCard highlighted/legendary) */
+  .border-ornament {
+    border-image: linear-gradient(
+      135deg,
+      var(--color-bronze-dark) 0%,
+      var(--color-bronze-light) 30%,
+      var(--color-gold-pure) 50%,
+      var(--color-bronze-light) 70%,
+      var(--color-bronze-dark) 100%
+    ) 1;
+  }
+}
+
+/* ==========================================================================
+   Scrollbar — themed
+   ========================================================================== */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-bronze-dark);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-bronze-mid);
+}
+
+/* ==========================================================================
+   Selection color
+   ========================================================================== */
+
+::selection {
+  background: rgba(107, 31, 53, 0.5);
+  color: var(--color-gold-pure);
 }

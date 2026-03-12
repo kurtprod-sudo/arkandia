@@ -23,13 +23,14 @@ export default function AuthForm({ action, submitLabel, children }: AuthFormProp
   )
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className="space-y-5">
       {children}
 
       {state?.error && (
-        <p className="text-red-400 text-sm bg-red-950/50 border border-red-800 rounded px-3 py-2">
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-red-950/40 border border-red-900/50 text-red-300 text-sm font-body">
+          <span className="shrink-0">&#x26A0;</span>
           {state.error}
-        </p>
+        </div>
       )}
 
       <SubmitButton label={submitLabel} />
@@ -43,7 +44,17 @@ function SubmitButton({ label }: { label: string }) {
     <button
       type="submit"
       disabled={pending}
-      className="w-full py-2 px-4 bg-amber-500 hover:bg-amber-400 disabled:bg-amber-800 disabled:cursor-not-allowed text-black font-semibold rounded transition-colors"
+      className="
+        w-full py-3 px-4 rounded-lg
+        font-body font-bold text-base
+        bg-gradient-to-r from-wine-dark to-wine-mid
+        text-bronze-glow border border-bronze-mid/30
+        hover:from-wine-mid hover:to-wine-light hover:shadow-glow-wine
+        disabled:from-wine-dark/50 disabled:to-wine-dark/50
+        disabled:text-ark-text-muted disabled:border-bronze-dark/10
+        disabled:cursor-not-allowed
+        transition-all duration-200
+      "
     >
       {pending ? 'Aguarde...' : label}
     </button>

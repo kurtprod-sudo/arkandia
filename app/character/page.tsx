@@ -2,7 +2,14 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { xpToNextLevel, canChooseArchetype, canChooseClass } from '@/lib/game/xp'
 import AttributeDistributor from '@/components/character/AttributeDistributor'
-import StatBar from '@/components/ui/StatBar'
+import ArkStatBar from '@/components/ui/ArkStatBar'
+import ArkDivider from '@/components/ui/ArkDivider'
+import ArkBadge from '@/components/ui/ArkBadge'
+import {
+  SwordIcon, MagicIcon, ShieldIcon, HeartIcon,
+  ZapIcon, TargetIcon, AnchorIcon, CrownIcon,
+  CoinIcon, CrystalIcon, DiamondIcon,
+} from '@/components/ui/ArkIcons'
 
 
 export default async function CharacterSheetPage() {
@@ -14,12 +21,6 @@ export default async function CharacterSheetPage() {
 
   if (!user) redirect('/auth/login')
 
-  // -------------------------------------------------------------------------
-  // Passo 1: verifica existência com query simples (sem joins, sem RLS de
-  // tabelas relacionadas). Garante que o redirect para /create só dispara
-  // quando o personagem de fato não existe — não por falha de join/RLS.
-  // Isso quebra o loop: /character → /create → /character → ...
-  // -------------------------------------------------------------------------
   const { data: charCheck } = await supabase
     .from('characters')
     .select('id')
@@ -28,14 +29,6 @@ export default async function CharacterSheetPage() {
 
   if (!charCheck) redirect('/character/create')
 
-  // -------------------------------------------------------------------------
-  // Passo 2: queries separadas por tabela.
-  // Evita dois problemas de join:
-  //   a) Ambiguidade de FK em societies (characters.society_id ↔ societies.leader_id)
-  //      que faz o PostgREST retornar erro "more than one relationship was found"
-  //   b) Políticas RLS que usam sub-queries (get_my_character_id) podem não
-  //      resolver corretamente no contexto de um join composto
-  // -------------------------------------------------------------------------
   const characterId = charCheck.id
 
   const [
@@ -60,7 +53,6 @@ export default async function CharacterSheetPage() {
       .maybeSingle(),
   ])
 
-  // Debug: aparece no terminal do Next.js dev server
   if (process.env.NODE_ENV === 'development') {
     if (charError) console.error('[/character] characters error:', charError)
     if (attrsError) console.error('[/character] character_attributes error:', attrsError)
@@ -70,10 +62,10 @@ export default async function CharacterSheetPage() {
 
   if (!character) {
     return (
-      <main className="min-h-screen bg-neutral-950 flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-neutral-400 mb-3">Erro ao carregar personagem.</p>
-          <a href="/character" className="text-amber-400 underline text-sm">
+          <p className="text-ark-text-secondary mb-3 font-body">Erro ao carregar personagem.</p>
+          <a href="/character" className="text-bronze-light hover:text-bronze-glow underline text-sm font-body">
             Tentar novamente
           </a>
         </div>
@@ -81,13 +73,12 @@ export default async function CharacterSheetPage() {
     )
   }
 
-  // Atributos ainda não inicializados (trigger de criação ainda executando)
   if (!attrs || !wallet) {
     return (
-      <main className="min-h-screen bg-neutral-950 flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-neutral-400 mb-3">Inicializando personagem...</p>
-          <a href="/character" className="text-amber-400 underline text-sm">
+          <p className="text-ark-text-secondary mb-3 font-body">Inicializando personagem...</p>
+          <a href="/character" className="text-bronze-light hover:text-bronze-glow underline text-sm font-body">
             Clique para continuar
           </a>
         </div>
@@ -95,7 +86,6 @@ export default async function CharacterSheetPage() {
     )
   }
 
-  // Busca nome da sociedade separado (evita ambiguidade de FK no join)
   let societyName: string | null = null
   if (character.society_id) {
     const { data: society } = await supabase
@@ -105,133 +95,147 @@ export default async function CharacterSheetPage() {
       .maybeSingle()
     societyName = society?.name ?? null
   }
+
   const xpNeeded = xpToNextLevel(character.level)
-  const xpPercent = Math.min(100, (character.xp / xpNeeded) * 100)
-
-  const STATUS_LABELS = {
-    active: 'Vivo',
-    injured: 'Ferido',
-    dead: 'Morto',
-  } as const
-
-  const STATUS_COLORS = {
-    active: 'text-green-400',
-    injured: 'text-yellow-400',
-    dead: 'text-red-400',
-  } as const
-
+  const STATUS_LABELS = { active: 'Vivo', injured: 'Ferido', dead: 'Morto' } as const
+  const STATUS_BADGE: Record<string, 'alive' | 'injured' | 'dead'> = {
+    active: 'alive', injured: 'injured', dead: 'dead',
+  }
   const PROFESSION_LABELS: Record<string, string> = {
     comerciante: 'Comerciante', militar: 'Militar', clerigo: 'Clérigo',
     explorador: 'Explorador', artesao: 'Artesão', erudito: 'Erudito',
     nobre: 'Nobre', mercenario: 'Mercenário',
   }
 
-  return (
-    <main className="min-h-screen bg-neutral-950 text-white px-4 py-8">
-      <div className="max-w-4xl mx-auto space-y-6">
+  const ATTR_ROWS: { key: string; label: string; color: string; Icon: typeof SwordIcon }[] = [
+    { key: 'ataque', label: 'Ataque', color: 'text-attr-ataque', Icon: SwordIcon },
+    { key: 'magia', label: 'Magia', color: 'text-attr-magia', Icon: MagicIcon },
+    { key: 'defesa', label: 'Defesa', color: 'text-attr-defesa', Icon: ShieldIcon },
+    { key: 'vitalidade', label: 'Vitalidade', color: 'text-attr-vitalidade', Icon: HeartIcon },
+    { key: 'velocidade', label: 'Velocidade', color: 'text-attr-velocidade', Icon: ZapIcon },
+    { key: 'precisao', label: 'Precisão', color: 'text-attr-precisao', Icon: TargetIcon },
+    { key: 'tenacidade', label: 'Tenacidade', color: 'text-attr-tenacidade', Icon: AnchorIcon },
+    { key: 'capitania', label: 'Capitania', color: 'text-attr-capitania', Icon: CrownIcon },
+  ]
 
-        {/* Header */}
-        <div className="bg-neutral-900 rounded-xl p-6 border border-neutral-800">
+  return (
+    <main className="min-h-screen px-4 py-8 relative">
+      {/* Background effects */}
+      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full bg-wine-dark/8 blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full bg-bronze-dark/8 blur-[120px] pointer-events-none" />
+
+      <div className="max-w-4xl mx-auto space-y-6 relative z-10">
+
+        {/* Header Card */}
+        <div className="relative bg-ark-bg-secondary rounded-xl p-6 border border-bronze-dark/25">
+          {/* Ornamental top border */}
+          <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-bronze-mid/40 to-transparent" />
+
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-amber-400">{character.name}</h1>
+              <h1 className="font-display text-2xl font-bold text-gold-pure text-glow-bronze">
+                {character.name}
+              </h1>
               {character.title && (
-                <p className="text-neutral-400 text-sm italic">&quot;{character.title}&quot;</p>
+                <p className="text-ark-text-muted text-sm italic font-body mt-0.5">
+                  &quot;{character.title}&quot;
+                </p>
               )}
-              <p className="text-neutral-400 mt-1">
-                {PROFESSION_LABELS[character.profession]} •{' '}
+              <div className="flex items-center gap-2 mt-2">
+                <ArkBadge color="bronze">
+                  {PROFESSION_LABELS[character.profession]}
+                </ArkBadge>
                 {character.archetype ? (
-                  <span className="text-purple-400 capitalize">{character.archetype}</span>
+                  <ArkBadge color="capitania">
+                    {character.archetype}
+                  </ArkBadge>
                 ) : (
-                  <span className="text-neutral-600">Sem Arquétipo</span>
+                  <span className="text-ark-text-muted text-xs font-body">Sem Arquétipo</span>
                 )}
-              </p>
+              </div>
               {societyName && (
-                <p className="text-neutral-400 text-sm mt-1">
-                  Sociedade: <span className="text-white">{societyName}</span>
+                <p className="text-ark-text-muted text-sm mt-2 font-body">
+                  Sociedade: <span className="text-bronze-light">{societyName}</span>
                 </p>
               )}
             </div>
             <div className="text-right">
-              <p className="text-3xl font-bold text-white">Nv {character.level}</p>
-              <p className={`font-semibold ${STATUS_COLORS[character.status]}`}>
-                {STATUS_LABELS[character.status]}
+              <p className="text-3xl font-display font-bold text-gold-pure">
+                Nv {character.level}
               </p>
+              <ArkBadge color={STATUS_BADGE[character.status]} className="mt-1">
+                {STATUS_LABELS[character.status]}
+              </ArkBadge>
             </div>
           </div>
 
           {/* XP Bar */}
-          <div className="mt-4">
-            <div className="flex justify-between text-xs text-neutral-500 mb-1">
-              <span>XP</span>
-              <span>{character.xp} / {xpNeeded}</span>
-            </div>
-            <div className="h-2 bg-neutral-800 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-amber-500 transition-all"
-                style={{ width: `${xpPercent}%` }}
-              />
-            </div>
+          <div className="mt-5">
+            <ArkStatBar
+              label="Experiência"
+              current={character.xp}
+              max={xpNeeded}
+              type="xp"
+            />
           </div>
 
-          {/* Marcos desbloqueáveis */}
+          {/* Milestone alerts */}
           {canChooseArchetype(character.level) && !character.archetype && (
-            <div className="mt-4 p-3 bg-purple-950/30 border border-purple-800 rounded-lg">
-              <p className="text-purple-300 text-sm font-semibold">
+            <div className="mt-4 p-3 bg-attr-capitania/10 border border-attr-capitania/30 rounded-lg">
+              <p className="text-attr-capitania text-sm font-body font-semibold">
                 Nível 5 atingido — escolha seu Arquétipo de Ressonância!
               </p>
             </div>
           )}
           {canChooseClass(character.level) && !character.class_id && (
-            <div className="mt-2 p-3 bg-blue-950/30 border border-blue-800 rounded-lg">
-              <p className="text-blue-300 text-sm font-semibold">
+            <div className="mt-2 p-3 bg-attr-eter/10 border border-attr-eter/30 rounded-lg">
+              <p className="text-attr-eter text-sm font-body font-semibold">
                 Nível 10 atingido — escolha sua Classe!
               </p>
             </div>
           )}
         </div>
 
-        {/* Atributos */}
+        {/* Vitals + Attributes Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Vitais */}
-          <div className="bg-neutral-900 rounded-xl p-5 border border-neutral-800 space-y-4">
-            <h2 className="text-sm font-semibold text-neutral-400 uppercase tracking-wide">
+          {/* Vitals */}
+          <div className="bg-ark-bg-secondary rounded-xl p-5 border border-bronze-dark/25 space-y-4">
+            <h2 className="text-xs font-body text-ark-text-secondary uppercase tracking-wider">
               Vitais
             </h2>
-            <StatBar label="HP" current={attrs.hp_atual} max={attrs.hp_max} color="red" />
-            <StatBar label="Éter" current={attrs.eter_atual} max={attrs.eter_max} color="blue" />
-            <div className="flex justify-between text-sm pt-2 border-t border-neutral-800">
-              <span className="text-neutral-400">Moral</span>
-              <span className="font-mono text-amber-400">{attrs.moral}/200</span>
+            <ArkStatBar label="HP" current={attrs.hp_atual} max={attrs.hp_max} type="hp" />
+            <ArkStatBar label="Éter" current={attrs.eter_atual} max={attrs.eter_max} type="eter" />
+            <ArkDivider variant="dark" />
+            <div className="flex justify-between text-sm">
+              <span className="text-ark-text-secondary font-body flex items-center gap-1.5">
+                <span className="text-attr-moral">&#x2665;</span> Moral
+              </span>
+              <span className="font-data font-bold text-attr-moral">{attrs.moral}/200</span>
             </div>
           </div>
 
-          {/* Atributos de combate */}
-          <div className="bg-neutral-900 rounded-xl p-5 border border-neutral-800">
-            <h2 className="text-sm font-semibold text-neutral-400 uppercase tracking-wide mb-4">
+          {/* Combat Attributes */}
+          <div className="bg-ark-bg-secondary rounded-xl p-5 border border-bronze-dark/25">
+            <h2 className="text-xs font-body text-ark-text-secondary uppercase tracking-wider mb-4">
               Atributos
             </h2>
             <div className="space-y-2">
-              {[
-                ['Ataque', attrs.ataque],
-                ['Magia', attrs.magia],
-                ['Defesa', attrs.defesa],
-                ['Vitalidade', attrs.vitalidade],
-                ['Velocidade', attrs.velocidade],
-                ['Precisão', attrs.precisao],
-                ['Tenacidade', attrs.tenacidade],
-                ['Capitania', attrs.capitania],
-              ].map(([label, value]) => (
-                <div key={String(label)} className="flex justify-between text-sm">
-                  <span className="text-neutral-400">{label}</span>
-                  <span className="font-mono font-semibold text-white">{value}</span>
+              {ATTR_ROWS.map(({ key, label, color, Icon }) => (
+                <div key={key} className="flex items-center justify-between text-sm py-1">
+                  <span className="flex items-center gap-2 text-ark-text-secondary font-body">
+                    <Icon className={color} size={15} />
+                    {label}
+                  </span>
+                  <span className={`font-data font-bold ${color}`}>
+                    {attrs[key as keyof typeof attrs]}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Distribuição de pontos */}
+        {/* Attribute Distribution */}
         {attrs.attribute_points > 0 && (
           <AttributeDistributor
             characterId={character.id}
@@ -240,23 +244,32 @@ export default async function CharacterSheetPage() {
           />
         )}
 
-        {/* Carteira */}
-        <div className="bg-neutral-900 rounded-xl p-5 border border-neutral-800">
-          <h2 className="text-sm font-semibold text-neutral-400 uppercase tracking-wide mb-4">
+        {/* Wallet */}
+        <div className="bg-ark-bg-secondary rounded-xl p-5 border border-bronze-dark/25">
+          <h2 className="text-xs font-body text-ark-text-secondary uppercase tracking-wider mb-4">
             Carteira
           </h2>
           <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <p className="text-xs text-neutral-500 mb-1">Libras</p>
-              <p className="text-xl font-bold text-yellow-400">{wallet.libras.toLocaleString()}</p>
+            <div className="text-center p-3 rounded-lg bg-ark-bg-primary border border-bronze-dark/20">
+              <CoinIcon className="text-gold-pure mx-auto mb-1" size={22} />
+              <p className="text-xs text-ark-text-muted mb-1 font-body">Libras</p>
+              <p className="text-xl font-data font-bold text-gold-pure">
+                {wallet.libras.toLocaleString()}
+              </p>
             </div>
-            <div className="text-center">
-              <p className="text-xs text-neutral-500 mb-1">Essência</p>
-              <p className="text-xl font-bold text-purple-400">{wallet.essencia.toLocaleString()}</p>
+            <div className="text-center p-3 rounded-lg bg-ark-bg-primary border border-bronze-dark/20">
+              <CrystalIcon className="text-attr-capitania mx-auto mb-1" size={22} />
+              <p className="text-xs text-ark-text-muted mb-1 font-body">Essência</p>
+              <p className="text-xl font-data font-bold text-attr-capitania">
+                {wallet.essencia.toLocaleString()}
+              </p>
             </div>
-            <div className="text-center">
-              <p className="text-xs text-neutral-500 mb-1">Premium</p>
-              <p className="text-xl font-bold text-emerald-400">{wallet.premium_currency.toLocaleString()}</p>
+            <div className="text-center p-3 rounded-lg bg-ark-bg-primary border border-bronze-dark/20">
+              <DiamondIcon className="text-status-alive mx-auto mb-1" size={22} />
+              <p className="text-xs text-ark-text-muted mb-1 font-body">Premium</p>
+              <p className="text-xl font-data font-bold text-status-alive">
+                {wallet.premium_currency.toLocaleString()}
+              </p>
             </div>
           </div>
         </div>

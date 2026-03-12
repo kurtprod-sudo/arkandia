@@ -1,63 +1,44 @@
 import Link from 'next/link'
 import { register } from '../actions'
 import AuthForm from '@/components/ui/AuthForm'
+import ArkInput from '@/components/ui/ArkInput'
+import ArkDivider from '@/components/ui/ArkDivider'
 
 export default function RegisterPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-neutral-950">
-      <div className="w-full max-w-md px-6">
-        <h1 className="text-3xl font-bold text-amber-400 text-center mb-2">Arkandia</h1>
-        <p className="text-neutral-400 text-center mb-8">Crie sua conta</p>
+    <main className="min-h-screen flex items-center justify-center px-4 relative">
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-wine-dark/15 blur-[100px] pointer-events-none" />
 
-        <AuthForm action={register} submitLabel="Criar Conta">
-          <div>
-            <label className="block text-sm text-neutral-300 mb-1" htmlFor="username">
-              Nome de usuário
-            </label>
-            <input
+      <div className="w-full max-w-md relative z-10">
+        <h1 className="font-display text-3xl font-bold text-gold-pure text-glow-bronze text-center mb-1">
+          Arkandia
+        </h1>
+        <p className="text-ark-text-secondary text-center font-body text-sm mb-2">
+          Crie sua conta
+        </p>
+        <ArkDivider className="w-48 mx-auto mb-8" />
+
+        <div className="bg-ark-bg-secondary border border-bronze-dark/25 rounded-xl p-6">
+          <AuthForm action={register} submitLabel="Criar Conta">
+            <ArkInput
               id="username"
               name="username"
               type="text"
+              label="Nome de usuário"
               required
               minLength={3}
               maxLength={24}
               pattern="[a-zA-Z0-9_]+"
               title="Apenas letras, números e underscore"
-              className="w-full px-4 py-2 rounded bg-neutral-800 border border-neutral-700 text-white focus:outline-none focus:border-amber-500"
             />
-          </div>
+            <ArkInput id="email" name="email" type="email" label="Email" required />
+            <ArkInput id="password" name="password" type="password" label="Senha" required minLength={8} />
+          </AuthForm>
+        </div>
 
-          <div>
-            <label className="block text-sm text-neutral-300 mb-1" htmlFor="email">
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              className="w-full px-4 py-2 rounded bg-neutral-800 border border-neutral-700 text-white focus:outline-none focus:border-amber-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-neutral-300 mb-1" htmlFor="password">
-              Senha
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              minLength={8}
-              className="w-full px-4 py-2 rounded bg-neutral-800 border border-neutral-700 text-white focus:outline-none focus:border-amber-500"
-            />
-          </div>
-        </AuthForm>
-
-        <p className="text-center text-neutral-500 mt-4 text-sm">
+        <p className="text-center text-ark-text-muted mt-5 text-sm font-body">
           Já tem conta?{' '}
-          <Link href="/auth/login" className="text-amber-400 hover:underline">
+          <Link href="/auth/login" className="text-bronze-light hover:text-bronze-glow transition-colors">
             Entrar
           </Link>
         </p>

@@ -3,6 +3,8 @@
 import { useState, useTransition } from 'react'
 import { distributeAttribute } from '@/app/character/actions'
 import { type CharacterAttributes } from '@/types'
+import ArkButton from '@/components/ui/ArkButton'
+import { ATTR_ICONS } from '@/components/ui/ArkIcons'
 
 interface Props {
   characterId: string
@@ -12,16 +14,16 @@ interface Props {
 
 type DistributableAttr = 'ataque' | 'magia' | 'eter_max' | 'defesa' | 'vitalidade' | 'velocidade' | 'precisao' | 'tenacidade' | 'capitania'
 
-const ATTRS: { key: DistributableAttr; label: string; desc: string }[] = [
-  { key: 'ataque', label: 'Ataque', desc: 'Dano físico' },
-  { key: 'magia', label: 'Magia', desc: 'Habilidades místicas e curas' },
-  { key: 'eter_max', label: 'Éter', desc: 'Recurso para ativar habilidades' },
-  { key: 'defesa', label: 'Defesa', desc: 'Mitiga todo tipo de dano' },
-  { key: 'vitalidade', label: 'Vitalidade', desc: 'Determina HP máximo (+10 HP cada)' },
-  { key: 'velocidade', label: 'Velocidade', desc: 'Iniciativa e chance de esquiva' },
-  { key: 'precisao', label: 'Precisão', desc: 'Chance de aplicar efeitos negativos' },
-  { key: 'tenacidade', label: 'Tenacidade', desc: 'Resistência a efeitos negativos' },
-  { key: 'capitania', label: 'Capitania', desc: 'Limite de tropas lideradas' },
+const ATTRS: { key: DistributableAttr; label: string; desc: string; color: string; iconKey: string }[] = [
+  { key: 'ataque', label: 'Ataque', desc: 'Dano físico', color: 'text-attr-ataque', iconKey: 'ataque' },
+  { key: 'magia', label: 'Magia', desc: 'Habilidades místicas e curas', color: 'text-attr-magia', iconKey: 'magia' },
+  { key: 'eter_max', label: 'Éter', desc: 'Recurso para ativar habilidades', color: 'text-attr-eter', iconKey: 'eter' },
+  { key: 'defesa', label: 'Defesa', desc: 'Mitiga todo tipo de dano', color: 'text-attr-defesa', iconKey: 'defesa' },
+  { key: 'vitalidade', label: 'Vitalidade', desc: 'Determina HP máximo (+10 HP cada)', color: 'text-attr-vitalidade', iconKey: 'vitalidade' },
+  { key: 'velocidade', label: 'Velocidade', desc: 'Iniciativa e chance de esquiva', color: 'text-attr-velocidade', iconKey: 'velocidade' },
+  { key: 'precisao', label: 'Precisão', desc: 'Chance de aplicar efeitos negativos', color: 'text-attr-precisao', iconKey: 'precisao' },
+  { key: 'tenacidade', label: 'Tenacidade', desc: 'Resistência a efeitos negativos', color: 'text-attr-tenacidade', iconKey: 'tenacidade' },
+  { key: 'capitania', label: 'Capitania', desc: 'Limite de tropas lideradas', color: 'text-attr-capitania', iconKey: 'capitania' },
 ]
 
 export default function AttributeDistributor({ characterId, availablePoints, currentAttributes }: Props) {
@@ -62,42 +64,46 @@ export default function AttributeDistributor({ characterId, availablePoints, cur
   }
 
   return (
-    <div className="bg-amber-950/20 border border-amber-700 rounded-xl p-5">
+    <div className="bg-wine-dark/15 border border-wine-mid/30 rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-amber-400 font-bold">
+        <h2 className="font-display text-sm text-gold-pure text-glow-bronze">
           Pontos para distribuir
         </h2>
-        <span className="text-2xl font-bold text-amber-400">{remaining}</span>
+        <span className="text-2xl font-data font-bold text-gold-pure">{remaining}</span>
       </div>
 
       <div className="space-y-2 mb-4">
-        {ATTRS.map(({ key, label, desc }) => {
+        {ATTRS.map(({ key, label, desc, color, iconKey }) => {
           const currentVal = currentAttributes[key]
-          const pending = pendingDistrib[key] ?? 0
+          const pendingVal = pendingDistrib[key] ?? 0
+          const Icon = ATTR_ICONS[iconKey as keyof typeof ATTR_ICONS]
           return (
             <div key={key} className="flex items-center gap-3">
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-white font-medium">{label}</p>
-                <p className="text-xs text-neutral-500 truncate">{desc}</p>
+                <div className="flex items-center gap-1.5">
+                  {Icon && <Icon className={color} size={14} />}
+                  <p className={`text-sm font-body font-medium ${color}`}>{label}</p>
+                </div>
+                <p className="text-xs text-ark-text-muted truncate">{desc}</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => adjust(key, -1)}
-                  disabled={pending <= 0 || pending === undefined}
-                  className="w-7 h-7 rounded bg-neutral-700 hover:bg-neutral-600 disabled:opacity-30 disabled:cursor-not-allowed text-white font-bold"
+                  disabled={pendingVal <= 0}
+                  className="w-7 h-7 rounded bg-ark-bg-tertiary border border-bronze-dark/30 hover:border-bronze-mid/50 disabled:opacity-30 disabled:cursor-not-allowed text-ark-text-primary font-bold transition-colors"
                 >
                   −
                 </button>
-                <span className="w-20 text-center font-mono text-sm">
-                  <span className="text-white">{currentVal}</span>
-                  {pending > 0 && (
-                    <span className="text-amber-400"> +{pending}</span>
+                <span className="w-20 text-center font-data text-sm">
+                  <span className="text-ark-text-primary">{currentVal}</span>
+                  {pendingVal > 0 && (
+                    <span className="text-gold-pure"> +{pendingVal}</span>
                   )}
                 </span>
                 <button
                   onClick={() => adjust(key, 1)}
                   disabled={remaining <= 0}
-                  className="w-7 h-7 rounded bg-neutral-700 hover:bg-neutral-600 disabled:opacity-30 disabled:cursor-not-allowed text-white font-bold"
+                  className="w-7 h-7 rounded bg-ark-bg-tertiary border border-bronze-dark/30 hover:border-bronze-mid/50 disabled:opacity-30 disabled:cursor-not-allowed text-ark-text-primary font-bold transition-colors"
                 >
                   +
                 </button>
@@ -108,18 +114,19 @@ export default function AttributeDistributor({ characterId, availablePoints, cur
       </div>
 
       {message && (
-        <p className={`text-sm mb-3 ${message.includes('!') ? 'text-green-400' : 'text-red-400'}`}>
+        <p className={`text-sm mb-3 font-body ${message.includes('!') ? 'text-status-alive' : 'text-status-dead'}`}>
           {message}
         </p>
       )}
 
-      <button
+      <ArkButton
         onClick={confirm}
         disabled={pending || totalPending === 0}
-        className="w-full py-2 bg-amber-500 hover:bg-amber-400 disabled:bg-neutral-700 disabled:cursor-not-allowed text-black font-bold rounded transition-colors"
+        className="w-full"
+        size="lg"
       >
         {pending ? 'Aplicando...' : 'Confirmar Distribuição'}
-      </button>
+      </ArkButton>
     </div>
   )
 }

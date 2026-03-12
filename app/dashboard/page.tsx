@@ -2,6 +2,9 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { logout } from '@/app/auth/actions'
+import ArkButton from '@/components/ui/ArkButton'
+import ArkDivider from '@/components/ui/ArkDivider'
+import ArkBadge from '@/components/ui/ArkBadge'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -31,79 +34,105 @@ export default async function DashboardPage() {
     .order('created_at', { ascending: false })
     .limit(10)
 
+  const PROFESSION_LABELS: Record<string, string> = {
+    comerciante: 'Comerciante', militar: 'Militar', clerigo: 'Clérigo',
+    explorador: 'Explorador', artesao: 'Artesão', erudito: 'Erudito',
+    nobre: 'Nobre', mercenario: 'Mercenário',
+  }
+
+  const STATUS_LABELS: Record<string, string> = {
+    active: 'Vivo', injured: 'Ferido', dead: 'Morto',
+  }
+
+  const STATUS_BADGE: Record<string, 'alive' | 'injured' | 'dead'> = {
+    active: 'alive', injured: 'injured', dead: 'dead',
+  }
+
   return (
-    <main className="min-h-screen bg-neutral-950 text-white">
+    <main className="min-h-screen relative">
+      {/* Background effects */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-wine-dark/6 blur-[150px] pointer-events-none" />
+
       {/* Navbar */}
-      <nav className="border-b border-neutral-800 px-6 py-3 flex items-center justify-between">
-        <span className="text-amber-400 font-bold text-lg">Arkandia</span>
+      <nav className="border-b border-bronze-dark/25 px-6 py-3 flex items-center justify-between bg-ark-bg-secondary/80 backdrop-blur-sm relative z-10">
+        <Link href="/dashboard" className="font-display text-gold-pure text-lg text-glow-bronze">
+          Arkandia
+        </Link>
         <div className="flex items-center gap-4">
           {profile?.role === 'gm' && (
-            <Link href="/gm" className="text-sm text-red-400 hover:text-red-300">
+            <Link href="/gm" className="text-sm text-wine-glow hover:text-wine-light transition-colors font-body">
               Painel GM
             </Link>
           )}
-          <span className="text-neutral-400 text-sm">{profile?.username}</span>
+          <span className="text-ark-text-muted text-sm font-body">{profile?.username}</span>
           <form action={logout}>
-            <button className="text-sm text-neutral-500 hover:text-white">
+            <button className="text-sm text-ark-text-muted hover:text-ark-text-primary transition-colors font-body">
               Sair
             </button>
           </form>
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-6 relative z-10">
 
-        {/* Personagem */}
+        {/* Character Card */}
         {character ? (
-          <div className="bg-neutral-900 rounded-xl p-6 border border-neutral-800">
+          <div className="bg-ark-bg-secondary rounded-xl p-6 border border-bronze-dark/25">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-neutral-400 text-sm uppercase tracking-wide">
+              <h2 className="text-xs font-body text-ark-text-secondary uppercase tracking-wider">
                 Meu Personagem
               </h2>
               <Link
                 href="/character"
-                className="text-sm text-amber-400 hover:underline"
+                className="text-sm text-bronze-light hover:text-bronze-glow transition-colors font-body"
               >
-                Ver ficha completa →
+                Ver ficha completa &rarr;
               </Link>
             </div>
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-amber-900/30 border-2 border-amber-700 flex items-center justify-center text-2xl font-bold text-amber-400">
+              <div className="w-14 h-14 rounded-full bg-wine-dark/30 border-2 border-bronze-mid/50 flex items-center justify-center text-2xl font-display font-bold text-gold-pure">
                 {character.name.charAt(0)}
               </div>
               <div>
-                <p className="text-xl font-bold">{character.name}</p>
-                <p className="text-neutral-400 text-sm">
-                  Nível {character.level} • {character.status}
-                </p>
+                <p className="text-xl font-display font-bold text-gold-pure">{character.name}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-ark-text-secondary text-sm font-body">
+                    Nv {character.level}
+                  </span>
+                  <span className="text-bronze-dark">•</span>
+                  <ArkBadge color="bronze" className="text-[10px]">
+                    {PROFESSION_LABELS[character.profession] ?? character.profession}
+                  </ArkBadge>
+                  <ArkBadge color={STATUS_BADGE[character.status]} className="text-[10px]">
+                    {STATUS_LABELS[character.status]}
+                  </ArkBadge>
+                </div>
               </div>
             </div>
           </div>
         ) : (
-          <div className="bg-neutral-900 rounded-xl p-6 border border-amber-800 text-center">
-            <p className="text-neutral-400 mb-3">Você ainda não criou seu personagem.</p>
-            <Link
-              href="/character/create"
-              className="inline-block px-6 py-2 bg-amber-500 text-black font-bold rounded hover:bg-amber-400"
-            >
-              Criar Personagem
+          <div className="bg-ark-bg-secondary rounded-xl p-6 border border-wine-mid/30 text-center">
+            <p className="text-ark-text-secondary mb-4 font-body">Você ainda não criou seu personagem.</p>
+            <Link href="/character/create">
+              <ArkButton size="lg">Criar Personagem</ArkButton>
             </Link>
           </div>
         )}
 
-        {/* Jornal do Mundo */}
-        <div className="bg-neutral-900 rounded-xl p-6 border border-neutral-800">
-          <h2 className="font-semibold text-neutral-400 text-sm uppercase tracking-wide mb-4">
+        {/* World Journal */}
+        <div className="bg-ark-bg-secondary rounded-xl p-6 border border-bronze-dark/25">
+          <h2 className="text-xs font-body text-ark-text-secondary uppercase tracking-wider mb-1">
             Jornal do Mundo
           </h2>
+          <ArkDivider variant="dark" className="mb-4" />
           {publicEvents && publicEvents.length > 0 ? (
             <ul className="space-y-3">
               {publicEvents.map((event) => (
-                <li key={event.id} className="text-sm border-b border-neutral-800 pb-3 last:border-0">
-                  <p className="text-neutral-300">
+                <li key={event.id} className="text-sm border-b border-bronze-dark/15 pb-3 last:border-0">
+                  <p className="text-ark-text-secondary font-body">
                     {event.narrative_text ?? event.type}
                   </p>
-                  <p className="text-neutral-600 text-xs mt-1">
+                  <p className="text-ark-text-muted text-xs mt-1 font-data">
                     {new Date(event.created_at).toLocaleDateString('pt-BR', {
                       day: '2-digit',
                       month: 'short',
@@ -115,7 +144,9 @@ export default async function DashboardPage() {
               ))}
             </ul>
           ) : (
-            <p className="text-neutral-600 text-sm">O mundo aguarda seus primeiros heróis.</p>
+            <p className="text-ark-text-muted text-sm font-body italic">
+              O mundo aguarda seus primeiros heróis.
+            </p>
           )}
         </div>
 

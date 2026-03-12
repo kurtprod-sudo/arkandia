@@ -6,6 +6,11 @@ RPG híbrido web: **Next.js** como motor de regras + **Habbo Hotel** como palco 
 
 ---
 
+## Status do projeto
+Fase 1 concluída em Março 2026.
+
+---
+
 ## Stack
 
 | Camada | Tecnologia |
@@ -35,7 +40,14 @@ RPG híbrido web: **Next.js** como motor de regras + **Habbo Hotel** como palco 
 /components
   /ui
     AuthForm.tsx        — Form genérico com useActionState
-    StatBar.tsx         — Barra HP/Éter reutilizável
+    ArkCard.tsx         — Card (variantes: default, highlighted, legendary)
+    ArkButton.tsx       — Botão (variantes: primary, secondary, ghost, danger)
+    ArkBadge.tsx
+    ArkStatBar.tsx      — Barra HP/Éter/XP/Moral reutilizável
+    ArkDivider.tsx
+    ArkTooltip.tsx
+    ArkModal.tsx
+    ArkIcons.tsx        — Ícones temáticos SVG (atributos, moedas, profissões)
   /character
     CreateCharacterForm.tsx  — Form de criação com preview de atributos
     AttributeDistributor.tsx — UI para distribuir attribute_points
@@ -60,6 +72,26 @@ RPG híbrido web: **Next.js** como motor de regras + **Habbo Hotel** como palco 
   /migrations
     001_initial_schema.sql — Schema completo + RLS + Triggers + Seed
 ```
+
+---
+
+## Componentes Ark* disponíveis
+Toda página nova deve usar esses componentes de `/components/ui/`:
+- **ArkCard** — variantes: default, highlighted, legendary
+- **ArkButton** — variantes: primary, secondary, ghost, danger
+- **ArkBadge**
+- **ArkStatBar** — variantes: hp, eter, xp, moral
+- **ArkDivider**
+- **ArkTooltip**
+- **ArkModal**
+- **ArkIcons** — ícones temáticos SVG para atributos, moedas e profissões
+
+---
+
+## Design system
+- **Paleta:** variáveis CSS em globals.css (vinho, bronze, dourado, cores por atributo)
+- **Tipografia:** Cinzel Decorative (títulos), Crimson Pro (textos), Inter (números)
+- **Efeitos:** .glow-wine, .glow-bronze, .glow-gold, .shimmer, .pulse-glow, .particle-float
 
 ---
 
@@ -141,3 +173,8 @@ SUPABASE_SERVICE_ROLE_KEY=         # Chave service role (apenas server-side)
 | Arquétipo | 5 | 1 dos 12 — passivas e multiplicadores |
 | Classe | 10 | Skills ativas |
 | Sociedade | Qualquer | Fundação ou entrada — Expedições e Guerras |
+
+---
+
+## Convenção de prompts futuros
+Todo prompt novo deve começar com `@CONTEXT.md @GDD.md` e referenciar os componentes Ark* para qualquer página nova criada.

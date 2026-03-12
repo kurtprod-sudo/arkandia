@@ -3,18 +3,18 @@
 import { useState, useTransition } from 'react'
 import { gmGrantCurrency, gmEditAttributes, gmEditCharacterStatus } from '@/app/gm/actions'
 import { type CharacterWithAttributes } from '@/types'
+import ArkBadge from '@/components/ui/ArkBadge'
+import ArkButton from '@/components/ui/ArkButton'
+import { ATTR_ICONS, CoinIcon, CrystalIcon, DiamondIcon } from '@/components/ui/ArkIcons'
 
 interface Props {
   characters: CharacterWithAttributes[]
 }
 
-const STATUS_COLORS = {
-  active: 'text-green-400 border-green-800',
-  injured: 'text-yellow-400 border-yellow-800',
-  dead: 'text-red-400 border-red-800',
+const STATUS_LABELS = { active: 'Vivo', injured: 'Ferido', dead: 'Morto' } as const
+const STATUS_BADGE: Record<string, 'alive' | 'injured' | 'dead'> = {
+  active: 'alive', injured: 'injured', dead: 'dead',
 }
-
-const STATUS_LABELS = { active: 'Vivo', injured: 'Ferido', dead: 'Morto' }
 
 const PROFESSION_LABELS: Record<string, string> = {
   comerciante: 'Comerciante', militar: 'Militar', clerigo: 'Clérigo',
@@ -22,13 +22,25 @@ const PROFESSION_LABELS: Record<string, string> = {
   nobre: 'Nobre', mercenario: 'Mercenário',
 }
 
+const ATTR_GRID: { key: string; abbr: string; color: string; iconKey: string }[] = [
+  { key: 'ataque', abbr: 'ATQ', color: 'text-attr-ataque', iconKey: 'ataque' },
+  { key: 'magia', abbr: 'MAG', color: 'text-attr-magia', iconKey: 'magia' },
+  { key: 'eter_max', abbr: 'ETR', color: 'text-attr-eter', iconKey: 'eter' },
+  { key: 'defesa', abbr: 'DEF', color: 'text-attr-defesa', iconKey: 'defesa' },
+  { key: 'vitalidade', abbr: 'VIT', color: 'text-attr-vitalidade', iconKey: 'vitalidade' },
+  { key: 'velocidade', abbr: 'VEL', color: 'text-attr-velocidade', iconKey: 'velocidade' },
+  { key: 'precisao', abbr: 'PRE', color: 'text-attr-precisao', iconKey: 'precisao' },
+  { key: 'tenacidade', abbr: 'TEN', color: 'text-attr-tenacidade', iconKey: 'tenacidade' },
+  { key: 'capitania', abbr: 'CAP', color: 'text-attr-capitania', iconKey: 'capitania' },
+]
+
 export default function GMCharacterList({ characters }: Props) {
   const [expanded, setExpanded] = useState<string | null>(null)
 
   return (
     <div className="space-y-3">
       {characters.length === 0 && (
-        <p className="text-neutral-600 text-sm">Nenhum personagem criado ainda.</p>
+        <p className="text-ark-text-muted text-sm font-body italic">Nenhum personagem criado ainda.</p>
       )}
       {characters.map((char) => (
         <CharacterRow
@@ -94,79 +106,103 @@ function CharacterRow({
   }
 
   return (
-    <div className="bg-neutral-900 rounded-xl border border-neutral-800 overflow-hidden">
+    <div className="bg-ark-bg-secondary rounded-xl border border-bronze-dark/25 overflow-hidden">
       {/* Row header */}
       <button
         onClick={onToggle}
-        className="w-full px-5 py-4 flex items-center justify-between hover:bg-neutral-800 transition-colors"
+        className="w-full px-5 py-4 flex items-center justify-between hover:bg-ark-bg-tertiary transition-colors"
       >
         <div className="flex items-center gap-4 text-left">
-          <div className="w-10 h-10 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center font-bold text-amber-400">
+          <div className="w-10 h-10 rounded-full bg-wine-dark/30 border border-bronze-mid/40 flex items-center justify-center font-display font-bold text-gold-pure">
             {character.name.charAt(0)}
           </div>
           <div>
-            <p className="font-semibold">{character.name}</p>
-            <p className="text-xs text-neutral-500">
+            <p className="font-display text-sm font-bold text-gold-pure">{character.name}</p>
+            <p className="text-xs text-ark-text-muted font-body">
               Nv {character.level} • {PROFESSION_LABELS[character.profession] ?? character.profession}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <span className={`text-xs px-2 py-1 rounded border ${STATUS_COLORS[character.status]}`}>
+          <ArkBadge color={STATUS_BADGE[character.status]}>
             {STATUS_LABELS[character.status]}
-          </span>
-          <span className="text-neutral-500 text-xs">{isExpanded ? '▲' : '▼'}</span>
+          </ArkBadge>
+          <span className="text-ark-text-muted text-xs">{isExpanded ? '▲' : '▼'}</span>
         </div>
       </button>
 
       {/* Expanded panel */}
       {isExpanded && (
-        <div className="border-t border-neutral-800 px-5 py-4 space-y-5">
+        <div className="border-t border-bronze-dark/20 px-5 py-4 space-y-5">
           {message && (
-            <p className={`text-sm ${message.startsWith('Erro') ? 'text-red-400' : 'text-green-400'}`}>
+            <p className={`text-sm font-body ${message.startsWith('Erro') ? 'text-status-dead' : 'text-status-alive'}`}>
               {message}
             </p>
           )}
 
-          {/* Atributos atuais */}
+          {/* Current attributes */}
           {attrs && (
             <div>
-              <p className="text-xs text-neutral-500 uppercase tracking-wide mb-2">Atributos atuais</p>
+              <p className="text-xs text-ark-text-muted uppercase tracking-wider mb-2 font-body">Atributos atuais</p>
               <div className="grid grid-cols-4 gap-2 text-xs">
-                {[
-                  ['ATQ', attrs.ataque], ['MAG', attrs.magia], ['ETR', attrs.eter_max],
-                  ['DEF', attrs.defesa], ['VIT', attrs.vitalidade], ['VEL', attrs.velocidade],
-                  ['PRE', attrs.precisao], ['TEN', attrs.tenacidade], ['CAP', attrs.capitania],
-                  ['HP', `${attrs.hp_atual}/${attrs.hp_max}`], ['Moral', attrs.moral], ['Pts', attrs.attribute_points],
-                ].map(([label, value]) => (
-                  <div key={String(label)} className="bg-neutral-800 rounded p-2">
-                    <p className="text-neutral-500">{label}</p>
-                    <p className="font-mono font-semibold text-white">{value}</p>
-                  </div>
-                ))}
+                {ATTR_GRID.map(({ key, abbr, color, iconKey }) => {
+                  const Icon = ATTR_ICONS[iconKey as keyof typeof ATTR_ICONS]
+                  return (
+                    <div key={key} className="bg-ark-bg-primary rounded-lg p-2 border border-bronze-dark/15">
+                      <div className="flex items-center gap-1 mb-0.5">
+                        {Icon && <Icon className={color} size={12} />}
+                        <p className="text-ark-text-muted font-data">{abbr}</p>
+                      </div>
+                      <p className={`font-data font-bold ${color}`}>
+                        {attrs[key as keyof typeof attrs]}
+                      </p>
+                    </div>
+                  )
+                })}
+                <div className="bg-ark-bg-primary rounded-lg p-2 border border-bronze-dark/15">
+                  <p className="text-ark-text-muted font-data text-xs">HP</p>
+                  <p className="font-data font-bold text-wine-glow">{attrs.hp_atual}/{attrs.hp_max}</p>
+                </div>
+                <div className="bg-ark-bg-primary rounded-lg p-2 border border-bronze-dark/15">
+                  <p className="text-ark-text-muted font-data text-xs">Moral</p>
+                  <p className="font-data font-bold text-attr-moral">{attrs.moral}</p>
+                </div>
+                <div className="bg-ark-bg-primary rounded-lg p-2 border border-bronze-dark/15">
+                  <p className="text-ark-text-muted font-data text-xs">Pts</p>
+                  <p className="font-data font-bold text-gold-pure">{attrs.attribute_points}</p>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Carteira */}
+          {/* Wallet */}
           {wallet && (
             <div>
-              <p className="text-xs text-neutral-500 uppercase tracking-wide mb-2">Carteira</p>
-              <div className="flex gap-4 text-sm">
-                <span>Libras: <strong className="text-yellow-400">{wallet.libras}</strong></span>
-                <span>Essência: <strong className="text-purple-400">{wallet.essencia}</strong></span>
-                <span>Premium: <strong className="text-emerald-400">{wallet.premium_currency}</strong></span>
+              <p className="text-xs text-ark-text-muted uppercase tracking-wider mb-2 font-body">Carteira</p>
+              <div className="flex gap-4 text-sm font-body">
+                <span className="flex items-center gap-1">
+                  <CoinIcon className="text-gold-pure" size={14} />
+                  <strong className="text-gold-pure font-data">{wallet.libras}</strong>
+                </span>
+                <span className="flex items-center gap-1">
+                  <CrystalIcon className="text-attr-capitania" size={14} />
+                  <strong className="text-attr-capitania font-data">{wallet.essencia}</strong>
+                </span>
+                <span className="flex items-center gap-1">
+                  <DiamondIcon className="text-status-alive" size={14} />
+                  <strong className="text-status-alive font-data">{wallet.premium_currency}</strong>
+                </span>
               </div>
             </div>
           )}
 
-          {/* Editar atributo */}
+          {/* Edit attribute */}
           <form onSubmit={handleEditAttr} className="flex gap-2 items-end">
             <div>
-              <label className="text-xs text-neutral-500 block mb-1">Atributo</label>
+              <label className="text-xs text-ark-text-muted block mb-1 font-body">Atributo</label>
               <select
                 name="attr"
-                className="bg-neutral-800 border border-neutral-700 text-white text-sm rounded px-2 py-1.5"
+                className="bg-ark-bg-primary border border-bronze-dark/30 text-ark-text-primary text-sm rounded-lg px-2 py-1.5 font-data focus:outline-none focus:border-bronze-mid/50"
               >
                 {['ataque','magia','eter_max','eter_atual','defesa','vitalidade','hp_max','hp_atual',
                   'velocidade','precisao','tenacidade','capitania','moral','attribute_points'].map((a) => (
@@ -175,30 +211,26 @@ function CharacterRow({
               </select>
             </div>
             <div>
-              <label className="text-xs text-neutral-500 block mb-1">Valor</label>
+              <label className="text-xs text-ark-text-muted block mb-1 font-body">Valor</label>
               <input
                 name="value"
                 type="number"
                 placeholder="0"
-                className="w-24 bg-neutral-800 border border-neutral-700 text-white text-sm rounded px-2 py-1.5"
+                className="w-24 bg-ark-bg-primary border border-bronze-dark/30 text-ark-text-primary text-sm rounded-lg px-2 py-1.5 font-data focus:outline-none focus:border-bronze-mid/50"
               />
             </div>
-            <button
-              type="submit"
-              disabled={pending}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm rounded"
-            >
+            <ArkButton type="submit" disabled={pending} variant="secondary" size="sm">
               Definir
-            </button>
+            </ArkButton>
           </form>
 
-          {/* Conceder moeda */}
+          {/* Grant currency */}
           <form onSubmit={handleGrantCurrency} className="flex gap-2 items-end">
             <div>
-              <label className="text-xs text-neutral-500 block mb-1">Moeda</label>
+              <label className="text-xs text-ark-text-muted block mb-1 font-body">Moeda</label>
               <select
                 name="currency"
-                className="bg-neutral-800 border border-neutral-700 text-white text-sm rounded px-2 py-1.5"
+                className="bg-ark-bg-primary border border-bronze-dark/30 text-ark-text-primary text-sm rounded-lg px-2 py-1.5 font-data focus:outline-none focus:border-bronze-mid/50"
               >
                 <option value="libras">Libras</option>
                 <option value="essencia">Essência</option>
@@ -206,37 +238,33 @@ function CharacterRow({
               </select>
             </div>
             <div>
-              <label className="text-xs text-neutral-500 block mb-1">Quantidade</label>
+              <label className="text-xs text-ark-text-muted block mb-1 font-body">Quantidade</label>
               <input
                 name="amount"
                 type="number"
                 min="1"
                 placeholder="100"
-                className="w-24 bg-neutral-800 border border-neutral-700 text-white text-sm rounded px-2 py-1.5"
+                className="w-24 bg-ark-bg-primary border border-bronze-dark/30 text-ark-text-primary text-sm rounded-lg px-2 py-1.5 font-data focus:outline-none focus:border-bronze-mid/50"
               />
             </div>
-            <button
-              type="submit"
-              disabled={pending}
-              className="px-3 py-1.5 bg-yellow-600 hover:bg-yellow-500 disabled:opacity-50 text-black font-semibold text-sm rounded"
-            >
+            <ArkButton type="submit" disabled={pending} size="sm">
               Conceder
-            </button>
+            </ArkButton>
           </form>
 
-          {/* Alterar status */}
+          {/* Change status */}
           <div>
-            <p className="text-xs text-neutral-500 uppercase tracking-wide mb-2">Alterar status</p>
+            <p className="text-xs text-ark-text-muted uppercase tracking-wider mb-2 font-body">Alterar status</p>
             <div className="flex gap-2">
               {(['active', 'injured', 'dead'] as const).map((s) => (
                 <button
                   key={s}
                   onClick={() => handleStatusChange(s)}
                   disabled={pending || character.status === s}
-                  className={`px-3 py-1 rounded text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed ${
-                    s === 'active' ? 'bg-green-800 hover:bg-green-700 text-green-200' :
-                    s === 'injured' ? 'bg-yellow-800 hover:bg-yellow-700 text-yellow-200' :
-                    'bg-red-800 hover:bg-red-700 text-red-200'
+                  className={`px-3 py-1.5 rounded-lg text-xs font-body font-semibold border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                    s === 'active' ? 'bg-emerald-950/40 border-emerald-800/40 text-status-alive hover:bg-emerald-950/60' :
+                    s === 'injured' ? 'bg-amber-950/40 border-amber-800/40 text-status-injured hover:bg-amber-950/60' :
+                    'bg-red-950/40 border-red-800/40 text-status-dead hover:bg-red-950/60'
                   }`}
                 >
                   {STATUS_LABELS[s]}

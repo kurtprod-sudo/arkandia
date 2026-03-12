@@ -7,39 +7,39 @@ interface Props {
 }
 
 const EVENT_COLORS: Record<string, string> = {
-  character_created: 'text-green-400',
-  level_up: 'text-amber-400',
-  battle_result: 'text-red-400',
-  currency_granted: 'text-yellow-400',
-  gm_override: 'text-purple-400',
-  attribute_distributed: 'text-blue-400',
-  archetype_chosen: 'text-purple-400',
-  class_chosen: 'text-blue-400',
-  narrative_action: 'text-amber-300',
+  character_created: 'text-status-alive',
+  level_up: 'text-gold-pure',
+  battle_result: 'text-attr-ataque',
+  currency_granted: 'text-gold-pure',
+  gm_override: 'text-wine-glow',
+  attribute_distributed: 'text-attr-eter',
+  archetype_chosen: 'text-attr-capitania',
+  class_chosen: 'text-attr-magia',
+  narrative_action: 'text-bronze-light',
 }
 
 export default function GMEventFeed({ events }: Props) {
   if (events.length === 0) {
-    return <p className="text-neutral-600 text-sm">Nenhum evento registrado.</p>
+    return <p className="text-ark-text-muted text-sm font-body italic">Nenhum evento registrado.</p>
   }
 
   return (
-    <div className="bg-neutral-900 rounded-xl border border-neutral-800 overflow-hidden">
+    <div className="bg-ark-bg-secondary rounded-xl border border-bronze-dark/25 overflow-hidden">
       <div className="overflow-y-auto max-h-[600px]">
         {events.map((event) => (
           <div
             key={event.id}
-            className="px-4 py-3 border-b border-neutral-800 last:border-0"
+            className="px-4 py-3 border-b border-bronze-dark/15 last:border-0"
           >
             <div className="flex items-start justify-between gap-2">
               <span
-                className={`text-xs font-mono font-semibold shrink-0 ${
-                  EVENT_COLORS[event.type] ?? 'text-neutral-400'
+                className={`text-xs font-data font-semibold shrink-0 ${
+                  EVENT_COLORS[event.type] ?? 'text-ark-text-muted'
                 }`}
               >
                 {event.type}
               </span>
-              <span className="text-neutral-600 text-xs shrink-0">
+              <span className="text-ark-text-muted text-xs shrink-0 font-data">
                 {new Date(event.created_at).toLocaleTimeString('pt-BR', {
                   hour: '2-digit',
                   minute: '2-digit',
@@ -47,10 +47,10 @@ export default function GMEventFeed({ events }: Props) {
               </span>
             </div>
             {event.narrative_text && (
-              <p className="text-neutral-300 text-xs mt-1">{event.narrative_text}</p>
+              <p className="text-ark-text-secondary text-xs mt-1 font-body">{event.narrative_text}</p>
             )}
             {Object.keys(event.metadata).length > 0 && (
-              <pre className="text-neutral-600 text-xs mt-1 overflow-hidden text-ellipsis whitespace-nowrap">
+              <pre className="text-ark-text-muted text-xs mt-1 overflow-hidden text-ellipsis whitespace-nowrap font-data">
                 {JSON.stringify(event.metadata)}
               </pre>
             )}
