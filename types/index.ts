@@ -11,6 +11,7 @@ export type UserRole = 'player' | 'gm'
 
 export type CharacterStatus = 'active' | 'injured' | 'dead'
 
+/** @deprecated Profissões foram removidas no redesign de Março 2026. Mantido para compatibilidade. */
 export type ProfessionType =
   | 'comerciante'
   | 'militar'
@@ -35,11 +36,15 @@ export type ArchetypeType =
   | 'vinculo'
   | 'ruina'
 
-export type SkillType = 'active' | 'passive'
+export type SkillType = 'ativa' | 'passiva' | 'reativa'
 
-export type RangeState = 'curto' | 'medio' | 'longo' | 'all'
+export type RangeState = 'curto' | 'medio' | 'longo' | 'qualquer'
 
 export type SocietyMemberRole = 'leader' | 'officer' | 'member'
+
+export type MaestriaCategory = 'prestígio' | 'ressonância' | 'lendária'
+
+export type MaestriaFlavor = 'bestial' | 'mítica' | 'singular'
 
 export type EventType =
   | 'level_up'
@@ -66,6 +71,35 @@ export interface Profile {
   created_at: string
 }
 
+export interface Race {
+  id: string
+  name: string
+  archetype_origin: string[]
+  geo_affinity: string
+  lore_text: string
+  passives: RacePassives
+  created_at: string
+}
+
+export interface RacePassives {
+  descricao_bonus: string
+  adaptacao?: boolean
+  versatilidade?: boolean
+  eter_bonus?: boolean
+  percepcao_sonho?: boolean
+  defesa_bonus?: boolean
+  vitalidade_bonus?: boolean
+  bonus_forja?: boolean
+  ataque_bonus?: boolean
+  resistencia_fogo?: boolean
+  eco_do_ciclo?: boolean
+  tenacidade_bonus?: boolean
+  bonus_impacto?: boolean
+  magia_bonus?: boolean
+  eter_regeneracao?: boolean
+  bonus_maritimo?: boolean
+}
+
 export interface Character {
   id: string
   user_id: string
@@ -80,6 +114,13 @@ export interface Character {
   class_id: string | null
   society_id: string | null
   avatar_url?: string | null
+  race_id?: string
+  resonance_archetype?: ArchetypeType
+  resonance_level?: number
+  is_resonance_unlocked?: boolean
+  injured_until?: string | null
+  recovery_until?: string | null
+  race?: Race
   created_at: string
 }
 
@@ -110,6 +151,7 @@ export interface CharacterWallet {
   updated_at: string
 }
 
+/** @deprecated Profissões foram removidas no redesign de Março 2026. Use Race + GameClass. */
 export interface Profession {
   id: string
   name: ProfessionType
@@ -118,6 +160,7 @@ export interface Profession {
   bonuses: ProfessionBonuses
 }
 
+/** @deprecated Parte do sistema de Profissões removido no redesign. */
 export interface ProfessionBaseAttributes {
   ataque?: number
   magia?: number
@@ -130,6 +173,7 @@ export interface ProfessionBaseAttributes {
   capitania?: number
 }
 
+/** @deprecated Parte do sistema de Profissões removido no redesign. */
 export interface ProfessionBonuses {
   economic_multiplier?: number
   capitania_bonus?: number
@@ -147,13 +191,9 @@ export interface Archetype {
 }
 
 export interface ArchetypePassives {
-  penetracao_defesa?: number
-  dano_bonus_percent?: number
-  hp_bonus_percent?: number
-  eter_bonus_percent?: number
-  velocidade_bonus?: number
-  moral_bonus?: number
-  [key: string]: number | undefined
+  tendencia?: string
+  culturas?: string[]
+  [key: string]: string | string[] | number | undefined
 }
 
 export interface GameClass {
@@ -162,28 +202,102 @@ export interface GameClass {
   description: string
   allowed_professions: ProfessionType[]
   base_skill_ids: string[]
+  weapon_type?: string
+  primary_attributes?: string[]
+  secondary_attribute?: string
+  lore_text?: string
+  scaling?: Record<string, string>
 }
 
 export interface Skill {
   id: string
   name: string
-  description: string
-  type: SkillType
-  damage_formula: DamageFormula | null
-  is_true_damage: boolean
-  defense_penetration: number
+  class_id: string | null
+  skill_type: SkillType
+  tree_position: number | null
+  formula: SkillFormula
   eter_cost: number
   cooldown_turns: number
   effect_duration_turns: number | null
   range_state: RangeState
+  description: string
+  is_starting_skill: boolean
   created_at: string
 }
 
+export interface SkillFormula {
+  base?: number
+  ataque_factor?: number
+  magia_factor?: number
+  defesa_factor?: number
+  is_true_damage?: boolean
+  defense_penetration_percent?: number
+  effect_type?: string
+  effect_duration?: number
+}
+
+/** @deprecated Usava o schema antigo de skills. Mantido para compatibilidade. */
 export interface DamageFormula {
   base: number
   ataque_factor?: number
   magia_factor?: number
   defesa_factor?: number
+}
+
+export interface CharacterSkill {
+  id: string
+  character_id: string
+  skill_id: string
+  acquired_at: string
+  skill?: Skill
+}
+
+export interface CharacterBuildingSlot {
+  id: string
+  character_id: string
+  slot: 1 | 2 | 3 | 4 | 5 | 6
+  skill_id: string | null
+  equipment_item_id: string | null
+  updated_at: string
+  skill?: Skill
+}
+
+export interface Maestria {
+  id: string
+  name: string
+  category: MaestriaCategory
+  flavor: MaestriaFlavor | null
+  description: string
+  restrictions: MaestriaRestrictions
+  cost: MaestriaCost
+  skill_ids: string[]
+  is_exhaustible: boolean
+  exhausted_by: string | null
+  exhausted_at: string | null
+  is_active: boolean
+  created_at: string
+}
+
+export interface MaestriaRestrictions {
+  class_id?: string
+  class_ids?: string[]
+  resonance_type?: ArchetypeType
+  min_level?: number
+  min_resonance_level?: number
+}
+
+export interface MaestriaCost {
+  essencia?: number
+  gema?: number
+  requires_item?: string
+}
+
+export interface CharacterMaestria {
+  id: string
+  character_id: string
+  maestria_id: string
+  acquired_at: string
+  maestria?: Maestria
 }
 
 export interface Society {
@@ -247,9 +361,16 @@ export interface RegisterFormData {
   username: string
 }
 
+/** @deprecated Usa ProfessionType. Para o novo sistema, use CreateCharacterFormDataV2. */
 export interface CreateCharacterFormData {
   name: string
   profession: ProfessionType
+}
+
+export interface CreateCharacterFormDataV2 {
+  name: string
+  race_id: string
+  class_id: string
 }
 
 export interface DistributeAttributePayload {

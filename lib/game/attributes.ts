@@ -9,13 +9,13 @@ export function calcHpMax(vitalidade: number): number {
   return vitalidade * 10
 }
 
-/** Éter máximo base = definido pela profissão + pontos distribuídos */
+/** Éter máximo base = definido pela classe + pontos distribuídos */
 export function calcEterMax(eterBase: number): number {
   return eterBase
 }
 
-/** Atributos base padrão quando profissão não define um valor */
-const ATTRIBUTE_DEFAULTS: Required<ProfessionBaseAttributes> = {
+/** Atributos base padrão quando a Classe não define um valor */
+const ATTRIBUTE_DEFAULTS: Required<Omit<CharacterAttributes, 'character_id' | 'updated_at' | 'hp_max' | 'hp_atual' | 'eter_atual' | 'moral' | 'attribute_points'>> = {
   ataque: 5,
   magia: 5,
   eter_max: 20,
@@ -27,7 +27,46 @@ const ATTRIBUTE_DEFAULTS: Required<ProfessionBaseAttributes> = {
   capitania: 0,
 }
 
-/** Constrói os atributos iniciais de um personagem a partir da profissão */
+/**
+ * Constrói os atributos iniciais de um personagem a partir da Classe escolhida.
+ * Referência: GDD_Personagem §3 e §4
+ */
+export function buildInitialAttributesFromClass(
+  characterId: string,
+  classScaling: Record<string, number>
+): Omit<CharacterAttributes, 'updated_at'> {
+  const ataque = classScaling.ataque ?? ATTRIBUTE_DEFAULTS.ataque
+  const magia = classScaling.magia ?? ATTRIBUTE_DEFAULTS.magia
+  const eterMax = classScaling.eter_max ?? ATTRIBUTE_DEFAULTS.eter_max
+  const defesa = classScaling.defesa ?? ATTRIBUTE_DEFAULTS.defesa
+  const vitalidade = classScaling.vitalidade ?? ATTRIBUTE_DEFAULTS.vitalidade
+  const velocidade = classScaling.velocidade ?? ATTRIBUTE_DEFAULTS.velocidade
+  const precisao = classScaling.precisao ?? ATTRIBUTE_DEFAULTS.precisao
+  const tenacidade = classScaling.tenacidade ?? ATTRIBUTE_DEFAULTS.tenacidade
+  const capitania = classScaling.capitania ?? ATTRIBUTE_DEFAULTS.capitania
+
+  const hpMax = calcHpMax(vitalidade)
+
+  return {
+    character_id: characterId,
+    ataque,
+    magia,
+    eter_max: eterMax,
+    eter_atual: eterMax,
+    defesa,
+    vitalidade,
+    hp_max: hpMax,
+    hp_atual: hpMax,
+    velocidade,
+    precisao,
+    tenacidade,
+    capitania,
+    moral: 100,
+    attribute_points: 0,
+  }
+}
+
+/** @deprecated Use buildInitialAttributesFromClass. Mantido para compatibilidade com código da Fase 1. */
 export function buildInitialAttributes(
   characterId: string,
   professionBase: ProfessionBaseAttributes
