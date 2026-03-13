@@ -1,5 +1,5 @@
 # GDD_Mundo — Arkandia: O Mundo de Ellia
-> Versão 1.0 — Março 2026  
+> Versão 1.1 — alinhado ao GDD_Personagem  
 > Documento de referência canônico para o universo de Arkandia.  
 > Este arquivo é a fonte primária de verdade sobre o mundo, seu lore, sua cosmologia, sua história, suas nações, suas facções e suas figuras lendárias.  
 > Todo conteúdo gerado por IA (jornal, NPCs, missões, eventos narrativos) deve ser consistente com este documento.
@@ -597,10 +597,10 @@ Düren é a nação que o Conselho dos Anciões usa como braço armado para supr
 
 | Território | Categoria | Recurso exclusivo | Defesa | Facção NPC |
 |---|---|---|---|---|
-| Rota de Ermorath | Comercial | +20% geração passiva de Libras | Média | Mãos de Zaffar |
-| Planície de Caldrath | Militar | +15 Capitania máxima | Baixa | Nenhuma — disputada |
-| Minas de Gravik | Forja | Aço anti-étérico (-10% dano mágico recebido) | Alta | Inquisição de Düren |
-| Serdin, Enclave Arcano | Arcano | +25% Éter máximo + pesquisa de Skills | Muito Alta | Academia Arcana de Serdin |
+| Rota de Ermorath | Comercial | Bônus passivo de geração de Libras (valor definido em seed SQL) | Média | Mãos de Zaffar |
+| Planície de Caldrath | Militar | Aumenta Capitania máxima (valor definido em seed SQL) | Baixa | Nenhuma — disputada |
+| Minas de Gravik | Forja | Aço anti-étérico — reduz dano mágico recebido (valor definido em seed SQL) | Alta | Inquisição de Düren |
+| Serdin, Enclave Arcano | Arcano | Aumenta Éter máximo + pesquisa de Skills (valor definido em seed SQL) | Muito Alta | Academia Arcana de Serdin |
 | Aurelia Exterior | Comercial | Acesso ao mercado imperial valoriano | Alta | Marinha Imperial |
 
 ---
@@ -612,7 +612,7 @@ Düren é a nação que o Conselho dos Anciões usa como braço armado para supr
 | Senda do Dragão | Relíquia | Ativa missão especial de linhagem dracônica | Muito Alta | Clãs de Ryugakure |
 | Vale dos Espelhos de Jade | Arcano | Visões proféticas — revela informações ocultas de inimigos | Alta | Shenzhou |
 | Mandala de Jyotirmaya | Arcano | Desperta Ressonâncias adormecidas — passivas raras | Muito Alta | Indravaar (Brahmagni) |
-| Fronteira de Tempestade | Militar | +20% dano de tropas em batalhas ao ar livre | Média | Suserania Negra |
+| Fronteira de Tempestade | Militar | Bônus de dano de tropas em batalhas ao ar livre (valor definido em seed SQL) | Média | Suserania Negra |
 
 ---
 
@@ -620,10 +620,10 @@ Düren é a nação que o Conselho dos Anciões usa como braço armado para supr
 
 | Território | Categoria | Recurso exclusivo | Defesa | Facção NPC |
 |---|---|---|---|---|
-| Monte Hverstr | Relíquia | Meditação — acelera progressão de XP por 72h | Baixa | Clãs de Norrheim |
+| Monte Hverstr | Relíquia | Meditação — acelera progressão de XP por período limitado (valor definido em seed SQL) | Baixa | Clãs de Norrheim |
 | Minas de Ferro-Rúnico | Forja | Ferro rúnico — crafting de armas com efeitos de status aprimorados | Média | Norrheim (confederação) |
-| Muro de Cinzas | Estratégico | -15% custo de recrutamento de tropas (aura de sacrifício) | Muito Alta | Inquisição de Düren |
-| Bosque de Freya | Arcano | Regeneração de HP +10% fora de combate | Média | As Treze do Norte |
+| Muro de Cinzas | Estratégico | Reduz custo de recrutamento de tropas — aura de sacrifício (valor definido em seed SQL) | Muito Alta | Inquisição de Düren |
+| Bosque de Freya | Arcano | Bônus de regeneração de HP fora de combate (valor definido em seed SQL) | Média | As Treze do Norte |
 
 ---
 
@@ -634,7 +634,7 @@ Düren é a nação que o Conselho dos Anciões usa como braço armado para supr
 | Floresta de Belthara | — | **Sagrado — não disputável.** Tentativa gera penalidade de reputação com todas as facções | — | Albyn (druidas) |
 | Círculo de Eira | Arcano | Restaura HP/Éter de toda a Sociedade 1x/semana | Alta | Albyn (Arquidruidas) |
 | Jardins Suspensos de Evyan | Arcano | Desperta passivas de Vínculo e Sonho | Alta | Eryuell |
-| Porto de Myrethon | Comercial | +30% velocidade de Expedições marítimas | Média | Ogygia (Conselho) |
+| Porto de Myrethon | Comercial | Bônus de velocidade em Expedições marítimas (valor definido em seed SQL) | Média | Ogygia (Conselho) |
 | Pyranthea, Forjas de Hefesto | Forja | Armas simbióticas — só craftáveis aqui | Muito Alta | Ogygia (Pyranthea) |
 
 ---
@@ -645,7 +645,7 @@ Düren é a nação que o Conselho dos Anciões usa como braço armado para supr
 |---|---|---|---|---|
 | Obelisco de Thoth | Relíquia | Acesso a registros — revela lore de Monólitos próximos | Alta | Kastulle (sacerdotes) |
 | Necrópole de Hemkara | Relíquia | Missões especiais de Morte e Vínculo | Muito Alta | Kastulle (Concílio de Ísis) |
-| Areal de Nashid | Relíquia | Tempo instável — XP de missões 1.5x | Média | Ottovar (Vaelith) |
+| Areal de Nashid | Relíquia | Tempo instável — multiplicador de XP em missões (valor definido em seed SQL) | Média | Ottovar (Vaelith) |
 | Silhu, a Cidade Esquecida | — | **Proibido** — qualquer ocupação resulta em evento catastrófico | Absoluta | Nenhuma. *Algo lá dentro* |
 | Ruínas de Urgath | Relíquia | Monólitos de Memória — decifráveis com requisito de Maestria | Variável | Urgath (tribos) |
 
@@ -1150,7 +1150,7 @@ No meio da campanha, o personagem atinge nível 5. A Ressonância se manifesta.
 
 #### ATO 4 — O CUSTO DO DEVER (Níveis 7–9)
 
-A Expedição é enviada para missão que envolve diretamente um dos interesses dos Quatro Imperadores — especificamente de Shaiya ou Regulus, dependendo da macrorregião de origem do personagem.
+A Expedição é enviada para missão que envolve diretamente um dos interesses dos Quatro Imperadores — especificamente de Shaiya ou Regulus, dependendo da Raça e Classe do personagem.
 
 A missão termina com confrontação impossível de vencer sozinho. **Pela primeira vez, a narrativa sinaliza que a Expedição Régia é apenas um peão num jogo muito maior.**
 
@@ -1160,7 +1160,7 @@ A missão termina com confrontação impossível de vencer sozinho. **Pela prime
 
 #### CONCLUSÃO — O ANCIÃO (Nível 9 → 10)
 
-A campanha termina com o personagem atingindo nível 10 — momento de escolha da Classe. O Ato final coloca em cena ao menos um membro do Conselho dos Anciões de forma direta. O antagonismo central é revelado sem ambiguidade.
+A campanha termina com o personagem atingindo nível 10. O Ato final coloca em cena ao menos um membro do Conselho dos Anciões de forma direta. O antagonismo central é revelado sem ambiguidade.
 
 **A partir daqui, o jogo abre completamente:** Sociedades, guerras de território, PvP, e os arcos de Monólitos de longo prazo.
 
@@ -1174,10 +1174,10 @@ O tempo flui de forma desigual em Urgath porque o Arquétipo do Tempo impregnnou
 
 | Mecânica | Descrição |
 |---|---|
-| **Multiplicador de XP** | Missões em Urgath dão 1.5x XP — "o tempo é mais denso aqui, cada hora vivida pesa mais na alma" |
-| **Produção passiva expandida** | Territórios de Urgath calculam produção como se 2h extras tivessem passado (8h reais = 10h calculadas) |
+| **Multiplicador de XP** | Missões em Urgath concedem XP com multiplicador — o tempo é mais denso aqui, cada hora vivida pesa mais na alma (valor definido em seed SQL) |
+| **Produção passiva expandida** | Produção passiva calculada com bônus de tempo (valor definido em seed SQL) |
 | **Ecos Temporais** | Ao interagir com Monólitos em solo urgathiano, chance de receber visão de evento histórico — fragmento de lore narrativo. GM usa para revelar cronologia de Petrania organicamente |
-| **Maldição do Areal** | Tempo excessivo em missões do Areal de Nashid aplica **Distorção Temporal**: Velocidade -2 por stack (máximo 3). Removida ao sair de Urgath e descansar |
+| **Maldição do Areal** | Tempo excessivo em missões do Areal de Nashid aplica **Distorção Temporal**: penalidade de Velocidade por stack, máximo 3 stacks (valor definido em seed SQL). Removida ao sair de Urgath e descansar |
 
 ---
 
@@ -1213,7 +1213,7 @@ O tempo flui de forma desigual em Urgath porque o Arquétipo do Tempo impregnnou
 - Não é dark fantasy onde tudo termina em tragédia e desespero
 - Não é um mundo genérico de espadas e magia sem filosofia por trás
 - Não é um mundo onde os "mocinhos" são obviamente identificáveis
-- Não usa elfo/anão/orc como placeholders — cada raça tem nome e cultura próprios em Ellia
+- As raças jogáveis são: Humano, Elfo, Anão, Draconiano, Meio-Gigante e Melfork. Cada uma com origem arquetípica, identidade cultural e bônus passivos próprios — detalhados no GDD_Personagem.md
 
 ---
 
