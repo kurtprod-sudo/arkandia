@@ -101,3 +101,21 @@ export async function gmEditCharacterStatus(
   revalidatePath('/gm')
   return { success: true }
 }
+
+/**
+ * Ativa a Ressonância de um personagem manualmente.
+ * Simula o evento narrativo da campanha inicial (nível 5).
+ * Referência: GDD_Personagem §6
+ */
+export async function gmUnlockResonance(
+  characterId: string,
+  archetype: string
+) {
+  await assertGM()
+
+  const { unlockResonance } = await import('@/lib/game/resonance')
+  const result = await unlockResonance(characterId, archetype)
+
+  revalidatePath('/gm')
+  return result
+}

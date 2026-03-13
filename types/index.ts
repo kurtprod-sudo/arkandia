@@ -59,6 +59,11 @@ export type EventType =
   | 'society_joined'
   | 'currency_granted'
   | 'gm_override'
+  | 'skill_acquired'
+  | 'resonance_unlocked'
+  | 'resonance_upgraded'
+  | 'maestria_acquired'
+  | 'building_updated'
 
 // ---------------------------------------------------------------------------
 // Tabelas do banco

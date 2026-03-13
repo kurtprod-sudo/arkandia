@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { canChooseArchetype, canChooseClass } from '@/lib/game/xp'
+import { PROGRESSION_MILESTONES } from '@/lib/game/xp'
 import CharacterSheet from '@/components/character/CharacterSheet'
 
 export default async function CharacterSheetPage() {
@@ -134,17 +134,17 @@ export default async function CharacterSheetPage() {
         />
 
         {/* Milestone alerts */}
-        {canChooseArchetype(character.level) && !character.archetype && (
+        {character.level >= PROGRESSION_MILESTONES.RESONANCE && !character.is_resonance_unlocked && (
           <div className="max-w-5xl mx-auto mt-6 p-4 bg-attr-capitania/10 border border-attr-capitania/30 rounded-lg">
             <p className="text-attr-capitania text-sm font-body font-semibold">
-              Nível 5 atingido — escolha seu Arquétipo de Ressonância!
+              Nível 5 atingido — sua Ressonância está prestes a despertar.
             </p>
           </div>
         )}
-        {canChooseClass(character.level) && !character.class_id && (
+        {character.level >= PROGRESSION_MILESTONES.FULL_UNLOCK && (
           <div className="max-w-5xl mx-auto mt-2 p-4 bg-attr-eter/10 border border-attr-eter/30 rounded-lg">
             <p className="text-attr-eter text-sm font-body font-semibold">
-              Nível 10 atingido — escolha sua Classe!
+              Nível 10 atingido — o mundo de Arkandia se abre. Sociedades, territórios e combate agora estão disponíveis.
             </p>
           </div>
         )}
