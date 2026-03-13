@@ -27,6 +27,7 @@ export default async function CharacterSheetPage() {
     { data: attrs, error: attrsError },
     { data: wallet, error: walletError },
     { data: buildingRaw },
+    { data: reputationsRaw },
   ] = await Promise.all([
     supabase
       .from('characters')
@@ -48,6 +49,10 @@ export default async function CharacterSheetPage() {
       .select('slot, skill_id, skills (id, name, skill_type, eter_cost, range_state)')
       .eq('character_id', characterId)
       .order('slot'),
+    supabase
+      .from('character_reputation')
+      .select('*, factions(id, name, slug, type, is_hidden)')
+      .eq('character_id', characterId),
   ])
 
   // Extract joined names before casting to Character type
@@ -72,6 +77,12 @@ export default async function CharacterSheetPage() {
         }
       : null,
   }))
+
+  // Filter out hidden factions from reputations
+  const reputations = (reputationsRaw ?? []).filter((r) => {
+    const f = r.factions as Record<string, unknown> | null
+    return f ? !f.is_hidden : true
+  })
 
   if (process.env.NODE_ENV === 'development') {
     if (charError) console.error('[/character] characters error:', charError)
@@ -131,6 +142,7 @@ export default async function CharacterSheetPage() {
           raceName={raceName}
           className={className}
           building={building}
+          reputations={reputations as unknown as import('@/types').CharacterReputation[]}
         />
 
         {/* Milestone alerts */}

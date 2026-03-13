@@ -119,3 +119,15 @@ export async function gmUnlockResonance(
   revalidatePath('/gm')
   return result
 }
+
+export async function gmUpdateReputation(
+  characterId: string,
+  factionSlug: string,
+  delta: number
+) {
+  await assertGM()
+  const { updateReputation } = await import('@/lib/game/reputation')
+  const result = await updateReputation(characterId, factionSlug, delta)
+  revalidatePath('/gm')
+  return result
+}

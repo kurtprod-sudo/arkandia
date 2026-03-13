@@ -12,7 +12,8 @@ import {
 } from '@/components/ui/ArkIcons'
 import ArkBuildingSlots, { type BuildingSlotData } from './ArkBuildingSlots'
 import ArkResonanceCard from './ArkResonanceCard'
-import type { Character, CharacterAttributes, CharacterWallet } from '@/types'
+import ArkReputationList from './ArkReputationList'
+import type { Character, CharacterAttributes, CharacterWallet, CharacterReputation } from '@/types'
 
 interface CharacterSheetProps {
   character: Character
@@ -22,6 +23,7 @@ interface CharacterSheetProps {
   raceName: string | null
   className: string | null
   building: BuildingSlotData[]
+  reputations: CharacterReputation[]
 }
 
 const ATTR_ROWS: { key: keyof CharacterAttributes; label: string; abbr: string; color: string; Icon: typeof SwordIcon }[] = [
@@ -150,6 +152,7 @@ export default function CharacterSheet({
   raceName,
   className: charClassName,
   building,
+  reputations,
 }: CharacterSheetProps) {
   const xpNeeded = xpToNextLevel(character.level)
   const moralColor = attrs.moral > 150 ? 'text-[var(--text-gold)]' : attrs.moral >= 50 ? 'text-status-injured' : 'text-[var(--ark-red-glow)]'
@@ -332,6 +335,16 @@ export default function CharacterSheet({
           </svg>
         }>
           <ArkBuildingSlots slots={building} />
+        </SectionCard>
+
+        {/* Reputations */}
+        <SectionCard label="REPUTAÇÕES" icon={
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 1L9 5L13 5.5L10 8.5L11 13L7 10.5L3 13L4 8.5L1 5.5L5 5Z"
+              fill="#6e160f" stroke="#d3a539" strokeWidth="0.6"/>
+          </svg>
+        }>
+          <ArkReputationList reputations={reputations} />
         </SectionCard>
 
         {/* Wallet */}

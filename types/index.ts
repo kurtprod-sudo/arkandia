@@ -64,6 +64,7 @@ export type EventType =
   | 'resonance_upgraded'
   | 'maestria_acquired'
   | 'building_updated'
+  | 'reputation_changed'
 
 // ---------------------------------------------------------------------------
 // Tabelas do banco
@@ -303,6 +304,31 @@ export interface CharacterMaestria {
   maestria_id: string
   acquired_at: string
   maestria?: Maestria
+}
+
+export type ReputationStage =
+  'hostil' | 'neutro' | 'reconhecido' | 'aliado' | 'venerado'
+
+export interface Faction {
+  id: string
+  name: string
+  slug: string
+  type: string
+  alignment: string
+  description: string
+  is_hidden: boolean
+  conflict_faction_slugs: string[]
+  created_at: string
+}
+
+export interface CharacterReputation {
+  id: string
+  character_id: string
+  faction_id: string
+  points: number
+  stage: ReputationStage
+  updated_at: string
+  factions?: Faction
 }
 
 export interface Society {
