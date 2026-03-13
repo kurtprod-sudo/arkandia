@@ -31,9 +31,9 @@ const CornerOrnament = ({ className = '' }: { className?: string }) => (
 
 const variantStyles = {
   default:
-    'border border-[var(--ark-gold-dim)] bg-[var(--ark-bg)] bg-dot-pattern',
+    'ark-card',
   highlighted:
-    'border border-[var(--ark-gold)] bg-[var(--ark-bg)] bg-dot-pattern shadow-glow-gold',
+    'ark-card-raised',
   legendary:
     'border border-[var(--ark-gold-bright)] bg-[var(--ark-bg)] bg-dot-pattern shimmer-legendary',
 }

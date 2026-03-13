@@ -79,10 +79,11 @@ Cada um concede passivas e multiplicadores únicos. Exemplo: Ruína concede Pene
 5. GM tem override em tudo — endpoints de admin em todo sistema
 
 ## Design System
-- Paleta: vinho/bronze/dourado sobre fundo preto profundo
-- Fontes: Cinzel Decorative (títulos), Crimson Pro (textos), Inter (números)
+- Paleta: crimson escuro sobre preto profundo — branco/cinza para interface, dourado reservado para momentos épicos
+- Fonte: Intelo (local, todos os pesos) — única família, papel definido por weight e letter-spacing
 - Componentes: ArkCard, ArkButton, ArkBadge, ArkStatBar, ArkDivider, ArkTooltip, ArkModal, ArkIcons
-- Efeitos: glow-wine, glow-bronze, glow-gold, shimmer, pulse-glow, particle-float
+- Superfícies: glassmorphism (backdrop-filter blur) como padrão — cards translúcidos sobre background
+- Regra do dourado: SOMENTE nome do personagem, arquétipo, itens lendários, level máximo
 
 ## Stack
 - Frontend: Next.js 14 (App Router)

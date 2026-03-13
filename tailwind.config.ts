@@ -42,6 +42,7 @@ const config: Config = {
           disabled:  'var(--color-text-disabled)',
           gold:      'var(--color-text-gold)',
           'gold-soft':'var(--color-text-gold-soft)',
+          error:     'var(--color-text-error)',
         },
         // Status
         status: {
@@ -49,6 +50,11 @@ const config: Config = {
           injured: 'var(--color-status-injured)',
           dead:    'var(--color-status-dead)',
         },
+        // Incrementos v3
+        'ark-white':        'var(--ark-white)',
+        'ark-red-vivid':    'var(--ark-red-vivid)',
+        'ark-amber':        'var(--ark-amber)',
+        'ark-amber-bright': 'var(--ark-amber-bright)',
         // Attribute colors
         attr: {
           ataque:     'var(--color-attr-ataque)',
@@ -64,9 +70,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        display: ['var(--font-display)', 'serif'],
-        body:    ['var(--font-body)',    'serif'],
-        data:    ['var(--font-data)',    'sans-serif'],
+        display: ['var(--font-intelo)', 'sans-serif'],
+        body:    ['var(--font-intelo)', 'sans-serif'],
+        data:    ['var(--font-intelo)', 'sans-serif'],
       },
       boxShadow: {
         'glow-gold':    '0 0 20px rgba(200,134,10,0.35), 0 0 50px rgba(200,134,10,0.12)',

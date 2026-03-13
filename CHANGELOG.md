@@ -1,5 +1,40 @@
 # CHANGELOG — Arkandia
 
+## [Design System v3] — Março 2026
+
+### Mudança filosófica de paleta
+- Texto principal: `#F0E6D3` → `#ffffff` (branco puro)
+- Texto secundário/labels: tons bronze → rgba branco com opacidade
+- Dourado restrito: reservado para nome do personagem, arquétipo, itens lendários
+- Superfícies: sólidas → glassmorphism (`backdrop-filter: blur`) como padrão
+- Borders: dourado dim → crimson rgba como padrão de interface
+
+### Migração tipográfica
+- Removidas: Cormorant Garamond, Libre Baskerville, Rajdhani (Google Fonts)
+- Adicionada: Intelo (fonte local, `public/fonts/`, 16 arquivos)
+- Variável única `--font-intelo` reconecta `--font-display`, `--font-body`, `--font-data`
+
+### Componentes atualizados
+- ArkInput — paleta crimson/branco, border focus crimson
+- ArkButton — variante primary crimson puro, secondary transparente com border crimson
+- ArkCard — glassmorphism como padrão, borda dourada apenas na variante `legendary`
+
+### Novas variáveis CSS
+- `--ark-surface`, `--ark-surface-raised`, `--ark-surface-solid`
+- `--ark-border`, `--ark-border-bright`, `--ark-border-gold`
+- `--ark-blur`, `--ark-blur-sm`
+- `--text-error: #ff6b6b`
+
+### Arquivos modificados
+- app/layout.tsx — localFont Intelo substituindo Google Fonts
+- app/globals.css — paleta v3, classes atualizadas, regra canônica documentada
+- tailwind.config.ts — tokens atualizados, fallback sans-serif, token error adicionado
+- components/ui/ArkInput.tsx — paleta crimson/branco
+- components/ui/ArkButton.tsx — variantes primary e secondary
+- components/ui/ArkCard.tsx — glassmorphism como padrão
+
+---
+
 ## [Design System v2] — Março 2026
 
 ### Refatoração visual completa

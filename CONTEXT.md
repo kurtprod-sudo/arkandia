@@ -91,13 +91,14 @@ Toda página nova deve usar esses componentes de `/components/ui/`:
 ## Design System
 
 ### Tipografia
-| Variável CSS       | Fonte               | Uso                                      |
-|--------------------|---------------------|------------------------------------------|
-| `--font-display`   | Cormorant Garamond  | Títulos, nome do personagem, headers     |
-| `--font-body`      | Libre Baskerville   | Nomes de atributos, texto de conteúdo    |
-| `--font-data`      | Rajdhani            | Labels, stats, números, UI, siglas       |
+| Variável CSS       | Fonte   | Peso    | Uso                                        |
+|--------------------|---------|---------|--------------------------------------------|
+| `--font-display`   | Intelo  | 700–800 | Títulos, nome do personagem, headers       |
+| `--font-body`      | Intelo  | 400     | Texto corrido, descrições, lore            |
+| `--font-data`      | Intelo  | 600     | Labels, stats, números, UI, siglas         |
 
-Classes Tailwind: `font-display`, `font-body`, `font-data`
+Todas apontam para `--font-intelo` (fonte local em `public/fonts/`).
+Classes Tailwind: `font-display`, `font-body`, `font-data` — mantidas para compatibilidade.
 
 ### Paleta de Cores
 | Variável             | Hex       | Uso                              |
@@ -108,11 +109,20 @@ Classes Tailwind: `font-display`, `font-body`, `font-data`
 | `--ark-gold-bright`  | #f0c84a   | Shimmer, hover gold              |
 | `--ark-bg`           | #0a0508   | Background base                  |
 | `--ark-bg-raised`    | #110a0e   | Cards, superfícies elevadas      |
-| `--text-primary`     | #F0E6D3   | Texto principal                  |
-| `--text-secondary`   | #B89A6A   | Texto secundário, bronze         |
-| `--text-label`       | #7A6040   | Labels apagados, siglas          |
-| `--text-ghost`       | #3A2A18   | Separadores, fantasmas           |
+| `--text-primary`     | #ffffff            | Texto principal                       |
+| `--text-secondary`   | rgba(255,255,255,0.65) | Texto secundário                 |
+| `--text-label`       | rgba(255,255,255,0.4)  | Labels, siglas                   |
+| `--text-ghost`       | rgba(255,255,255,0.2)  | Separadores, fantasmas           |
+| `--ark-surface`      | rgba(110,22,15,0.15)   | Cards — glassmorphism base       |
+| `--ark-border`       | rgba(196,42,30,0.3)    | Borders padrão — crimson sutil   |
+| `--ark-border-bright`| rgba(196,42,30,0.7)    | Borders foco/hover               |
 | `--text-gold`        | #D3A539   | Texto dourado                    |
+| `--ark-white`        | #F5EDD8   | Texto hero, headlines de landing     |
+| `--ark-red-vivid`    | #e03030   | Glows intensos, hover, impacto       |
+| `--ark-amber`        | #e87820   | XP, level up, conquistas             |
+| `--ark-amber-bright` | #f5a030   | Hover amber, shimmer de conquista    |
+
+**Regra canônica:** Dourado (`--ark-gold`, `--ark-gold-bright`) aparece SOMENTE em nome do personagem, arquétipo, itens lendários e level máximo. Nunca em borders de card, labels, tabs ou botões comuns.
 
 ### Componentes Ark* disponíveis
 Toda página nova deve usar esses componentes de `/components/ui/`:
@@ -131,6 +141,10 @@ Toda página nova deve usar esses componentes de `/components/ui/`:
 - `portrait-glow` → glow animado na moldura do portrait
 - Barras: `bar-hp` (vermelho), `bar-eter` (cinza/branco), `bar-xp` (dourado)
 - Atributos: nome em maiúsculo + sigla `(ABR)` em `.ark-attr-abbr`
+- `.shimmer-epic` → shimmer dourado/branco para títulos de landing
+- `.glow-vivid` → pulse animado em vermelho vívido para elementos de destaque
+- `.flash-levelup` → animação de conquista em âmbar
+- `.text-hero` → headline branca creme em Intelo bold
 
 ### Asset de Moldura
 - `/public/assets/frames/portrait-default.png` — 1024×1536px

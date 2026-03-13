@@ -9,17 +9,16 @@ interface ArkButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles = {
   primary: [
-    'bg-[var(--text-ghost)] border border-[var(--ark-gold)]',
-    'text-[var(--ark-gold-bright)]',
-    'border-t-[#f0c84a]/60 border-b-[#7a5a18]/80',
-    'hover:bg-[#3A2A18]/80 hover:border-[#f0c84a]/50',
-    'disabled:bg-[#3A2A18]/30 disabled:text-[var(--text-ghost)] disabled:border-[var(--ark-gold-dim)]',
+    'bg-[var(--ark-red)] border border-[var(--ark-border-bright)]',
+    'text-[var(--text-primary)]',
+    'hover:bg-[var(--ark-red-bright)]',
+    'disabled:opacity-40 disabled:cursor-not-allowed',
   ].join(' '),
   secondary: [
-    'bg-transparent border border-[var(--ark-gold-dim)]',
+    'bg-transparent border border-[var(--ark-border)]',
     'text-[var(--text-secondary)]',
-    'hover:border-[var(--ark-gold)] hover:text-[var(--ark-gold-bright)]',
-    'disabled:text-[var(--text-label)] disabled:border-[var(--text-ghost)]',
+    'hover:border-[var(--ark-border-bright)] hover:text-[var(--text-primary)]',
+    'disabled:text-[var(--text-ghost)] disabled:border-[var(--text-ghost)]',
   ].join(' '),
   ghost: [
     'bg-transparent border-none',

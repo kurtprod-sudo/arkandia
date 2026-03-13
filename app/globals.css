@@ -3,74 +3,112 @@
 @tailwind utilities;
 
 /* ==========================================================================
-   ARKANDIA — Design System v2 (Final)
+   ARKANDIA — Design System v3
+
+   REGRA DE COR:
+   BRANCO (#ffffff e rgba) → interface cotidiana: labels, texto, borders, botões
+   CRIMSON (#6e160f, #a01f16, #c42a1e) → ações primárias, foco, destaque de interação
+   DOURADO (#d3a539, #f0c84a) → SOMENTE: nome do personagem, arquétipo, itens lendários,
+                                          level máximo, momentos épicos de progressão
+
+   Dourado não aparece em: botões, labels, borders de card, tabs, links de navegação.
    ========================================================================== */
 
 :root {
-  /* ── Canonical palette ── */
+  /* ── Paleta base — sem alteração ── */
   --ark-red:         #6e160f;
   --ark-red-bright:  #a01f16;
   --ark-red-glow:    #c42a1e;
   --ark-gold:        #d3a539;
   --ark-gold-bright: #f0c84a;
   --ark-gold-dim:    #7a5a18;
-  --ark-void:        #050203;
+  --ark-void:        #07050f;
   --ark-bg:          #0a0508;
   --ark-bg-raised:   #110a0e;
 
-  --text-hero:       #FFFFFF;
-  --text-primary:    #F0E6D3;
-  --text-secondary:  #B89A6A;
-  --text-label:      #7A6040;
-  --text-ghost:      #3A2A18;
-  --text-gold:       #D3A539;
-  --text-gold-soft:  #A07828;
+  /* ── Tipografia — ATUALIZADO ── */
+  --text-hero:       #ffffff;
+  --text-primary:    #ffffff;
+  --text-secondary:  rgba(255,255,255,0.65);
+  --text-label:      rgba(255,255,255,0.4);
+  --text-ghost:      rgba(255,255,255,0.2);
+  --text-gold:       #d3a539;
+  --text-gold-soft:  #a07828;
+  --text-error:      #ff6b6b;
 
-  /* ── Tailwind token aliases (referenced by tailwind.config.ts + components) ── */
-  --color-bg-void:      #050305;
-  --color-bg-primary:   #0A0608;
-  --color-bg-secondary: #110A0E;
-  --color-bg-tertiary:  #1A1018;
-  --color-bg-overlay:   rgba(5, 3, 5, 0.85);
+  /* ── Incrementos v3 — épico/vibrante ── */
+  --ark-white:        #F5EDD8;
+  --ark-red-vivid:    #e03030;
+  --ark-amber:        #e87820;
+  --ark-amber-bright: #f5a030;
 
-  --color-gold-pure:    #F5D485;
-  --color-gold-bright:  #E8C060;
-  --color-gold-mid:     #C8860A;
-  --color-gold-dim:     #8A5A10;
-  --color-gold-ghost:   #2A1808;
+  /* ── Superfícies ── */
+  --ark-surface:        rgba(110, 22, 15, 0.15);
+  --ark-surface-raised: rgba(110, 22, 15, 0.25);
+  --ark-surface-solid:  #110a0e;
 
-  --color-crimson-bright: #E84040;
-  --color-crimson-mid:    #A82828;
-  --color-crimson-dark:   #501010;
+  /* ── Borders ── */
+  --ark-border:         rgba(196, 42, 30, 0.3);
+  --ark-border-bright:  rgba(196, 42, 30, 0.7);
+  --ark-border-gold:    rgba(211, 165, 57, 0.3);
 
-  --color-text-hero:      #FFFFFF;
-  --color-text-primary:   #F0E6D3;
-  --color-text-secondary: #B89A6A;
-  --color-text-label:     #7A6040;
-  --color-text-muted:     #5A4A38;
-  --color-text-ghost:     #3A2A18;
-  --color-text-disabled:  #2A2018;
-  --color-text-gold:      #D3A539;
-  --color-text-gold-soft: #A07828;
+  /* ── Blur ── */
+  --ark-blur:    blur(20px);
+  --ark-blur-sm: blur(12px);
 
+  /* ── Tailwind token aliases ── */
+  --color-bg-void:      #07050f;
+  --color-bg-primary:   #0a0508;
+  --color-bg-secondary: #110a0e;
+  --color-bg-tertiary:  #1a1018;
+  --color-bg-overlay:   rgba(7, 5, 15, 0.6);
+
+  --color-gold-pure:    #f5d485;
+  --color-gold-bright:  #f0c84a;
+  --color-gold-mid:     #d3a539;
+  --color-gold-dim:     #7a5a18;
+  --color-gold-ghost:   #2a1808;
+
+  --color-crimson-bright: #c42a1e;
+  --color-crimson-mid:    #a01f16;
+  --color-crimson-dark:   #6e160f;
+
+  --color-text-hero:      #ffffff;
+  --color-text-primary:   #ffffff;
+  --color-text-secondary: rgba(255,255,255,0.65);
+  --color-text-label:     rgba(255,255,255,0.4);
+  --color-text-muted:     rgba(255,255,255,0.3);
+  --color-text-ghost:     rgba(255,255,255,0.2);
+  --color-text-disabled:  rgba(255,255,255,0.15);
+  --color-text-gold:      #d3a539;
+  --color-text-gold-soft: #a07828;
+  --color-text-error:     #ff6b6b;
+
+  /* Status — sem alteração */
   --color-status-alive:   #30C060;
   --color-status-injured: #E8A020;
   --color-status-dead:    #882020;
 
+  /* Atributos — atualizado */
   --color-attr-ataque:     #E85D4A;
   --color-attr-magia:      #9060E8;
   --color-attr-eter:       #4090E8;
   --color-attr-defesa:     #60A060;
   --color-attr-vitalidade: #E84060;
   --color-attr-velocidade: #E8C040;
-  --color-attr-precisao:   #E88040;
-  --color-attr-tenacidade: #A080C0;
-  --color-attr-capitania:  #C090D8;
-  --color-attr-moral:      #E06090;
+  --color-attr-precisao:   #60C0C0;
+  --color-attr-tenacidade: #A06030;
+  --color-attr-capitania:  #C060E8;
+  --color-attr-moral:      #E88040;
 
   --color-orn-gold:   #C8860A;
   --color-orn-bright: #E8C060;
   --color-orn-dim:    #4A2A10;
+
+  /* ── Font aliases → Intelo ── */
+  --font-display: var(--font-intelo);
+  --font-body:    var(--font-intelo);
+  --font-data:    var(--font-intelo);
 }
 
 /* ==========================================================================
@@ -80,6 +118,12 @@
 body {
   color: var(--text-primary);
   background: var(--ark-void);
+}
+
+/* Intelo — ajustes globais de legibilidade */
+
+.font-data, [class*="font-data"] {
+  letter-spacing: 0.04em;
 }
 
 /* ==========================================================================
@@ -119,6 +163,22 @@ body {
 @keyframes float-idle {
   0%, 100% { transform: translateY(0px); }
   50%       { transform: translateY(-4px); }
+}
+
+@keyframes shimmer-epic {
+  0%, 100% { background-position: -200% center; }
+  50%       { background-position: 200% center; }
+}
+
+@keyframes pulse-vivid {
+  0%, 100% { filter: drop-shadow(0 0 6px var(--ark-red-vivid)); }
+  50%       { filter: drop-shadow(0 0 18px var(--ark-red-vivid)); }
+}
+
+@keyframes levelup-flash {
+  0%   { filter: drop-shadow(0 0 0px var(--ark-amber)); opacity: 1; }
+  50%  { filter: drop-shadow(0 0 24px var(--ark-amber-bright)); opacity: 1; }
+  100% { filter: drop-shadow(0 0 6px var(--ark-amber)); opacity: 1; }
 }
 
 /* ==========================================================================
@@ -207,20 +267,84 @@ body {
 .animate-rune-pulse  { animation: rune-pulse 3s ease-in-out infinite; }
 
 /* ==========================================================================
+   Incrementos v3 — épico/vibrante
+   ========================================================================== */
+
+/* Shimmer épico — para títulos de landing e momentos hero */
+.shimmer-epic {
+  background: linear-gradient(
+    90deg,
+    var(--ark-gold)        0%,
+    var(--ark-amber-bright) 30%,
+    var(--ark-white)        50%,
+    var(--ark-amber-bright) 70%,
+    var(--ark-gold)        100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer-epic 3s linear infinite;
+}
+
+/* Glow vívido — hover em botões primários e ícones de destaque */
+.glow-vivid {
+  animation: pulse-vivid 2s ease-in-out infinite;
+}
+
+/* Flash de level up / conquista */
+.flash-levelup {
+  animation: levelup-flash 0.8s ease-out forwards;
+}
+
+/* Texto hero branco creme — para headlines de landing */
+.text-hero {
+  color: var(--ark-white);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Cards — glassmorphism
+   ========================================================================== */
+
+.ark-card {
+  background: var(--ark-surface);
+  backdrop-filter: var(--ark-blur);
+  -webkit-backdrop-filter: var(--ark-blur);
+  border: 1px solid var(--ark-border);
+  border-radius: 2px;
+}
+
+.ark-card-raised {
+  background: var(--ark-surface-raised);
+  backdrop-filter: var(--ark-blur);
+  -webkit-backdrop-filter: var(--ark-blur);
+  border: 1px solid var(--ark-border);
+  border-radius: 2px;
+}
+
+.ark-card-solid {
+  background: var(--ark-surface-solid);
+  border: 1px solid var(--ark-border);
+  border-radius: 2px;
+}
+
+/* ==========================================================================
    HUD
    ========================================================================== */
 
 .ark-hud { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 12px 0 18px; }
 .ark-hud-row { display: flex; align-items: center; gap: 6px; }
-.ark-hud-dot { width: 3px; height: 3px; background: #7a5a18; border-radius: 50%; }
+.ark-hud-dot { width: 3px; height: 3px; background: var(--ark-border); border-radius: 50%; }
 
 .ark-chip-archetype {
-  font-family: var(--font-data);
-  font-size: 12px; font-weight: 600;
-  letter-spacing: 0.12em; text-transform: uppercase;
+  font-family: var(--font-intelo);
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
   color: #f0c84a;
-  background: #1a0c0a;
-  border: 1px solid #d3a539;
+  background: rgba(110,22,15,0.4);
+  border: 1px solid rgba(211,165,57,0.5);
   border-radius: 2px;
   padding: 3px 10px;
   position: relative;
@@ -228,8 +352,11 @@ body {
 .ark-chip-archetype::before,
 .ark-chip-archetype::after {
   content: '';
-  position: absolute; top: 50%; transform: translateY(-50%);
-  width: 5px; height: 5px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 5px;
   background: #d3a539;
   clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
 }
@@ -237,23 +364,27 @@ body {
 .ark-chip-archetype::after  { right: -10px; }
 
 .ark-chip {
-  font-family: var(--font-data);
-  font-size: 11px; font-weight: 500;
+  font-family: var(--font-intelo);
+  font-size: 11px; font-weight: 600;
   letter-spacing: 0.1em; text-transform: uppercase;
   padding: 2px 8px; border-radius: 2px;
 }
-.ark-chip-class         { color: #B89A6A; border: 1px solid #3A2A18; background: #110a0e; }
-.ark-chip-status-alive  { color: #5ecf7a; border: 1px solid #1e4a2a; background: #0d1f12; }
-.ark-chip-status-dead   { color: #cf5e5e; border: 1px solid #4a1e1e; background: #1f0d0d; }
-.ark-chip-status-curse  { color: #b07aff; border: 1px solid #3a2060; background: #150d20; }
+.ark-chip-class         { color: var(--text-secondary); border: 1px solid var(--ark-border); background: rgba(110,22,15,0.2); }
+.ark-chip-status-alive  { color: #5ecf7a; border: 1px solid rgba(30,74,42,0.6); background: rgba(13,31,18,0.6); }
+.ark-chip-status-dead   { color: #cf5e5e; border: 1px solid rgba(74,30,30,0.6); background: rgba(31,13,13,0.6); }
+.ark-chip-status-curse  { color: #b07aff; border: 1px solid rgba(60,32,96,0.6); background: rgba(21,13,32,0.6); }
 
 .ark-hud-meta {
-  font-family: var(--font-data);
-  font-size: 11px; letter-spacing: 0.08em;
-  color: #7A6040;
-  display: flex; gap: 10px; align-items: center;
+  font-family: var(--font-intelo);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  font-weight: 400;
+  color: var(--text-label);
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
-.ark-hud-meta-sep { color: #3A2A18; }
+.ark-hud-meta-sep { color: var(--ark-border); }
 
 /* ==========================================================================
    Section Headers
@@ -261,14 +392,20 @@ body {
 
 .ark-section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .ark-section-title {
-  font-family: var(--font-display);
-  font-size: 13px; font-weight: 700;
-  letter-spacing: 0.18em; text-transform: uppercase;
-  color: #d3a539;
+  font-family: var(--font-intelo);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.ark-section-title--gold {
+  color: var(--ark-gold);
 }
 .ark-section-line {
-  flex: 1; height: 1px;
-  background: linear-gradient(to right, #d3a53960, transparent);
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--ark-border-bright), transparent);
 }
 
 /* ==========================================================================
@@ -276,15 +413,76 @@ body {
    ========================================================================== */
 
 .ark-attr-name {
-  font-family: var(--font-body);
-  font-size: 12px; color: #F0E6D3; flex: 1;
-  text-transform: uppercase; letter-spacing: 0.04em;
+  font-family: var(--font-intelo);
+  font-size: 12px;
+  color: var(--text-primary);
+  flex: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 400;
 }
 .ark-attr-abbr {
-  font-family: var(--font-data);
-  font-size: 10px; color: #7A6040;
-  letter-spacing: 0.08em; margin-left: 4px;
+  font-family: var(--font-intelo);
+  font-size: 10px;
+  color: var(--text-label);
+  letter-spacing: 0.1em;
+  margin-left: 4px;
+  font-weight: 600;
 }
+
+/* ==========================================================================
+   Input native
+   ========================================================================== */
+
+.ark-input-native {
+  background: rgba(7, 5, 15, 0.6);
+  border: 1px solid var(--ark-border);
+  border-radius: 2px;
+  padding: 11px 14px;
+  color: var(--text-primary);
+  font-family: var(--font-intelo);
+  font-size: 14px;
+  font-weight: 400;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.ark-input-native:focus {
+  border-color: var(--ark-border-bright);
+}
+
+.ark-input-label {
+  font-family: var(--font-intelo);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-label);
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* ==========================================================================
+   Button primary
+   ========================================================================== */
+
+.ark-btn-primary {
+  background: var(--ark-red);
+  color: var(--text-primary);
+  font-family: var(--font-intelo);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  border: 1px solid var(--ark-border-bright);
+  border-radius: 2px;
+  padding: 13px 24px;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+}
+.ark-btn-primary:hover  { background: var(--ark-red-bright); }
+.ark-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ==========================================================================
    Bars
@@ -298,28 +496,16 @@ body {
    Scrollbar — themed
    ========================================================================== */
 
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--ark-bg);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--ark-gold-dim);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--ark-gold);
-}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--ark-bg); }
+::-webkit-scrollbar-thumb { background: var(--ark-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ark-border-bright); }
 
 /* ==========================================================================
    Selection color
    ========================================================================== */
 
 ::selection {
-  background: rgba(168, 40, 40, 0.5);
-  color: var(--ark-gold-bright);
+  background: rgba(196, 42, 30, 0.4);
+  color: #ffffff;
 }
