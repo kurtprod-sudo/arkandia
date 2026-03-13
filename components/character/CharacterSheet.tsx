@@ -10,6 +10,8 @@ import {
   ZapIcon, TargetIcon, AnchorIcon, CrownIcon,
   CoinIcon, CrystalIcon, DiamondIcon, FlameIcon,
 } from '@/components/ui/ArkIcons'
+import ArkBuildingSlots, { type BuildingSlotData } from './ArkBuildingSlots'
+import ArkResonanceCard from './ArkResonanceCard'
 import type { Character, CharacterAttributes, CharacterWallet } from '@/types'
 
 interface CharacterSheetProps {
@@ -17,6 +19,9 @@ interface CharacterSheetProps {
   attrs: CharacterAttributes
   wallet: CharacterWallet
   societyName: string | null
+  raceName: string | null
+  className: string | null
+  building: BuildingSlotData[]
 }
 
 const ATTR_ROWS: { key: keyof CharacterAttributes; label: string; abbr: string; color: string; Icon: typeof SwordIcon }[] = [
@@ -142,6 +147,9 @@ export default function CharacterSheet({
   attrs,
   wallet,
   societyName,
+  raceName,
+  className: charClassName,
+  building,
 }: CharacterSheetProps) {
   const xpNeeded = xpToNextLevel(character.level)
   const moralColor = attrs.moral > 150 ? 'text-[var(--text-gold)]' : attrs.moral >= 50 ? 'text-status-injured' : 'text-[var(--ark-red-glow)]'
@@ -206,14 +214,16 @@ export default function CharacterSheet({
             {/* Camada 1 — Arquétipo */}
             <div style={{ position: 'relative', padding: '0 16px', display: 'flex', justifyContent: 'center' }}>
               <div className="ark-chip-archetype">
-                {character.archetype ?? 'N/A'}
+                {character.archetype
+                  ? character.archetype.charAt(0).toUpperCase() + character.archetype.slice(1)
+                  : 'N/A'}
               </div>
             </div>
 
             {/* Camada 2 — Classe + Status */}
             <div className="ark-hud-row">
               <div className="ark-chip ark-chip-class">
-                {character.class_id ? 'Classe' : 'N/A'}
+                {charClassName ?? 'N/A'}
               </div>
               <div className="ark-hud-dot" />
               <div className={`ark-chip ark-chip-status-${character.status === 'dead' ? 'dead' : 'alive'}`}>
@@ -225,11 +235,19 @@ export default function CharacterSheet({
             <div className="ark-hud-meta">
               <span>Nível {character.level}</span>
               <span className="ark-hud-meta-sep">·</span>
-              <span>Sociedade — {societyName ?? 'N/A'}</span>
+              <span>{raceName ?? 'Raça desconhecida'}</span>
               <span className="ark-hud-meta-sep">·</span>
-              <span>Raça — N/A</span>
+              <span>{societyName ?? 'Sem sociedade'}</span>
             </div>
           </div>
+
+          {/* Resonance Card */}
+          <ArkResonanceCard
+            archetype={character.resonance_archetype ?? null}
+            resonanceLevel={character.resonance_level ?? 0}
+            isUnlocked={character.is_resonance_unlocked ?? false}
+            characterLevel={character.level}
+          />
         </div>
       </div>
 
@@ -304,6 +322,16 @@ export default function CharacterSheet({
               </div>
             ))}
           </div>
+        </SectionCard>
+
+        {/* Building Slots */}
+        <SectionCard label="BUILDING" icon={
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M3 1h8v12H3z" stroke="#d3a539" strokeWidth="0.6" fill="#6e160f"/>
+            <path d="M5 4h4M5 7h4M5 10h4" stroke="#d3a539" strokeWidth="0.5"/>
+          </svg>
+        }>
+          <ArkBuildingSlots slots={building} />
         </SectionCard>
 
         {/* Wallet */}

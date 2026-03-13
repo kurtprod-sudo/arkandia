@@ -12,12 +12,6 @@ const STATUS_LABELS = {
   dead: 'Morto',
 }
 
-const PROFESSION_LABELS: Record<string, string> = {
-  comerciante: 'Comerciante', militar: 'Militar', clerigo: 'Clérigo',
-  explorador: 'Explorador', artesao: 'Artesão', erudito: 'Erudito',
-  nobre: 'Nobre', mercenario: 'Mercenário',
-}
-
 export default async function PublicCharacterPage({ params }: Props) {
   const { id } = await params
   const supabase = await createClient()
@@ -30,8 +24,11 @@ export default async function PublicCharacterPage({ params }: Props) {
       level,
       status,
       title,
-      profession,
       archetype,
+      resonance_archetype,
+      is_resonance_unlocked,
+      races (name),
+      classes (name),
       societies (name)
     `)
     .eq('id', id)
@@ -40,6 +37,8 @@ export default async function PublicCharacterPage({ params }: Props) {
   if (!character) notFound()
 
   const society = character.societies as { name: string } | null
+  const race = character.races as { name: string } | null
+  const gameClass = character.classes as { name: string } | null
 
   return (
     <main className="min-h-screen bg-[var(--ark-void)] text-[var(--text-primary)] flex items-center justify-center px-4">
@@ -63,7 +62,18 @@ export default async function PublicCharacterPage({ params }: Props) {
           {/* Informações públicas */}
           <div className="space-y-3">
             <InfoRow label="Nível" value={String(character.level)} />
-            <InfoRow label="Profissão" value={PROFESSION_LABELS[character.profession] ?? character.profession} />
+            <InfoRow label="Raça" value={race?.name ?? '—'} />
+            <InfoRow label="Classe" value={gameClass?.name ?? '—'} />
+            {character.is_resonance_unlocked && character.resonance_archetype && (
+              <InfoRow
+                label="Ressonância"
+                value={
+                  (character.resonance_archetype as string).charAt(0).toUpperCase() +
+                  (character.resonance_archetype as string).slice(1)
+                }
+                valueClass="text-[var(--ark-gold-bright)]"
+              />
+            )}
             {character.archetype && (
               <InfoRow
                 label="Arquétipo"

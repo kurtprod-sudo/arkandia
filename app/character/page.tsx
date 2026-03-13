@@ -23,13 +23,14 @@ export default async function CharacterSheetPage() {
   const characterId = charCheck.id
 
   const [
-    { data: character, error: charError },
+    { data: characterRaw, error: charError },
     { data: attrs, error: attrsError },
     { data: wallet, error: walletError },
+    { data: buildingRaw },
   ] = await Promise.all([
     supabase
       .from('characters')
-      .select('*')
+      .select('*, races (name), classes (name)')
       .eq('id', characterId)
       .maybeSingle(),
     supabase
@@ -42,7 +43,35 @@ export default async function CharacterSheetPage() {
       .select('*')
       .eq('character_id', characterId)
       .maybeSingle(),
+    supabase
+      .from('character_building')
+      .select('slot, skill_id, skills (id, name, skill_type, eter_cost, range_state)')
+      .eq('character_id', characterId)
+      .order('slot'),
   ])
+
+  // Extract joined names before casting to Character type
+  const raceName = (characterRaw as Record<string, unknown>)?.races
+    ? ((characterRaw as Record<string, unknown>).races as { name: string }).name
+    : null
+  const className = (characterRaw as Record<string, unknown>)?.classes
+    ? ((characterRaw as Record<string, unknown>).classes as { name: string }).name
+    : null
+  const character = characterRaw
+
+  // Transform building slots
+  const building = (buildingRaw ?? []).map((b) => ({
+    slot: b.slot as number,
+    skill: b.skills
+      ? {
+          id: (b.skills as Record<string, unknown>).id as string,
+          name: (b.skills as Record<string, unknown>).name as string,
+          skill_type: (b.skills as Record<string, unknown>).skill_type as string,
+          eter_cost: (b.skills as Record<string, unknown>).eter_cost as number,
+          range_state: (b.skills as Record<string, unknown>).range_state as string,
+        }
+      : null,
+  }))
 
   if (process.env.NODE_ENV === 'development') {
     if (charError) console.error('[/character] characters error:', charError)
@@ -99,6 +128,9 @@ export default async function CharacterSheetPage() {
           attrs={attrs}
           wallet={wallet}
           societyName={societyName}
+          raceName={raceName}
+          className={className}
+          building={building}
         />
 
         {/* Milestone alerts */}

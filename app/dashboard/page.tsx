@@ -23,7 +23,7 @@ export default async function DashboardPage() {
 
   const { data: character } = await supabase
     .from('characters')
-    .select('id, name, level, status, profession')
+    .select('id, name, level, status, races (name), classes (name)')
     .eq('user_id', user.id)
     .single()
 
@@ -33,12 +33,6 @@ export default async function DashboardPage() {
     .eq('is_public', true)
     .order('created_at', { ascending: false })
     .limit(10)
-
-  const PROFESSION_LABELS: Record<string, string> = {
-    comerciante: 'Comerciante', militar: 'Militar', clerigo: 'Clérigo',
-    explorador: 'Explorador', artesao: 'Artesão', erudito: 'Erudito',
-    nobre: 'Nobre', mercenario: 'Mercenário',
-  }
 
   const STATUS_LABELS: Record<string, string> = {
     active: 'Vivo', injured: 'Ferido', dead: 'Morto',
@@ -100,9 +94,11 @@ export default async function DashboardPage() {
                     Nv {character.level}
                   </span>
                   <span className="text-[var(--text-ghost)]">•</span>
-                  <ArkBadge color="bronze" className="text-[10px]">
-                    {PROFESSION_LABELS[character.profession] ?? character.profession}
-                  </ArkBadge>
+                  <span className="text-[var(--text-label)] text-xs font-data">
+                    {(character.races as { name: string } | null)?.name ?? '—'}
+                    {' · '}
+                    {(character.classes as { name: string } | null)?.name ?? '—'}
+                  </span>
                   <ArkBadge color={STATUS_BADGE[character.status]} className="text-[10px]">
                     {STATUS_LABELS[character.status]}
                   </ArkBadge>
