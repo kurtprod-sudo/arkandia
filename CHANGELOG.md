@@ -1,5 +1,32 @@
 # CHANGELOG — Arkandia
 
+## [Redesign — Game Design Completo] — Março 2026
+
+### Game Design
+- Criado GDD_Mundo.md v1.1 — lore completo, cosmologia, 5 macrorregiões, 15 nações, territórios, facções, figuras lendárias, Imperadores, Conselho dos Anciões, Armas Ancestrais, Monólitos
+- Criado GDD_Personagem.md v1.0 — 6 raças jogáveis, 11 classes (por arma), atributos, progressão, ressonância com level próprio, skills, building de 6 slots, 3 categorias de maestria, 3 moedas
+- Criado GDD_Sistemas.md v1.0 — combate PvP/PvE em turnos, guerra de territórios idle, expedições (3 tipos), economia player-driven, daily tasks, engajamento e retenção
+- Criado GDD_Narrativa.md v1.0 — Gazeta do Horizonte (persona Mara Voss), 6 contextos de IA, conduta e restrições da IA, painel GM narrativo, glossário canônico, diretrizes de estilo
+
+### Decisões de redesign
+- **Profissões removidas** — crafting e comércio são features de menu, não identidade de personagem
+- **Raças jogáveis definidas:** Humano, Elfo, Anão, Draconiano, Meio-Gigante, Melfork
+- **11 Classes por arma** (não por arquétipo mágico): Lanceiro, Espadachim, Lutador, Bardo, Atirador, Arqueiro, Assassino, Druida, Destruidor, Escudeiro, Mago
+- **Ressonância** escolhida na Criação → agora é revelada por evento narrativo no Nível 5
+- **Classe** no Nível 10 → agora escolhida na Criação do personagem
+- **Skills não sobem de nível** — escalam pelos atributos do personagem
+- **Building:** limite de 6 slots entre ativas, passivas e reativas
+- **3 categorias de Maestria:** Prestígio (Pergaminho + Essência), Ressonância (Essência), Lendária (Gema, esgotável)
+- **Avatar visual** 2.5D gerado por IA com estilo Fate/One Piece definido
+- **Cenários Sociais** — instâncias de RP no site como substituto visual ao Habbo
+
+### Pendente (próximas fases)
+- GDD_Sociedades.md — a criar antes da Fase 12 de implementação
+- Refatoração do banco: migração 002 (sistema de personagem)
+- Refatoração da criação de personagem (Raça + Classe substituem Profissão)
+
+---
+
 ## [Design System v3] — Março 2026
 
 ### Mudança filosófica de paleta

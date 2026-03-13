@@ -227,12 +227,18 @@ SUPABASE_SERVICE_ROLE_KEY=         # Chave service role (apenas server-side)
 
 | Marco | Nível | Desbloqueio |
 |---|---|---|
-| Profissão | 1 | Definida na criação — atributos base e bônus |
-| Arquétipo | 5 | 1 dos 12 — passivas e multiplicadores |
-| Classe | 10 | Skills ativas |
-| Sociedade | Qualquer | Fundação ou entrada — Expedições e Guerras |
+| Criação | 1 | Escolha de Raça + Classe — atributos base, 2 skills iniciais (1 ativa + 1 passiva) |
+| Ressonância | 5 | Revelada por evento narrativo — expande Éter máximo, acessa Maestrias de Ressonância |
+| Abertura total | 10 | Fim da Campanha Inicial — Sociedades, PvP, territórios, Maestrias desbloqueadas |
+| Maestrias | Após 8 skills | Requer completar árvore básica da Classe |
 
 ---
 
-## Convenção de prompts futuros
-Todo prompt novo deve começar com `@CONTEXT.md @GDD.md` e referenciar os componentes Ark* para qualquer página nova criada.
+## Convenção de prompts
+
+Todo prompt deve referenciar os arquivos relevantes para a feature em desenvolvimento:
+- Contexto geral: `@CONTEXT.md @GDD.md`
+- Features de personagem: `@GDD_Personagem.md`
+- Features de sistemas: `@GDD_Sistemas.md`
+- Features narrativas e IA: `@GDD_Narrativa.md`
+- Lore e mundo: `@GDD_Mundo.md`
