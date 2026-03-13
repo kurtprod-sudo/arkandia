@@ -106,14 +106,14 @@ function CharacterRow({
   }
 
   return (
-    <div className="bg-[var(--ark-bg-raised)] rounded-xl border border-[var(--ark-gold-dim)] overflow-hidden">
+    <div className="bg-[var(--ark-surface)] backdrop-blur-xl rounded-sm border border-[var(--ark-border)] overflow-hidden">
       {/* Row header */}
       <button
         onClick={onToggle}
-        className="w-full px-5 py-4 flex items-center justify-between hover:bg-[var(--ark-bg-raised)] transition-colors"
+        className="w-full px-5 py-4 flex items-center justify-between hover:bg-[var(--ark-surface-raised)] transition-colors"
       >
         <div className="flex items-center gap-4 text-left">
-          <div className="w-10 h-10 rounded-full bg-[#6e160f]/30 border border-[#d3a539]/40 flex items-center justify-center font-display font-bold text-[var(--ark-gold-bright)]">
+          <div className="w-10 h-10 rounded-full bg-[#6e160f]/30 border border-[var(--ark-border-bright)] flex items-center justify-center font-display font-bold text-[var(--text-primary)]">
             {character.name.charAt(0)}
           </div>
           <div>
@@ -133,7 +133,7 @@ function CharacterRow({
 
       {/* Expanded panel */}
       {isExpanded && (
-        <div className="border-t border-[#7a5a18]/40 px-5 py-4 space-y-5">
+        <div className="border-t border-[var(--ark-border)] px-5 py-4 space-y-5">
           {message && (
             <p className={`text-sm font-body ${message.startsWith('Erro') ? 'text-status-dead' : 'text-status-alive'}`}>
               {message}
@@ -148,7 +148,7 @@ function CharacterRow({
                 {ATTR_GRID.map(({ key, abbr, color, iconKey }) => {
                   const Icon = ATTR_ICONS[iconKey as keyof typeof ATTR_ICONS]
                   return (
-                    <div key={key} className="bg-[var(--ark-bg)] rounded-lg p-2 border border-[#7a5a18]/40">
+                    <div key={key} className="bg-[var(--ark-surface)] rounded-sm p-2 border border-[var(--ark-border)]">
                       <div className="flex items-center gap-1 mb-0.5">
                         {Icon && <Icon className={color} size={12} />}
                         <p className="text-[var(--text-label)] font-data">{abbr}</p>
@@ -159,15 +159,15 @@ function CharacterRow({
                     </div>
                   )
                 })}
-                <div className="bg-[var(--ark-bg)] rounded-lg p-2 border border-[#7a5a18]/40">
+                <div className="bg-[var(--ark-surface)] rounded-sm p-2 border border-[var(--ark-border)]">
                   <p className="text-[var(--text-label)] font-data text-xs">HP</p>
                   <p className="font-data font-bold text-[var(--ark-red-glow)]">{attrs.hp_atual}/{attrs.hp_max}</p>
                 </div>
-                <div className="bg-[var(--ark-bg)] rounded-lg p-2 border border-[#7a5a18]/40">
+                <div className="bg-[var(--ark-surface)] rounded-sm p-2 border border-[var(--ark-border)]">
                   <p className="text-[var(--text-label)] font-data text-xs">Moral</p>
                   <p className="font-data font-bold text-attr-moral">{attrs.moral}</p>
                 </div>
-                <div className="bg-[var(--ark-bg)] rounded-lg p-2 border border-[#7a5a18]/40">
+                <div className="bg-[var(--ark-surface)] rounded-sm p-2 border border-[var(--ark-border)]">
                   <p className="text-[var(--text-label)] font-data text-xs">Pts</p>
                   <p className="font-data font-bold text-[var(--ark-gold-bright)]">{attrs.attribute_points}</p>
                 </div>
@@ -202,7 +202,7 @@ function CharacterRow({
               <label className="text-xs text-[var(--text-label)] block mb-1 font-body">Atributo</label>
               <select
                 name="attr"
-                className="bg-[var(--ark-bg)] border border-[var(--ark-gold-dim)] text-[var(--text-primary)] text-sm rounded-sm px-2 py-1.5 font-data focus:outline-none focus:border-[var(--ark-gold)]"
+                className="bg-[var(--ark-bg)] border border-[var(--ark-border)] text-[var(--text-primary)] text-sm rounded-sm px-2 py-1.5 font-data focus:outline-none focus:border-[var(--ark-border-bright)]"
               >
                 {['ataque','magia','eter_max','eter_atual','defesa','vitalidade','hp_max','hp_atual',
                   'velocidade','precisao','tenacidade','capitania','moral','attribute_points'].map((a) => (
@@ -216,7 +216,7 @@ function CharacterRow({
                 name="value"
                 type="number"
                 placeholder="0"
-                className="w-24 bg-[var(--ark-bg)] border border-[var(--ark-gold-dim)] text-[var(--text-primary)] text-sm rounded-sm px-2 py-1.5 font-data focus:outline-none focus:border-[var(--ark-gold)]"
+                className="w-24 bg-[var(--ark-bg)] border border-[var(--ark-border)] text-[var(--text-primary)] text-sm rounded-sm px-2 py-1.5 font-data focus:outline-none focus:border-[var(--ark-border-bright)]"
               />
             </div>
             <ArkButton type="submit" disabled={pending} variant="secondary" size="sm">
@@ -230,7 +230,7 @@ function CharacterRow({
               <label className="text-xs text-[var(--text-label)] block mb-1 font-body">Moeda</label>
               <select
                 name="currency"
-                className="bg-[var(--ark-bg)] border border-[var(--ark-gold-dim)] text-[var(--text-primary)] text-sm rounded-sm px-2 py-1.5 font-data focus:outline-none focus:border-[var(--ark-gold)]"
+                className="bg-[var(--ark-bg)] border border-[var(--ark-border)] text-[var(--text-primary)] text-sm rounded-sm px-2 py-1.5 font-data focus:outline-none focus:border-[var(--ark-border-bright)]"
               >
                 <option value="libras">Libras</option>
                 <option value="essencia">Essência</option>
@@ -244,7 +244,7 @@ function CharacterRow({
                 type="number"
                 min="1"
                 placeholder="100"
-                className="w-24 bg-[var(--ark-bg)] border border-[var(--ark-gold-dim)] text-[var(--text-primary)] text-sm rounded-sm px-2 py-1.5 font-data focus:outline-none focus:border-[var(--ark-gold)]"
+                className="w-24 bg-[var(--ark-bg)] border border-[var(--ark-border)] text-[var(--text-primary)] text-sm rounded-sm px-2 py-1.5 font-data focus:outline-none focus:border-[var(--ark-border-bright)]"
               />
             </div>
             <ArkButton type="submit" disabled={pending} size="sm">
@@ -261,7 +261,7 @@ function CharacterRow({
                   key={s}
                   onClick={() => handleStatusChange(s)}
                   disabled={pending || character.status === s}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-body font-semibold border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                  className={`px-3 py-1.5 rounded-sm text-xs font-body font-semibold border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
                     s === 'active' ? 'bg-emerald-950/40 border-emerald-800/40 text-status-alive hover:bg-emerald-950/60' :
                     s === 'injured' ? 'bg-amber-950/40 border-amber-800/40 text-status-injured hover:bg-amber-950/60' :
                     'bg-red-950/40 border-red-800/40 text-status-dead hover:bg-red-950/60'

@@ -44,7 +44,7 @@ export default async function PublicCharacterPage({ params }: Props) {
   return (
     <main className="min-h-screen bg-[var(--ark-void)] text-[var(--text-primary)] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <div className="bg-[var(--ark-bg-raised)] rounded-xl p-8 border border-[var(--ark-gold-dim)]">
+        <div className="bg-[var(--ark-surface)] backdrop-blur-xl rounded-sm p-8 border border-[var(--ark-border)]">
           {/* Nome e título */}
           <div className="text-center mb-6">
             <h1 className="font-display text-3xl font-bold text-[var(--ark-gold-bright)]">{character.name}</h1>
@@ -98,7 +98,7 @@ function InfoRow({
   valueClass?: string
 }) {
   return (
-    <div className="flex justify-between border-b border-[#7a5a18]/40 pb-2">
+    <div className="flex justify-between border-b border-[var(--ark-border)] pb-2">
       <span className="text-[var(--text-secondary)] text-sm font-data">{label}</span>
       <span className={`font-data font-semibold text-sm ${valueClass}`}>{value}</span>
     </div>

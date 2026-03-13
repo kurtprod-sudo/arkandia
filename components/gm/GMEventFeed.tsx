@@ -24,12 +24,12 @@ export default function GMEventFeed({ events }: Props) {
   }
 
   return (
-    <div className="bg-[var(--ark-bg-raised)] rounded-xl border border-[var(--ark-gold-dim)] overflow-hidden">
+    <div className="bg-[var(--ark-surface)] backdrop-blur-xl rounded-sm border border-[var(--ark-border)] overflow-hidden">
       <div className="overflow-y-auto max-h-[600px]">
         {events.map((event) => (
           <div
             key={event.id}
-            className="px-4 py-3 border-b border-[#7a5a18]/40 last:border-0"
+            className="px-4 py-3 border-b border-[var(--ark-border)] last:border-0"
           >
             <div className="flex items-start justify-between gap-2">
               <span

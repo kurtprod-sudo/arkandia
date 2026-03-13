@@ -54,8 +54,8 @@ export default async function DashboardPage() {
       <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-[#6e160f]/6 blur-[150px] pointer-events-none" />
 
       {/* Navbar */}
-      <nav className="border-b border-[var(--ark-gold-dim)] px-6 py-3 flex items-center justify-between bg-[var(--ark-bg-raised)]/80 backdrop-blur-sm relative z-10">
-        <Link href="/dashboard" className="font-display text-[var(--ark-gold-bright)] text-lg text-glow-gold">
+      <nav className="border-b border-[var(--ark-border)] px-6 py-3 flex items-center justify-between bg-[var(--ark-surface)] backdrop-blur-xl relative z-10">
+        <Link href="/dashboard" className="font-display text-[var(--ark-gold-bright)] text-lg">
           Arkandia
         </Link>
         <div className="flex items-center gap-4">
@@ -77,20 +77,20 @@ export default async function DashboardPage() {
 
         {/* Character Card */}
         {character ? (
-          <div className="bg-[var(--ark-bg-raised)] rounded-xl p-6 border border-[var(--ark-gold-dim)]">
+          <div className="bg-[var(--ark-surface)] backdrop-blur-xl rounded-sm p-6 border border-[var(--ark-border)]">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xs font-body text-[var(--text-secondary)] uppercase tracking-wider">
                 Meu Personagem
               </h2>
               <Link
                 href="/character"
-                className="text-sm text-[var(--ark-gold-bright)] hover:text-[var(--ark-gold-bright)] transition-colors font-body"
+                className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors font-body"
               >
                 Ver ficha completa &rarr;
               </Link>
             </div>
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-[#6e160f]/30 border-2 border-[#d3a539]/50 flex items-center justify-center text-2xl font-display font-bold text-[var(--ark-gold-bright)]">
+              <div className="w-14 h-14 rounded-full bg-[#6e160f]/30 border-2 border-[var(--ark-border-bright)] flex items-center justify-center text-2xl font-display font-bold text-[var(--text-primary)]">
                 {character.name.charAt(0)}
               </div>
               <div>
@@ -99,7 +99,7 @@ export default async function DashboardPage() {
                   <span className="text-[var(--text-secondary)] text-sm font-body">
                     Nv {character.level}
                   </span>
-                  <span className="text-[var(--ark-gold-dim)]">•</span>
+                  <span className="text-[var(--text-ghost)]">•</span>
                   <ArkBadge color="bronze" className="text-[10px]">
                     {PROFESSION_LABELS[character.profession] ?? character.profession}
                   </ArkBadge>
@@ -111,7 +111,7 @@ export default async function DashboardPage() {
             </div>
           </div>
         ) : (
-          <div className="bg-[var(--ark-bg-raised)] rounded-xl p-6 border border-[#6e160f]/30 text-center">
+          <div className="bg-[var(--ark-surface)] backdrop-blur-xl rounded-sm p-6 border border-[var(--ark-border)] text-center">
             <p className="text-[var(--text-secondary)] mb-4 font-body">Você ainda não criou seu personagem.</p>
             <Link href="/character/create">
               <ArkButton size="lg">Criar Personagem</ArkButton>
@@ -120,7 +120,7 @@ export default async function DashboardPage() {
         )}
 
         {/* World Journal */}
-        <div className="bg-[var(--ark-bg-raised)] rounded-xl p-6 border border-[var(--ark-gold-dim)]">
+        <div className="bg-[var(--ark-surface)] backdrop-blur-xl rounded-sm p-6 border border-[var(--ark-border)]">
           <h2 className="text-xs font-body text-[var(--text-secondary)] uppercase tracking-wider mb-1">
             Jornal do Mundo
           </h2>
@@ -128,7 +128,7 @@ export default async function DashboardPage() {
           {publicEvents && publicEvents.length > 0 ? (
             <ul className="space-y-3">
               {publicEvents.map((event) => (
-                <li key={event.id} className="text-sm border-b border-[#7a5a18]/40 pb-3 last:border-0">
+                <li key={event.id} className="text-sm border-b border-[var(--ark-border)] pb-3 last:border-0">
                   <p className="text-[var(--text-secondary)] font-body">
                     {event.narrative_text ?? event.type}
                   </p>

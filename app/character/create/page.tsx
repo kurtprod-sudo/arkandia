@@ -43,7 +43,7 @@ export default async function CreateCharacterPage() {
         </p>
         <ArkDivider className="w-48 mx-auto mb-8" />
 
-        <div className="bg-[var(--ark-bg-raised)] border border-[var(--ark-gold-dim)] rounded-xl p-6">
+        <div className="bg-[var(--ark-surface)] backdrop-blur-xl border border-[var(--ark-border)] rounded-sm p-6">
           <CreateCharacterForm professions={(professions ?? []) as Profession[]} />
         </div>
       </div>

@@ -46,13 +46,13 @@ export default async function GMPanelPage() {
       <div className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full bg-[#6e160f]/8 blur-[180px] pointer-events-none" />
 
       {/* GM Navbar */}
-      <nav className="border-b border-[#6e160f]/30 px-6 py-3 flex items-center justify-between bg-[#6e160f]/10 backdrop-blur-sm relative z-10">
+      <nav className="border-b border-[var(--ark-border)] px-6 py-3 flex items-center justify-between bg-[var(--ark-surface)] backdrop-blur-xl relative z-10">
         <div className="flex items-center gap-3">
           <span className="font-display text-[var(--ark-red-glow)] text-lg">GM Panel</span>
           <span className="text-[var(--text-label)] text-sm font-body">— Arkandia</span>
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-sm text-[var(--ark-gold-bright)] hover:text-[var(--ark-gold-bright)] transition-colors font-body">
+          <Link href="/dashboard" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors font-body">
             Dashboard
           </Link>
           <span className="text-[var(--ark-red-glow)] text-sm font-data">{profile.username}</span>

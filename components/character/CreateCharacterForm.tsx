@@ -75,10 +75,10 @@ export default function CreateCharacterForm({ professions }: Props) {
               key={prof.id}
               type="button"
               onClick={() => setSelected(prof)}
-              className={`relative p-4 rounded-lg border text-left transition-all duration-200 ${
+              className={`relative p-4 rounded-sm border text-left transition-all duration-200 ${
                 selected?.id === prof.id
                   ? 'border-[#c42a1e]/60 bg-[#6e160f]/20 glow-crimson'
-                  : 'border-[var(--ark-gold-dim)] bg-[var(--ark-bg)] hover:border-[#d3a539]/40 hover:bg-[var(--ark-bg-raised)]'
+                  : 'border-[var(--ark-border)] bg-[var(--ark-bg)] hover:border-[var(--ark-border-bright)] hover:bg-[var(--ark-surface)]'
               }`}
             >
               <div className="flex items-center gap-2 mb-1">
@@ -105,7 +105,7 @@ export default function CreateCharacterForm({ professions }: Props) {
       </div>
 
       {state?.error && (
-        <div className="flex items-center gap-2 text-sm bg-red-950/40 border border-red-800/50 rounded-lg px-4 py-3">
+        <div className="flex items-center gap-2 text-sm bg-red-950/40 border border-red-800/50 rounded-sm px-4 py-3">
           <span className="text-red-400">&#x26A0;</span>
           <p className="text-red-300">{state.error}</p>
         </div>
@@ -144,7 +144,7 @@ function AttributePreview({ attrs }: { attrs: ProfessionBaseAttributes }) {
   ]
 
   return (
-    <div className="mt-4 p-4 bg-[var(--ark-bg)] rounded-lg border border-[var(--ark-gold-dim)]">
+    <div className="mt-4 p-4 bg-[var(--ark-surface)] rounded-sm border border-[var(--ark-border)]">
       <ArkDivider variant="dark" className="mt-0 mb-3" />
       <p className="text-xs text-[var(--text-label)] uppercase tracking-wider mb-3 font-body">
         Atributos iniciais
@@ -154,7 +154,7 @@ function AttributePreview({ attrs }: { attrs: ProfessionBaseAttributes }) {
           const val = attrs[key]
           const Icon = ATTR_ICONS[iconKey as keyof typeof ATTR_ICONS]
           return (
-            <div key={key} className="flex items-center justify-between text-sm px-2 py-1 rounded bg-[#110a0e]/50">
+            <div key={key} className="flex items-center justify-between text-sm px-2 py-1 rounded bg-[var(--ark-surface)]">
               <span className="flex items-center gap-1.5 text-[var(--text-secondary)]">
                 {Icon && <Icon className={color} size={14} />}
                 <span className="font-data text-xs">{abbr}</span>

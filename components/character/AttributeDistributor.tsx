@@ -64,7 +64,7 @@ export default function AttributeDistributor({ characterId, availablePoints, cur
   }
 
   return (
-    <div className="bg-[#6e160f]/15 border border-[#6e160f]/30 rounded-xl p-5">
+    <div className="bg-[var(--ark-surface)] backdrop-blur-xl border border-[var(--ark-border)] rounded-sm p-5">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-display text-sm text-[var(--ark-gold-bright)] text-glow-gold">
           Pontos para distribuir
@@ -90,7 +90,7 @@ export default function AttributeDistributor({ characterId, availablePoints, cur
                 <button
                   onClick={() => adjust(key, -1)}
                   disabled={pendingVal <= 0}
-                  className="w-7 h-7 rounded-sm bg-[var(--ark-bg-raised)] border border-[var(--ark-gold-dim)] hover:border-[var(--ark-gold)] disabled:opacity-30 disabled:cursor-not-allowed text-[var(--text-primary)] font-bold transition-colors font-data"
+                  className="w-7 h-7 rounded-sm bg-[var(--ark-surface)] border border-[var(--ark-border)] hover:border-[var(--ark-border-bright)] disabled:opacity-30 disabled:cursor-not-allowed text-[var(--text-primary)] font-bold transition-colors font-data"
                 >
                   −
                 </button>
@@ -103,7 +103,7 @@ export default function AttributeDistributor({ characterId, availablePoints, cur
                 <button
                   onClick={() => adjust(key, 1)}
                   disabled={remaining <= 0}
-                  className="w-7 h-7 rounded-sm bg-[var(--ark-bg-raised)] border border-[var(--ark-gold-dim)] hover:border-[var(--ark-gold)] disabled:opacity-30 disabled:cursor-not-allowed text-[var(--text-primary)] font-bold transition-colors font-data"
+                  className="w-7 h-7 rounded-sm bg-[var(--ark-surface)] border border-[var(--ark-border)] hover:border-[var(--ark-border-bright)] disabled:opacity-30 disabled:cursor-not-allowed text-[var(--text-primary)] font-bold transition-colors font-data"
                 >
                   +
                 </button>
