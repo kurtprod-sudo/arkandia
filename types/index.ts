@@ -114,8 +114,8 @@ export interface Character {
   class_id: string | null
   society_id: string | null
   avatar_url?: string | null
-  race_id?: string
-  resonance_archetype?: ArchetypeType
+  race_id?: string | null
+  resonance_archetype?: ArchetypeType | null
   resonance_level?: number
   is_resonance_unlocked?: boolean
   injured_until?: string | null

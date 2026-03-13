@@ -95,7 +95,7 @@ export default async function CharacterSheetPage() {
 
       <div className="relative z-10">
         <CharacterSheet
-          character={character}
+          character={character as unknown as import('@/types').Character}
           attrs={attrs}
           wallet={wallet}
           societyName={societyName}

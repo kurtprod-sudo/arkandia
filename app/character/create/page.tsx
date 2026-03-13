@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import CreateCharacterForm from '@/components/character/CreateCharacterForm'
 import ArkDivider from '@/components/ui/ArkDivider'
-import { type Profession } from '@/types'
+import { type Race, type GameClass } from '@/types'
 
 export default async function CreateCharacterPage() {
   const supabase = await createClient()
@@ -11,7 +11,7 @@ export default async function CreateCharacterPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) redirect('/auth/login')
+  if (!user) redirect('/')
 
   // Se já tem personagem, vai direto para a ficha
   const { data: existing } = await supabase
@@ -22,9 +22,14 @@ export default async function CreateCharacterPage() {
 
   if (existing) redirect('/character')
 
-  // Busca profissões disponíveis
-  const { data: professions } = await supabase
-    .from('professions')
+  // Busca raças e classes disponíveis
+  const { data: races } = await supabase
+    .from('races')
+    .select('*')
+    .order('name')
+
+  const { data: classes } = await supabase
+    .from('classes')
     .select('*')
     .order('name')
 
@@ -36,7 +41,7 @@ export default async function CreateCharacterPage() {
 
       <div className="w-full max-w-2xl relative z-10 py-12">
         <h1 className="font-display text-3xl font-bold text-[var(--ark-gold-bright)] text-glow-gold text-center mb-1">
-          Forja do Destino
+          Despertar em Ellia
         </h1>
         <p className="text-[var(--text-secondary)] text-center font-body text-sm mb-2">
           Quem você é neste mundo?
@@ -44,7 +49,10 @@ export default async function CreateCharacterPage() {
         <ArkDivider className="w-48 mx-auto mb-8" />
 
         <div className="bg-[var(--ark-surface)] backdrop-blur-xl border border-[var(--ark-border)] rounded-sm p-6">
-          <CreateCharacterForm professions={(professions ?? []) as Profession[]} />
+          <CreateCharacterForm
+            races={(races ?? []) as unknown as Race[]}
+            classes={(classes ?? []) as unknown as GameClass[]}
+          />
         </div>
       </div>
     </main>
