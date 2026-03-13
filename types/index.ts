@@ -79,6 +79,7 @@ export interface Character {
   archetype: ArchetypeType | null
   class_id: string | null
   society_id: string | null
+  avatar_url?: string | null
   created_at: string
 }
 

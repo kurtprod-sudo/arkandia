@@ -20,10 +20,10 @@ export default function ArkTooltip({ content, children, className = '' }: ArkToo
       {children}
       {visible && (
         <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none">
-          <div className="bg-ark-bg-secondary border border-bronze-dark/50 rounded-md px-3 py-2 shadow-lg shadow-black/40 whitespace-nowrap">
-            <div className="text-xs font-body text-ark-text-primary">{content}</div>
+          <div className="bg-[var(--ark-bg-raised)] border border-[var(--ark-gold-dim)] rounded-sm px-3 py-1.5 font-data text-xs shadow-[0_4px_16px_rgba(0,0,0,0.6)] whitespace-nowrap">
+            {content}
           </div>
-          <div className="w-2 h-2 bg-ark-bg-secondary border-r border-b border-bronze-dark/50 rotate-45 absolute left-1/2 -translate-x-1/2 -bottom-1" />
+          <div className="w-2 h-2 bg-[var(--ark-bg-raised)] border-r border-b border-[var(--ark-gold-dim)] rotate-45 absolute left-1/2 -translate-x-1/2 -bottom-1" />
         </div>
       )}
     </div>

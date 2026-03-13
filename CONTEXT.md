@@ -88,10 +88,54 @@ Toda página nova deve usar esses componentes de `/components/ui/`:
 
 ---
 
-## Design system
-- **Paleta:** variáveis CSS em globals.css (vinho, bronze, dourado, cores por atributo)
-- **Tipografia:** Cinzel Decorative (títulos), Crimson Pro (textos), Inter (números)
-- **Efeitos:** .glow-wine, .glow-bronze, .glow-gold, .shimmer, .pulse-glow, .particle-float
+## Design System
+
+### Tipografia
+| Variável CSS       | Fonte               | Uso                                      |
+|--------------------|---------------------|------------------------------------------|
+| `--font-display`   | Cormorant Garamond  | Títulos, nome do personagem, headers     |
+| `--font-body`      | Libre Baskerville   | Nomes de atributos, texto de conteúdo    |
+| `--font-data`      | Rajdhani            | Labels, stats, números, UI, siglas       |
+
+Classes Tailwind: `font-display`, `font-body`, `font-data`
+
+### Paleta de Cores
+| Variável             | Hex       | Uso                              |
+|----------------------|-----------|----------------------------------|
+| `--ark-red`          | #6e160f   | Cor primária, bordas, moldura    |
+| `--ark-red-glow`     | #c42a1e   | Glow, hover, barra HP            |
+| `--ark-gold`         | #d3a539   | Títulos, dourado, destaque       |
+| `--ark-gold-bright`  | #f0c84a   | Shimmer, hover gold              |
+| `--ark-bg`           | #0a0508   | Background base                  |
+| `--ark-bg-raised`    | #110a0e   | Cards, superfícies elevadas      |
+| `--text-primary`     | #F0E6D3   | Texto principal                  |
+| `--text-secondary`   | #B89A6A   | Texto secundário, bronze         |
+| `--text-label`       | #7A6040   | Labels apagados, siglas          |
+| `--text-ghost`       | #3A2A18   | Separadores, fantasmas           |
+| `--text-gold`        | #D3A539   | Texto dourado                    |
+
+### Componentes Ark* disponíveis
+Toda página nova deve usar esses componentes de `/components/ui/`:
+- **ArkCard** — variantes: default, highlighted, legendary
+- **ArkButton** — variantes: primary, secondary, ghost, danger
+- **ArkStatBar** — variantes: hp, eter, xp, moral
+- **ArkDivider**
+- **ArkTooltip**
+- **ArkModal**
+- **ArkPortraitParticles** — partículas animadas ao redor do portrait
+
+### Padrões visuais aprovados
+- `ark-section-header` + `ark-section-title` + `ark-section-line` → headers de seção
+- `ark-hud` com 3 camadas → Arquétipo / Classe+Status / Metadados finos
+- `name-shimmer` → efeito shimmer dourado no nome do personagem
+- `portrait-glow` → glow animado na moldura do portrait
+- Barras: `bar-hp` (vermelho), `bar-eter` (cinza/branco), `bar-xp` (dourado)
+- Atributos: nome em maiúsculo + sigla `(ABR)` em `.ark-attr-abbr`
+
+### Asset de Moldura
+- `/public/assets/frames/portrait-default.png` — 1024×1536px
+- Área interior: top 25.1%, left 14.3%, right 14.3%, bottom 9.8%
+- Usar com `mix-blend-mode: multiply` removido; fundo preto, PNG sobrepõe
 
 ---
 

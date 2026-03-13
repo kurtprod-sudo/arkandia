@@ -51,22 +51,22 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen relative">
       {/* Background effects */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-wine-dark/6 blur-[150px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-[#6e160f]/6 blur-[150px] pointer-events-none" />
 
       {/* Navbar */}
-      <nav className="border-b border-bronze-dark/25 px-6 py-3 flex items-center justify-between bg-ark-bg-secondary/80 backdrop-blur-sm relative z-10">
-        <Link href="/dashboard" className="font-display text-gold-pure text-lg text-glow-bronze">
+      <nav className="border-b border-[var(--ark-gold-dim)] px-6 py-3 flex items-center justify-between bg-[var(--ark-bg-raised)]/80 backdrop-blur-sm relative z-10">
+        <Link href="/dashboard" className="font-display text-[var(--ark-gold-bright)] text-lg text-glow-gold">
           Arkandia
         </Link>
         <div className="flex items-center gap-4">
           {profile?.role === 'gm' && (
-            <Link href="/gm" className="text-sm text-wine-glow hover:text-wine-light transition-colors font-body">
+            <Link href="/gm" className="text-sm text-[var(--ark-red-glow)] hover:text-[var(--ark-red-glow)]/80 transition-colors font-body">
               Painel GM
             </Link>
           )}
-          <span className="text-ark-text-muted text-sm font-body">{profile?.username}</span>
+          <span className="text-[var(--text-label)] text-sm font-body">{profile?.username}</span>
           <form action={logout}>
-            <button className="text-sm text-ark-text-muted hover:text-ark-text-primary transition-colors font-body">
+            <button className="text-sm text-[var(--text-label)] hover:text-[var(--text-primary)] transition-colors font-body">
               Sair
             </button>
           </form>
@@ -77,29 +77,29 @@ export default async function DashboardPage() {
 
         {/* Character Card */}
         {character ? (
-          <div className="bg-ark-bg-secondary rounded-xl p-6 border border-bronze-dark/25">
+          <div className="bg-[var(--ark-bg-raised)] rounded-xl p-6 border border-[var(--ark-gold-dim)]">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xs font-body text-ark-text-secondary uppercase tracking-wider">
+              <h2 className="text-xs font-body text-[var(--text-secondary)] uppercase tracking-wider">
                 Meu Personagem
               </h2>
               <Link
                 href="/character"
-                className="text-sm text-bronze-light hover:text-bronze-glow transition-colors font-body"
+                className="text-sm text-[var(--ark-gold-bright)] hover:text-[var(--ark-gold-bright)] transition-colors font-body"
               >
                 Ver ficha completa &rarr;
               </Link>
             </div>
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-wine-dark/30 border-2 border-bronze-mid/50 flex items-center justify-center text-2xl font-display font-bold text-gold-pure">
+              <div className="w-14 h-14 rounded-full bg-[#6e160f]/30 border-2 border-[#d3a539]/50 flex items-center justify-center text-2xl font-display font-bold text-[var(--ark-gold-bright)]">
                 {character.name.charAt(0)}
               </div>
               <div>
-                <p className="text-xl font-display font-bold text-gold-pure">{character.name}</p>
+                <p className="text-xl font-display font-bold text-[var(--ark-gold-bright)]">{character.name}</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-ark-text-secondary text-sm font-body">
+                  <span className="text-[var(--text-secondary)] text-sm font-body">
                     Nv {character.level}
                   </span>
-                  <span className="text-bronze-dark">•</span>
+                  <span className="text-[var(--ark-gold-dim)]">•</span>
                   <ArkBadge color="bronze" className="text-[10px]">
                     {PROFESSION_LABELS[character.profession] ?? character.profession}
                   </ArkBadge>
@@ -111,8 +111,8 @@ export default async function DashboardPage() {
             </div>
           </div>
         ) : (
-          <div className="bg-ark-bg-secondary rounded-xl p-6 border border-wine-mid/30 text-center">
-            <p className="text-ark-text-secondary mb-4 font-body">Você ainda não criou seu personagem.</p>
+          <div className="bg-[var(--ark-bg-raised)] rounded-xl p-6 border border-[#6e160f]/30 text-center">
+            <p className="text-[var(--text-secondary)] mb-4 font-body">Você ainda não criou seu personagem.</p>
             <Link href="/character/create">
               <ArkButton size="lg">Criar Personagem</ArkButton>
             </Link>
@@ -120,19 +120,19 @@ export default async function DashboardPage() {
         )}
 
         {/* World Journal */}
-        <div className="bg-ark-bg-secondary rounded-xl p-6 border border-bronze-dark/25">
-          <h2 className="text-xs font-body text-ark-text-secondary uppercase tracking-wider mb-1">
+        <div className="bg-[var(--ark-bg-raised)] rounded-xl p-6 border border-[var(--ark-gold-dim)]">
+          <h2 className="text-xs font-body text-[var(--text-secondary)] uppercase tracking-wider mb-1">
             Jornal do Mundo
           </h2>
           <ArkDivider variant="dark" className="mb-4" />
           {publicEvents && publicEvents.length > 0 ? (
             <ul className="space-y-3">
               {publicEvents.map((event) => (
-                <li key={event.id} className="text-sm border-b border-bronze-dark/15 pb-3 last:border-0">
-                  <p className="text-ark-text-secondary font-body">
+                <li key={event.id} className="text-sm border-b border-[#7a5a18]/40 pb-3 last:border-0">
+                  <p className="text-[var(--text-secondary)] font-body">
                     {event.narrative_text ?? event.type}
                   </p>
-                  <p className="text-ark-text-muted text-xs mt-1 font-data">
+                  <p className="text-[var(--text-label)] text-xs mt-1 font-data">
                     {new Date(event.created_at).toLocaleDateString('pt-BR', {
                       day: '2-digit',
                       month: 'short',
@@ -144,7 +144,7 @@ export default async function DashboardPage() {
               ))}
             </ul>
           ) : (
-            <p className="text-ark-text-muted text-sm font-body italic">
+            <p className="text-[var(--text-label)] text-sm font-body italic">
               O mundo aguarda seus primeiros heróis.
             </p>
           )}

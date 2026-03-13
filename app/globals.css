@@ -3,37 +3,74 @@
 @tailwind utilities;
 
 /* ==========================================================================
-   ARKANDIA — Design System Variables
+   ARKANDIA — Design System v2 (Final)
    ========================================================================== */
 
 :root {
-  /* Backgrounds */
-  --color-bg-primary: #0A0608;
-  --color-bg-secondary: #120D0F;
-  --color-bg-tertiary: #1C1418;
+  /* ── Canonical palette ── */
+  --ark-red:         #6e160f;
+  --ark-red-bright:  #a01f16;
+  --ark-red-glow:    #c42a1e;
+  --ark-gold:        #d3a539;
+  --ark-gold-bright: #f0c84a;
+  --ark-gold-dim:    #7a5a18;
+  --ark-void:        #050203;
+  --ark-bg:          #0a0508;
+  --ark-bg-raised:   #110a0e;
 
-  /* Wine accent */
-  --color-wine-dark: #3D0F1C;
-  --color-wine-mid: #6B1F35;
-  --color-wine-light: #9B3452;
-  --color-wine-glow: #C4415E;
+  --text-hero:       #FFFFFF;
+  --text-primary:    #F0E6D3;
+  --text-secondary:  #B89A6A;
+  --text-label:      #7A6040;
+  --text-ghost:      #3A2A18;
+  --text-gold:       #D3A539;
+  --text-gold-soft:  #A07828;
 
-  /* Bronze / Gold accent */
-  --color-bronze-dark: #4A3218;
-  --color-bronze-mid: #8B6330;
-  --color-bronze-light: #C49A4A;
-  --color-bronze-glow: #E8C06A;
-  --color-gold-pure: #F5D485;
+  /* ── Tailwind token aliases (referenced by tailwind.config.ts + components) ── */
+  --color-bg-void:      #050305;
+  --color-bg-primary:   #0A0608;
+  --color-bg-secondary: #110A0E;
+  --color-bg-tertiary:  #1A1018;
+  --color-bg-overlay:   rgba(5, 3, 5, 0.85);
 
-  /* Text */
-  --color-text-primary: #F0E6D3;
-  --color-text-secondary: #A89880;
-  --color-text-muted: #6B5D52;
+  --color-gold-pure:    #F5D485;
+  --color-gold-bright:  #E8C060;
+  --color-gold-mid:     #C8860A;
+  --color-gold-dim:     #8A5A10;
+  --color-gold-ghost:   #2A1808;
 
-  /* Status */
-  --color-status-alive: #4CAF82;
+  --color-crimson-bright: #E84040;
+  --color-crimson-mid:    #A82828;
+  --color-crimson-dark:   #501010;
+
+  --color-text-hero:      #FFFFFF;
+  --color-text-primary:   #F0E6D3;
+  --color-text-secondary: #B89A6A;
+  --color-text-label:     #7A6040;
+  --color-text-muted:     #5A4A38;
+  --color-text-ghost:     #3A2A18;
+  --color-text-disabled:  #2A2018;
+  --color-text-gold:      #D3A539;
+  --color-text-gold-soft: #A07828;
+
+  --color-status-alive:   #30C060;
   --color-status-injured: #E8A020;
-  --color-status-dead: #8B2020;
+  --color-status-dead:    #882020;
+
+  --color-attr-ataque:     #E85D4A;
+  --color-attr-magia:      #9060E8;
+  --color-attr-eter:       #4090E8;
+  --color-attr-defesa:     #60A060;
+  --color-attr-vitalidade: #E84060;
+  --color-attr-velocidade: #E8C040;
+  --color-attr-precisao:   #E88040;
+  --color-attr-tenacidade: #A080C0;
+  --color-attr-capitania:  #C090D8;
+  --color-attr-moral:      #E06090;
+
+  --color-orn-gold:   #C8860A;
+  --color-orn-bright: #E8C060;
+  --color-orn-dim:    #4A2A10;
 }
 
 /* ==========================================================================
@@ -41,76 +78,221 @@
    ========================================================================== */
 
 body {
-  color: var(--color-text-primary);
-  background: var(--color-bg-primary);
-}
-
-/* Subtle noise texture on cards */
-.ark-texture {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23120D0F'/%3E%3Crect width='1' height='1' fill='%23150F12' opacity='0.4'/%3E%3C/svg%3E");
+  color: var(--text-primary);
+  background: var(--ark-void);
 }
 
 /* ==========================================================================
-   Glow effects
+   Keyframes
+   ========================================================================== */
+
+@keyframes shimmer-name {
+  0%, 100% { background-position: -200% center; }
+  50%       { background-position: 200% center; }
+}
+
+@keyframes glow-breathe {
+  0%, 100% { filter: drop-shadow(0 0 8px #d3a53940); }
+  50%       { filter: drop-shadow(0 0 20px #d3a53980); }
+}
+
+@keyframes rune-pulse {
+  0%, 100% { opacity: 0.3; }
+  50%       { opacity: 0.8; }
+}
+
+@keyframes bar-reveal {
+  from { width: 0; }
+  to   { width: var(--bar-width, 100%); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 1; }
+}
+
+@keyframes shimmer-sweep {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+@keyframes float-idle {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-4px); }
+}
+
+/* ==========================================================================
+   Character name shimmer
+   ========================================================================== */
+
+.name-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--ark-gold) 0%,
+    var(--ark-gold-bright) 40%,
+    #fff 50%,
+    var(--ark-gold-bright) 60%,
+    var(--ark-gold) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer-name 4s linear infinite;
+}
+
+/* ==========================================================================
+   Portrait glow
+   ========================================================================== */
+
+.portrait-glow {
+  animation: glow-breathe 3s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   Utility classes
    ========================================================================== */
 
 @layer utilities {
-  .glow-wine {
-    box-shadow: 0 0 20px rgba(196, 65, 94, 0.3), 0 0 40px rgba(196, 65, 94, 0.1);
+  .glow-crimson {
+    box-shadow: 0 0 20px rgba(232,64,64,0.35), 0 0 50px rgba(232,64,64,0.12);
   }
 
-  .glow-bronze {
-    box-shadow: 0 0 20px rgba(196, 154, 74, 0.3), 0 0 40px rgba(196, 154, 74, 0.1);
+  .glow-violet {
+    box-shadow: 0 0 20px rgba(144,96,232,0.35), 0 0 50px rgba(144,96,232,0.12);
   }
 
-  .glow-gold {
-    box-shadow: 0 0 20px rgba(245, 212, 133, 0.35), 0 0 50px rgba(245, 212, 133, 0.15);
+  .text-glow-gold {
+    text-shadow: 0 0 12px rgba(232,192,96,0.6), 0 0 30px rgba(232,192,96,0.2);
   }
 
-  .text-glow-bronze {
-    text-shadow: 0 0 12px rgba(232, 192, 106, 0.5), 0 0 30px rgba(232, 192, 106, 0.2);
-  }
-
-  .text-glow-wine {
-    text-shadow: 0 0 12px rgba(196, 65, 94, 0.5), 0 0 30px rgba(196, 65, 94, 0.2);
-  }
-
-  /* Shimmer — for rare / legendary items */
-  .shimmer {
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(245, 212, 133, 0.08) 40%,
-      rgba(245, 212, 133, 0.15) 50%,
-      rgba(245, 212, 133, 0.08) 60%,
-      transparent 100%
-    );
+  .shimmer-legendary {
+    background: linear-gradient(90deg,
+      transparent 0%, rgba(245,212,133,0.06) 40%,
+      rgba(245,212,133,0.14) 50%, rgba(245,212,133,0.06) 60%,
+      transparent 100%);
     background-size: 200% 100%;
-    animation: shimmer 3s ease-in-out infinite;
+    animation: shimmer-sweep 3s ease-in-out infinite;
   }
 
-  /* Pulse glow — for active / alive elements */
-  .pulse-glow {
-    animation: pulse-glow 2.5s ease-in-out infinite;
+  .bg-dot-pattern {
+    background-image: radial-gradient(circle, rgba(200,134,10,0.08) 1px, transparent 1px);
+    background-size: 20px 20px;
   }
 
-  /* Float — for archetype icons */
-  .particle-float {
-    animation: particle-float 4s ease-in-out infinite;
+  .border-orn {
+    border: 1px solid var(--color-gold-dim);
+    outline: 1px solid var(--color-gold-ghost);
+    outline-offset: 2px;
   }
 
-  /* Ornamental border (used on ArkCard highlighted/legendary) */
-  .border-ornament {
-    border-image: linear-gradient(
-      135deg,
-      var(--color-bronze-dark) 0%,
-      var(--color-bronze-light) 30%,
-      var(--color-gold-pure) 50%,
-      var(--color-bronze-light) 70%,
-      var(--color-bronze-dark) 100%
-    ) 1;
+  .text-readable {
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6);
+  }
+  .text-readable-gold {
+    text-shadow:
+      0 1px 3px rgba(0,0,0,0.9),
+      0 0 12px rgba(211,165,57,0.4),
+      0 0 24px rgba(211,165,57,0.15);
+  }
+  .text-readable-white {
+    text-shadow:
+      0 1px 4px rgba(0,0,0,0.9),
+      0 2px 8px rgba(0,0,0,0.7);
   }
 }
+
+.animate-pulse-glow  { animation: pulse-glow 2.5s ease-in-out infinite; }
+.animate-float-idle  { animation: float-idle 5s ease-in-out infinite; }
+.animate-rune-pulse  { animation: rune-pulse 3s ease-in-out infinite; }
+
+/* ==========================================================================
+   HUD
+   ========================================================================== */
+
+.ark-hud { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 12px 0 18px; }
+.ark-hud-row { display: flex; align-items: center; gap: 6px; }
+.ark-hud-dot { width: 3px; height: 3px; background: #7a5a18; border-radius: 50%; }
+
+.ark-chip-archetype {
+  font-family: var(--font-data);
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: #f0c84a;
+  background: #1a0c0a;
+  border: 1px solid #d3a539;
+  border-radius: 2px;
+  padding: 3px 10px;
+  position: relative;
+}
+.ark-chip-archetype::before,
+.ark-chip-archetype::after {
+  content: '';
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 5px; height: 5px;
+  background: #d3a539;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+.ark-chip-archetype::before { left: -10px; }
+.ark-chip-archetype::after  { right: -10px; }
+
+.ark-chip {
+  font-family: var(--font-data);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 2px;
+}
+.ark-chip-class         { color: #B89A6A; border: 1px solid #3A2A18; background: #110a0e; }
+.ark-chip-status-alive  { color: #5ecf7a; border: 1px solid #1e4a2a; background: #0d1f12; }
+.ark-chip-status-dead   { color: #cf5e5e; border: 1px solid #4a1e1e; background: #1f0d0d; }
+.ark-chip-status-curse  { color: #b07aff; border: 1px solid #3a2060; background: #150d20; }
+
+.ark-hud-meta {
+  font-family: var(--font-data);
+  font-size: 11px; letter-spacing: 0.08em;
+  color: #7A6040;
+  display: flex; gap: 10px; align-items: center;
+}
+.ark-hud-meta-sep { color: #3A2A18; }
+
+/* ==========================================================================
+   Section Headers
+   ========================================================================== */
+
+.ark-section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.ark-section-title {
+  font-family: var(--font-display);
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: #d3a539;
+}
+.ark-section-line {
+  flex: 1; height: 1px;
+  background: linear-gradient(to right, #d3a53960, transparent);
+}
+
+/* ==========================================================================
+   Attribute rows
+   ========================================================================== */
+
+.ark-attr-name {
+  font-family: var(--font-body);
+  font-size: 12px; color: #F0E6D3; flex: 1;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.ark-attr-abbr {
+  font-family: var(--font-data);
+  font-size: 10px; color: #7A6040;
+  letter-spacing: 0.08em; margin-left: 4px;
+}
+
+/* ==========================================================================
+   Bars
+   ========================================================================== */
+
+.bar-hp   { background: linear-gradient(to right, #6e160f, #c42a1e); }
+.bar-eter { background: linear-gradient(to right, #2a2a35, #c8ccd8); }
+.bar-xp   { background: linear-gradient(to right, #2a1a08, #d3a539); }
 
 /* ==========================================================================
    Scrollbar — themed
@@ -121,16 +303,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-bg-primary);
+  background: var(--ark-bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-bronze-dark);
+  background: var(--ark-gold-dim);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-bronze-mid);
+  background: var(--ark-gold);
 }
 
 /* ==========================================================================
@@ -138,6 +320,6 @@ body {
    ========================================================================== */
 
 ::selection {
-  background: rgba(107, 31, 53, 0.5);
-  color: var(--color-gold-pure);
+  background: rgba(168, 40, 40, 0.5);
+  color: var(--ark-gold-bright);
 }

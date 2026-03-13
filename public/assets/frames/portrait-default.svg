@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300" fill="none">
+  <defs>
+    <linearGradient id="frameGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6e160f"/>
+      <stop offset="30%" stop-color="#a01f16"/>
+      <stop offset="50%" stop-color="#d3a539"/>
+      <stop offset="70%" stop-color="#a01f16"/>
+      <stop offset="100%" stop-color="#6e160f"/>
+    </linearGradient>
+  </defs>
+  <!-- Heraldic frame - transparent center, border only -->
+  <rect x="0" y="0" width="200" height="300" fill="none"/>
+  <rect x="8" y="8" width="184" height="284" fill="none" stroke="url(#frameGold)" stroke-width="6"/>
+  <rect x="16" y="16" width="168" height="268" fill="none" stroke="#6e160f" stroke-width="2" opacity="0.8"/>
+  <!-- Corner ornaments -->
+  <path d="M8 40 L8 8 L40 8" stroke="#d3a539" stroke-width="2" fill="none"/>
+  <path d="M160 8 L192 8 L192 40" stroke="#d3a539" stroke-width="2" fill="none"/>
+  <path d="M8 260 L8 292 L40 292" stroke="#d3a539" stroke-width="2" fill="none"/>
+  <path d="M160 292 L192 292 L192 260" stroke="#d3a539" stroke-width="2" fill="none"/>
+</svg>

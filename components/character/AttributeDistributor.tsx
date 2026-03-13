@@ -64,12 +64,12 @@ export default function AttributeDistributor({ characterId, availablePoints, cur
   }
 
   return (
-    <div className="bg-wine-dark/15 border border-wine-mid/30 rounded-xl p-5">
+    <div className="bg-[#6e160f]/15 border border-[#6e160f]/30 rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-display text-sm text-gold-pure text-glow-bronze">
+        <h2 className="font-display text-sm text-[var(--ark-gold-bright)] text-glow-gold">
           Pontos para distribuir
         </h2>
-        <span className="text-2xl font-data font-bold text-gold-pure">{remaining}</span>
+        <span className="text-2xl font-data font-bold text-[var(--ark-gold-bright)]">{remaining}</span>
       </div>
 
       <div className="space-y-2 mb-4">
@@ -84,26 +84,26 @@ export default function AttributeDistributor({ characterId, availablePoints, cur
                   {Icon && <Icon className={color} size={14} />}
                   <p className={`text-sm font-body font-medium ${color}`}>{label}</p>
                 </div>
-                <p className="text-xs text-ark-text-muted truncate">{desc}</p>
+                <p className="text-xs text-[var(--text-label)] truncate">{desc}</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => adjust(key, -1)}
                   disabled={pendingVal <= 0}
-                  className="w-7 h-7 rounded bg-ark-bg-tertiary border border-bronze-dark/30 hover:border-bronze-mid/50 disabled:opacity-30 disabled:cursor-not-allowed text-ark-text-primary font-bold transition-colors"
+                  className="w-7 h-7 rounded-sm bg-[var(--ark-bg-raised)] border border-[var(--ark-gold-dim)] hover:border-[var(--ark-gold)] disabled:opacity-30 disabled:cursor-not-allowed text-[var(--text-primary)] font-bold transition-colors font-data"
                 >
                   −
                 </button>
                 <span className="w-20 text-center font-data text-sm">
-                  <span className="text-ark-text-primary">{currentVal}</span>
+                  <span className="text-[var(--text-primary)]">{currentVal}</span>
                   {pendingVal > 0 && (
-                    <span className="text-gold-pure"> +{pendingVal}</span>
+                    <span className="text-[var(--ark-gold-bright)]"> +{pendingVal}</span>
                   )}
                 </span>
                 <button
                   onClick={() => adjust(key, 1)}
                   disabled={remaining <= 0}
-                  className="w-7 h-7 rounded bg-ark-bg-tertiary border border-bronze-dark/30 hover:border-bronze-mid/50 disabled:opacity-30 disabled:cursor-not-allowed text-ark-text-primary font-bold transition-colors"
+                  className="w-7 h-7 rounded-sm bg-[var(--ark-bg-raised)] border border-[var(--ark-gold-dim)] hover:border-[var(--ark-gold)] disabled:opacity-30 disabled:cursor-not-allowed text-[var(--text-primary)] font-bold transition-colors font-data"
                 >
                   +
                 </button>

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import ArkBadge from '@/components/ui/ArkBadge'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -10,7 +11,6 @@ const STATUS_LABELS = {
   injured: 'Ferido',
   dead: 'Morto',
 }
-
 
 const PROFESSION_LABELS: Record<string, string> = {
   comerciante: 'Comerciante', militar: 'Militar', clerigo: 'Clérigo',
@@ -42,30 +42,22 @@ export default async function PublicCharacterPage({ params }: Props) {
   const society = character.societies as { name: string } | null
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-white flex items-center justify-center px-4">
+    <main className="min-h-screen bg-[var(--ark-void)] text-[var(--text-primary)] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <div className="bg-neutral-900 rounded-xl p-8 border border-neutral-800">
+        <div className="bg-[var(--ark-bg-raised)] rounded-xl p-8 border border-[var(--ark-gold-dim)]">
           {/* Nome e título */}
           <div className="text-center mb-6">
-            <h1 className="text-3xl font-bold text-amber-400">{character.name}</h1>
+            <h1 className="font-display text-3xl font-bold text-[var(--ark-gold-bright)]">{character.name}</h1>
             {character.title && (
-              <p className="text-neutral-400 italic mt-1">&quot;{character.title}&quot;</p>
+              <p className="font-body text-[var(--text-secondary)] italic mt-1">&quot;{character.title}&quot;</p>
             )}
           </div>
 
           {/* Status vital */}
           <div className="flex justify-center mb-6">
-            <span
-              className={`px-4 py-1 rounded-full border text-sm font-semibold ${
-                character.status === 'active'
-                  ? 'border-green-700 bg-green-950/30 text-green-400'
-                  : character.status === 'injured'
-                  ? 'border-yellow-700 bg-yellow-950/30 text-yellow-400'
-                  : 'border-red-700 bg-red-950/30 text-red-400'
-              }`}
-            >
+            <ArkBadge color={character.status === 'active' ? 'alive' : character.status === 'injured' ? 'injured' : 'dead'}>
               {STATUS_LABELS[character.status]}
-            </span>
+            </ArkBadge>
           </div>
 
           {/* Informações públicas */}
@@ -76,18 +68,18 @@ export default async function PublicCharacterPage({ params }: Props) {
               <InfoRow
                 label="Arquétipo"
                 value={character.archetype.charAt(0).toUpperCase() + character.archetype.slice(1)}
-                valueClass="text-purple-400"
+                valueClass="text-attr-capitania"
               />
             )}
             <InfoRow
               label="Sociedade"
               value={society?.name ?? '—'}
-              valueClass={society ? 'text-white' : 'text-neutral-600'}
+              valueClass={society ? 'text-[var(--text-primary)]' : 'text-[var(--text-label)]'}
             />
           </div>
 
           {/* Nota de privacidade */}
-          <p className="text-xs text-neutral-600 text-center mt-6">
+          <p className="text-xs text-[var(--text-label)] text-center mt-6 font-data">
             Atributos, HP, Éter e Habilidades são informação privada.
           </p>
         </div>
@@ -99,16 +91,16 @@ export default async function PublicCharacterPage({ params }: Props) {
 function InfoRow({
   label,
   value,
-  valueClass = 'text-white',
+  valueClass = 'text-[var(--text-primary)]',
 }: {
   label: string
   value: string
   valueClass?: string
 }) {
   return (
-    <div className="flex justify-between border-b border-neutral-800 pb-2">
-      <span className="text-neutral-400 text-sm">{label}</span>
-      <span className={`font-semibold text-sm ${valueClass}`}>{value}</span>
+    <div className="flex justify-between border-b border-[#7a5a18]/40 pb-2">
+      <span className="text-[var(--text-secondary)] text-sm font-data">{label}</span>
+      <span className={`font-data font-semibold text-sm ${valueClass}`}>{value}</span>
     </div>
   )
 }

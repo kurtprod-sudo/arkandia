@@ -40,7 +40,7 @@ export default function GMCharacterList({ characters }: Props) {
   return (
     <div className="space-y-3">
       {characters.length === 0 && (
-        <p className="text-ark-text-muted text-sm font-body italic">Nenhum personagem criado ainda.</p>
+        <p className="text-[var(--text-label)] text-sm font-body italic">Nenhum personagem criado ainda.</p>
       )}
       {characters.map((char) => (
         <CharacterRow
@@ -106,19 +106,19 @@ function CharacterRow({
   }
 
   return (
-    <div className="bg-ark-bg-secondary rounded-xl border border-bronze-dark/25 overflow-hidden">
+    <div className="bg-[var(--ark-bg-raised)] rounded-xl border border-[var(--ark-gold-dim)] overflow-hidden">
       {/* Row header */}
       <button
         onClick={onToggle}
-        className="w-full px-5 py-4 flex items-center justify-between hover:bg-ark-bg-tertiary transition-colors"
+        className="w-full px-5 py-4 flex items-center justify-between hover:bg-[var(--ark-bg-raised)] transition-colors"
       >
         <div className="flex items-center gap-4 text-left">
-          <div className="w-10 h-10 rounded-full bg-wine-dark/30 border border-bronze-mid/40 flex items-center justify-center font-display font-bold text-gold-pure">
+          <div className="w-10 h-10 rounded-full bg-[#6e160f]/30 border border-[#d3a539]/40 flex items-center justify-center font-display font-bold text-[var(--ark-gold-bright)]">
             {character.name.charAt(0)}
           </div>
           <div>
-            <p className="font-display text-sm font-bold text-gold-pure">{character.name}</p>
-            <p className="text-xs text-ark-text-muted font-body">
+            <p className="font-display text-sm font-bold text-[var(--ark-gold-bright)]">{character.name}</p>
+            <p className="text-xs text-[var(--text-label)] font-body">
               Nv {character.level} • {PROFESSION_LABELS[character.profession] ?? character.profession}
             </p>
           </div>
@@ -127,13 +127,13 @@ function CharacterRow({
           <ArkBadge color={STATUS_BADGE[character.status]}>
             {STATUS_LABELS[character.status]}
           </ArkBadge>
-          <span className="text-ark-text-muted text-xs">{isExpanded ? '▲' : '▼'}</span>
+          <span className="text-[var(--text-label)] text-xs">{isExpanded ? '▲' : '▼'}</span>
         </div>
       </button>
 
       {/* Expanded panel */}
       {isExpanded && (
-        <div className="border-t border-bronze-dark/20 px-5 py-4 space-y-5">
+        <div className="border-t border-[#7a5a18]/40 px-5 py-4 space-y-5">
           {message && (
             <p className={`text-sm font-body ${message.startsWith('Erro') ? 'text-status-dead' : 'text-status-alive'}`}>
               {message}
@@ -143,15 +143,15 @@ function CharacterRow({
           {/* Current attributes */}
           {attrs && (
             <div>
-              <p className="text-xs text-ark-text-muted uppercase tracking-wider mb-2 font-body">Atributos atuais</p>
+              <p className="text-xs text-[var(--text-label)] uppercase tracking-wider mb-2 font-body">Atributos atuais</p>
               <div className="grid grid-cols-4 gap-2 text-xs">
                 {ATTR_GRID.map(({ key, abbr, color, iconKey }) => {
                   const Icon = ATTR_ICONS[iconKey as keyof typeof ATTR_ICONS]
                   return (
-                    <div key={key} className="bg-ark-bg-primary rounded-lg p-2 border border-bronze-dark/15">
+                    <div key={key} className="bg-[var(--ark-bg)] rounded-lg p-2 border border-[#7a5a18]/40">
                       <div className="flex items-center gap-1 mb-0.5">
                         {Icon && <Icon className={color} size={12} />}
-                        <p className="text-ark-text-muted font-data">{abbr}</p>
+                        <p className="text-[var(--text-label)] font-data">{abbr}</p>
                       </div>
                       <p className={`font-data font-bold ${color}`}>
                         {attrs[key as keyof typeof attrs]}
@@ -159,17 +159,17 @@ function CharacterRow({
                     </div>
                   )
                 })}
-                <div className="bg-ark-bg-primary rounded-lg p-2 border border-bronze-dark/15">
-                  <p className="text-ark-text-muted font-data text-xs">HP</p>
-                  <p className="font-data font-bold text-wine-glow">{attrs.hp_atual}/{attrs.hp_max}</p>
+                <div className="bg-[var(--ark-bg)] rounded-lg p-2 border border-[#7a5a18]/40">
+                  <p className="text-[var(--text-label)] font-data text-xs">HP</p>
+                  <p className="font-data font-bold text-[var(--ark-red-glow)]">{attrs.hp_atual}/{attrs.hp_max}</p>
                 </div>
-                <div className="bg-ark-bg-primary rounded-lg p-2 border border-bronze-dark/15">
-                  <p className="text-ark-text-muted font-data text-xs">Moral</p>
+                <div className="bg-[var(--ark-bg)] rounded-lg p-2 border border-[#7a5a18]/40">
+                  <p className="text-[var(--text-label)] font-data text-xs">Moral</p>
                   <p className="font-data font-bold text-attr-moral">{attrs.moral}</p>
                 </div>
-                <div className="bg-ark-bg-primary rounded-lg p-2 border border-bronze-dark/15">
-                  <p className="text-ark-text-muted font-data text-xs">Pts</p>
-                  <p className="font-data font-bold text-gold-pure">{attrs.attribute_points}</p>
+                <div className="bg-[var(--ark-bg)] rounded-lg p-2 border border-[#7a5a18]/40">
+                  <p className="text-[var(--text-label)] font-data text-xs">Pts</p>
+                  <p className="font-data font-bold text-[var(--ark-gold-bright)]">{attrs.attribute_points}</p>
                 </div>
               </div>
             </div>
@@ -178,11 +178,11 @@ function CharacterRow({
           {/* Wallet */}
           {wallet && (
             <div>
-              <p className="text-xs text-ark-text-muted uppercase tracking-wider mb-2 font-body">Carteira</p>
+              <p className="text-xs text-[var(--text-label)] uppercase tracking-wider mb-2 font-body">Carteira</p>
               <div className="flex gap-4 text-sm font-body">
                 <span className="flex items-center gap-1">
-                  <CoinIcon className="text-gold-pure" size={14} />
-                  <strong className="text-gold-pure font-data">{wallet.libras}</strong>
+                  <CoinIcon className="text-[var(--ark-gold-bright)]" size={14} />
+                  <strong className="text-[var(--ark-gold-bright)] font-data">{wallet.libras}</strong>
                 </span>
                 <span className="flex items-center gap-1">
                   <CrystalIcon className="text-attr-capitania" size={14} />
@@ -199,10 +199,10 @@ function CharacterRow({
           {/* Edit attribute */}
           <form onSubmit={handleEditAttr} className="flex gap-2 items-end">
             <div>
-              <label className="text-xs text-ark-text-muted block mb-1 font-body">Atributo</label>
+              <label className="text-xs text-[var(--text-label)] block mb-1 font-body">Atributo</label>
               <select
                 name="attr"
-                className="bg-ark-bg-primary border border-bronze-dark/30 text-ark-text-primary text-sm rounded-lg px-2 py-1.5 font-data focus:outline-none focus:border-bronze-mid/50"
+                className="bg-[var(--ark-bg)] border border-[var(--ark-gold-dim)] text-[var(--text-primary)] text-sm rounded-sm px-2 py-1.5 font-data focus:outline-none focus:border-[var(--ark-gold)]"
               >
                 {['ataque','magia','eter_max','eter_atual','defesa','vitalidade','hp_max','hp_atual',
                   'velocidade','precisao','tenacidade','capitania','moral','attribute_points'].map((a) => (
@@ -211,12 +211,12 @@ function CharacterRow({
               </select>
             </div>
             <div>
-              <label className="text-xs text-ark-text-muted block mb-1 font-body">Valor</label>
+              <label className="text-xs text-[var(--text-label)] block mb-1 font-body">Valor</label>
               <input
                 name="value"
                 type="number"
                 placeholder="0"
-                className="w-24 bg-ark-bg-primary border border-bronze-dark/30 text-ark-text-primary text-sm rounded-lg px-2 py-1.5 font-data focus:outline-none focus:border-bronze-mid/50"
+                className="w-24 bg-[var(--ark-bg)] border border-[var(--ark-gold-dim)] text-[var(--text-primary)] text-sm rounded-sm px-2 py-1.5 font-data focus:outline-none focus:border-[var(--ark-gold)]"
               />
             </div>
             <ArkButton type="submit" disabled={pending} variant="secondary" size="sm">
@@ -227,10 +227,10 @@ function CharacterRow({
           {/* Grant currency */}
           <form onSubmit={handleGrantCurrency} className="flex gap-2 items-end">
             <div>
-              <label className="text-xs text-ark-text-muted block mb-1 font-body">Moeda</label>
+              <label className="text-xs text-[var(--text-label)] block mb-1 font-body">Moeda</label>
               <select
                 name="currency"
-                className="bg-ark-bg-primary border border-bronze-dark/30 text-ark-text-primary text-sm rounded-lg px-2 py-1.5 font-data focus:outline-none focus:border-bronze-mid/50"
+                className="bg-[var(--ark-bg)] border border-[var(--ark-gold-dim)] text-[var(--text-primary)] text-sm rounded-sm px-2 py-1.5 font-data focus:outline-none focus:border-[var(--ark-gold)]"
               >
                 <option value="libras">Libras</option>
                 <option value="essencia">Essência</option>
@@ -238,13 +238,13 @@ function CharacterRow({
               </select>
             </div>
             <div>
-              <label className="text-xs text-ark-text-muted block mb-1 font-body">Quantidade</label>
+              <label className="text-xs text-[var(--text-label)] block mb-1 font-body">Quantidade</label>
               <input
                 name="amount"
                 type="number"
                 min="1"
                 placeholder="100"
-                className="w-24 bg-ark-bg-primary border border-bronze-dark/30 text-ark-text-primary text-sm rounded-lg px-2 py-1.5 font-data focus:outline-none focus:border-bronze-mid/50"
+                className="w-24 bg-[var(--ark-bg)] border border-[var(--ark-gold-dim)] text-[var(--text-primary)] text-sm rounded-sm px-2 py-1.5 font-data focus:outline-none focus:border-[var(--ark-gold)]"
               />
             </div>
             <ArkButton type="submit" disabled={pending} size="sm">
@@ -254,7 +254,7 @@ function CharacterRow({
 
           {/* Change status */}
           <div>
-            <p className="text-xs text-ark-text-muted uppercase tracking-wider mb-2 font-body">Alterar status</p>
+            <p className="text-xs text-[var(--text-label)] uppercase tracking-wider mb-2 font-body">Alterar status</p>
             <div className="flex gap-2">
               {(['active', 'injured', 'dead'] as const).map((s) => (
                 <button

@@ -66,7 +66,7 @@ export default function CreateCharacterForm({ professions }: Props) {
 
       {/* Escolha de profissão */}
       <div>
-        <p className="text-xs font-body text-ark-text-secondary uppercase tracking-wider mb-3">
+        <p className="text-xs font-body text-[var(--text-secondary)] uppercase tracking-wider mb-3">
           Escolha sua profissão
         </p>
         <div className="grid grid-cols-2 gap-3">
@@ -77,21 +77,21 @@ export default function CreateCharacterForm({ professions }: Props) {
               onClick={() => setSelected(prof)}
               className={`relative p-4 rounded-lg border text-left transition-all duration-200 ${
                 selected?.id === prof.id
-                  ? 'border-wine-glow/60 bg-wine-dark/20 glow-wine'
-                  : 'border-bronze-dark/30 bg-ark-bg-primary hover:border-bronze-mid/40 hover:bg-ark-bg-tertiary'
+                  ? 'border-[#c42a1e]/60 bg-[#6e160f]/20 glow-crimson'
+                  : 'border-[var(--ark-gold-dim)] bg-[var(--ark-bg)] hover:border-[#d3a539]/40 hover:bg-[var(--ark-bg-raised)]'
               }`}
             >
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-lg">{PROFESSION_ICONS[prof.name] ?? '⚡'}</span>
-                <p className="font-display text-sm font-bold text-gold-pure">
+                <p className="font-display text-sm font-bold text-[var(--ark-gold-bright)]">
                   {PROFESSION_LABELS[prof.name] ?? prof.name}
                 </p>
               </div>
-              <p className="text-xs text-ark-text-muted font-body mt-1 line-clamp-2">
+              <p className="text-xs text-[var(--text-label)] font-body mt-1 line-clamp-2">
                 {prof.description}
               </p>
               {selected?.id === prof.id && (
-                <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-wine-glow animate-pulse-glow" />
+                <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[var(--ark-red-glow)] animate-pulse-glow" />
               )}
             </button>
           ))}
@@ -144,9 +144,9 @@ function AttributePreview({ attrs }: { attrs: ProfessionBaseAttributes }) {
   ]
 
   return (
-    <div className="mt-4 p-4 bg-ark-bg-primary rounded-lg border border-bronze-dark/25">
+    <div className="mt-4 p-4 bg-[var(--ark-bg)] rounded-lg border border-[var(--ark-gold-dim)]">
       <ArkDivider variant="dark" className="mt-0 mb-3" />
-      <p className="text-xs text-ark-text-muted uppercase tracking-wider mb-3 font-body">
+      <p className="text-xs text-[var(--text-label)] uppercase tracking-wider mb-3 font-body">
         Atributos iniciais
       </p>
       <div className="grid grid-cols-3 gap-2">
@@ -154,8 +154,8 @@ function AttributePreview({ attrs }: { attrs: ProfessionBaseAttributes }) {
           const val = attrs[key]
           const Icon = ATTR_ICONS[iconKey as keyof typeof ATTR_ICONS]
           return (
-            <div key={key} className="flex items-center justify-between text-sm px-2 py-1 rounded bg-ark-bg-secondary/50">
-              <span className="flex items-center gap-1.5 text-ark-text-secondary">
+            <div key={key} className="flex items-center justify-between text-sm px-2 py-1 rounded bg-[#110a0e]/50">
+              <span className="flex items-center gap-1.5 text-[var(--text-secondary)]">
                 {Icon && <Icon className={color} size={14} />}
                 <span className="font-data text-xs">{abbr}</span>
               </span>

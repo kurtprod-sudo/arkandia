@@ -59,6 +59,7 @@ export type Database = {
           archetype: Database['public']['Enums']['archetype_type'] | null
           class_id: string | null
           society_id: string | null
+          avatar_url: string | null
           created_at: string
         }
         Insert: {
@@ -74,6 +75,7 @@ export type Database = {
           archetype?: Database['public']['Enums']['archetype_type'] | null
           class_id?: string | null
           society_id?: string | null
+          avatar_url?: string | null
           created_at?: string
         }
         Update: {
@@ -89,6 +91,7 @@ export type Database = {
           archetype?: Database['public']['Enums']['archetype_type'] | null
           class_id?: string | null
           society_id?: string | null
+          avatar_url?: string | null
           created_at?: string
         }
         Relationships: [

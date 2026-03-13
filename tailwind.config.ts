@@ -11,82 +11,90 @@ const config: Config = {
       colors: {
         // Backgrounds
         'ark-bg': {
-          primary: 'var(--color-bg-primary)',
+          void:      'var(--color-bg-void)',
+          primary:   'var(--color-bg-primary)',
           secondary: 'var(--color-bg-secondary)',
-          tertiary: 'var(--color-bg-tertiary)',
+          tertiary:  'var(--color-bg-tertiary)',
+          overlay:   'var(--color-bg-overlay)',
         },
-        // Wine accent
-        wine: {
-          dark: 'var(--color-wine-dark)',
-          mid: 'var(--color-wine-mid)',
-          light: 'var(--color-wine-light)',
-          glow: 'var(--color-wine-glow)',
-        },
-        // Bronze / Gold accent
-        bronze: {
-          dark: 'var(--color-bronze-dark)',
-          mid: 'var(--color-bronze-mid)',
-          light: 'var(--color-bronze-light)',
-          glow: 'var(--color-bronze-glow)',
-        },
+        // Gold / Bronze accent
         gold: {
-          pure: 'var(--color-gold-pure)',
+          pure:   'var(--color-gold-pure)',
+          bright: 'var(--color-gold-bright)',
+          mid:    'var(--color-gold-mid)',
+          dim:    'var(--color-gold-dim)',
+          ghost:  'var(--color-gold-ghost)',
+        },
+        // Crimson accent
+        crimson: {
+          bright: 'var(--color-crimson-bright)',
+          mid:    'var(--color-crimson-mid)',
+          dark:   'var(--color-crimson-dark)',
         },
         // Text
         'ark-text': {
-          primary: 'var(--color-text-primary)',
+          hero:      'var(--color-text-hero)',
+          primary:   'var(--color-text-primary)',
           secondary: 'var(--color-text-secondary)',
-          muted: 'var(--color-text-muted)',
+          label:     'var(--color-text-label)',
+          muted:     'var(--color-text-muted)',
+          ghost:     'var(--color-text-ghost)',
+          disabled:  'var(--color-text-disabled)',
+          gold:      'var(--color-text-gold)',
+          'gold-soft':'var(--color-text-gold-soft)',
         },
         // Status
         status: {
-          alive: 'var(--color-status-alive)',
+          alive:   'var(--color-status-alive)',
           injured: 'var(--color-status-injured)',
-          dead: 'var(--color-status-dead)',
+          dead:    'var(--color-status-dead)',
         },
         // Attribute colors
         attr: {
-          ataque: '#E85D4A',
-          magia: '#7B68EE',
-          eter: '#4FC3F7',
-          defesa: '#78909C',
-          vitalidade: '#66BB6A',
-          velocidade: '#FFD54F',
-          precisao: '#FF8A65',
-          tenacidade: '#A1887F',
-          capitania: '#CE93D8',
-          moral: '#F48FB1',
+          ataque:     'var(--color-attr-ataque)',
+          magia:      'var(--color-attr-magia)',
+          eter:       'var(--color-attr-eter)',
+          defesa:     'var(--color-attr-defesa)',
+          vitalidade: 'var(--color-attr-vitalidade)',
+          velocidade: 'var(--color-attr-velocidade)',
+          precisao:   'var(--color-attr-precisao)',
+          tenacidade: 'var(--color-attr-tenacidade)',
+          capitania:  'var(--color-attr-capitania)',
+          moral:      'var(--color-attr-moral)',
         },
       },
       fontFamily: {
-        display: ['var(--font-cinzel)', 'serif'],
-        body: ['var(--font-crimson)', 'serif'],
-        data: ['var(--font-inter)', 'sans-serif'],
+        display: ['var(--font-display)', 'serif'],
+        body:    ['var(--font-body)',    'serif'],
+        data:    ['var(--font-data)',    'sans-serif'],
       },
       boxShadow: {
-        'glow-wine': '0 0 20px rgba(196, 65, 94, 0.3), 0 0 40px rgba(196, 65, 94, 0.1)',
-        'glow-bronze': '0 0 20px rgba(196, 154, 74, 0.3), 0 0 40px rgba(196, 154, 74, 0.1)',
-        'glow-gold': '0 0 20px rgba(245, 212, 133, 0.35), 0 0 50px rgba(245, 212, 133, 0.15)',
+        'glow-gold':    '0 0 20px rgba(200,134,10,0.35), 0 0 50px rgba(200,134,10,0.12)',
+        'glow-crimson': '0 0 20px rgba(232,64,64,0.35), 0 0 50px rgba(232,64,64,0.12)',
       },
       keyframes: {
         shimmer: {
-          '0%': { backgroundPosition: '-200% 0' },
+          '0%':   { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
         },
         'pulse-glow': {
-          '0%, 100%': { opacity: '0.6' },
-          '50%': { opacity: '1' },
+          '0%, 100%': { opacity: '0.55' },
+          '50%':      { opacity: '1' },
         },
-        'particle-float': {
-          '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
-          '33%': { transform: 'translateY(-4px) rotate(1deg)' },
-          '66%': { transform: 'translateY(2px) rotate(-1deg)' },
+        'float-idle': {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%':      { transform: 'translateY(-4px)' },
+        },
+        'bar-reveal': {
+          from: { width: '0' },
+          to:   { width: 'var(--bar-target)' },
         },
       },
       animation: {
-        shimmer: 'shimmer 3s ease-in-out infinite',
+        shimmer:      'shimmer-sweep 3s ease-in-out infinite',
         'pulse-glow': 'pulse-glow 2.5s ease-in-out infinite',
-        'particle-float': 'particle-float 4s ease-in-out infinite',
+        'float-idle': 'float-idle 5s ease-in-out infinite',
+        'bar-reveal': 'bar-reveal 0.5s ease-out forwards',
       },
     },
   },

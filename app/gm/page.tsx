@@ -42,20 +42,20 @@ export default async function GMPanelPage() {
 
   return (
     <main className="min-h-screen relative">
-      {/* Background glow — wine for GM authority */}
-      <div className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full bg-wine-dark/8 blur-[180px] pointer-events-none" />
+      {/* Background glow — crimson for GM authority */}
+      <div className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full bg-[#6e160f]/8 blur-[180px] pointer-events-none" />
 
       {/* GM Navbar */}
-      <nav className="border-b border-wine-mid/30 px-6 py-3 flex items-center justify-between bg-wine-dark/10 backdrop-blur-sm relative z-10">
+      <nav className="border-b border-[#6e160f]/30 px-6 py-3 flex items-center justify-between bg-[#6e160f]/10 backdrop-blur-sm relative z-10">
         <div className="flex items-center gap-3">
-          <span className="font-display text-wine-glow text-lg">GM Panel</span>
-          <span className="text-ark-text-muted text-sm font-body">— Arkandia</span>
+          <span className="font-display text-[var(--ark-red-glow)] text-lg">GM Panel</span>
+          <span className="text-[var(--text-label)] text-sm font-body">— Arkandia</span>
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-sm text-bronze-light hover:text-bronze-glow transition-colors font-body">
+          <Link href="/dashboard" className="text-sm text-[var(--ark-gold-bright)] hover:text-[var(--ark-gold-bright)] transition-colors font-body">
             Dashboard
           </Link>
-          <span className="text-wine-light text-sm font-data">{profile.username}</span>
+          <span className="text-[var(--ark-red-glow)] text-sm font-data">{profile.username}</span>
         </div>
       </nav>
 
@@ -63,7 +63,7 @@ export default async function GMPanelPage() {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Character list — 2/3 */}
           <div className="xl:col-span-2">
-            <h2 className="text-xs font-body text-ark-text-secondary uppercase tracking-wider mb-1">
+            <h2 className="text-xs font-body text-[var(--text-secondary)] uppercase tracking-wider mb-1">
               Personagens ({characters?.length ?? 0})
             </h2>
             <ArkDivider variant="dark" className="mb-4" />
@@ -72,7 +72,7 @@ export default async function GMPanelPage() {
 
           {/* Event feed — 1/3 */}
           <div>
-            <h2 className="text-xs font-body text-ark-text-secondary uppercase tracking-wider mb-1">
+            <h2 className="text-xs font-body text-[var(--text-secondary)] uppercase tracking-wider mb-1">
               Feed de Eventos (últimos 50)
             </h2>
             <ArkDivider variant="dark" className="mb-4" />

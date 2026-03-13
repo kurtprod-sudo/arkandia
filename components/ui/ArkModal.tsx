@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, type ReactNode } from 'react'
+import ArkCard from './ArkCard'
+import ArkDivider from './ArkDivider'
 
 interface ArkModalProps {
   open: boolean
@@ -32,49 +34,38 @@ export default function ArkModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-[var(--color-bg-overlay)] backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Modal */}
-      <div
-        className={`
-          relative w-full max-w-lg
-          bg-ark-bg-secondary border border-bronze-dark/40
-          rounded-xl shadow-2xl shadow-black/60
-          ${className}
-        `}
-      >
-        {/* Ornamental top border */}
-        <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-bronze-mid/50 to-transparent" />
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-3">
-          <h2 className="font-display text-lg text-gold-pure text-glow-bronze">
-            {title}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-ark-text-muted hover:text-ark-text-primary transition-colors text-lg leading-none"
-          >
-            &#x2715;
-          </button>
+      <ArkCard variant="highlighted" className={`relative w-full max-w-lg mx-auto ${className}`}>
+        <div className="px-2">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-display text-lg text-[var(--ark-gold-bright)] text-glow-gold">
+              {title}
+            </h2>
+            <button
+              type="button"
+              onClick={onClose}
+              className="font-data text-[var(--text-label)] hover:text-[var(--text-primary)] transition-colors text-lg leading-none px-1"
+            >
+              &#x2715;
+            </button>
+          </div>
+          <ArkDivider variant="ornamental" className="my-3" />
         </div>
 
-        {/* Body */}
-        <div className="px-6 pb-4 font-body text-sm text-ark-text-secondary">
+        <div className="font-body text-sm text-[var(--text-secondary)] italic px-2">
           {children}
         </div>
 
-        {/* Actions */}
         {actions && (
-          <div className="flex items-center justify-end gap-3 px-6 pb-5 pt-2 border-t border-bronze-dark/20">
+          <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-[#7a5a18]/40 px-2">
             {actions}
           </div>
         )}
-      </div>
+      </ArkCard>
     </div>
   )
 }

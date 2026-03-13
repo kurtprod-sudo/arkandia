@@ -45,13 +45,11 @@ function SubmitButton({ label }: { label: string }) {
       type="submit"
       disabled={pending}
       className="
-        w-full py-3 px-4 rounded-lg
-        font-body font-bold text-base
-        bg-gradient-to-r from-wine-dark to-wine-mid
-        text-bronze-glow border border-bronze-mid/30
-        hover:from-wine-mid hover:to-wine-light hover:shadow-glow-wine
-        disabled:from-wine-dark/50 disabled:to-wine-dark/50
-        disabled:text-ark-text-muted disabled:border-bronze-dark/10
+        w-full py-3 px-4 rounded-sm
+        font-data font-semibold tracking-widest uppercase text-xs
+        bg-[var(--text-ghost)] text-[var(--ark-gold-bright)] border border-[var(--ark-gold)]
+        hover:border-[#f0c84a]/50
+        disabled:bg-[#3A2A18]/30 disabled:text-[var(--text-ghost)] disabled:border-[var(--ark-gold-dim)]
         disabled:cursor-not-allowed
         transition-all duration-200
       "

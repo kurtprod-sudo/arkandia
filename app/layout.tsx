@@ -1,24 +1,27 @@
 import type { Metadata } from 'next'
-import { Cinzel_Decorative, Crimson_Pro, Inter } from 'next/font/google'
+import { Cormorant_Garamond, Rajdhani, Libre_Baskerville } from 'next/font/google'
 import './globals.css'
 
-const cinzel = Cinzel_Decorative({
+const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
-  weight: ['400', '700', '900'],
-  variable: '--font-cinzel',
+  weight: ['400', '600', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-display',
   display: 'swap',
 })
 
-const crimson = Crimson_Pro({
+const rajdhani = Rajdhani({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
-  variable: '--font-crimson',
+  variable: '--font-data',
   display: 'swap',
 })
 
-const inter = Inter({
+const libreBaskerville = Libre_Baskerville({
   subsets: ['latin'],
-  variable: '--font-inter',
+  weight: ['400', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-body',
   display: 'swap',
 })
 
@@ -33,8 +36,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="pt-BR" className={`${cinzel.variable} ${crimson.variable} ${inter.variable}`}>
-      <body className="antialiased bg-ark-bg-primary text-ark-text-primary font-body">
+    <html lang="pt-BR" className={`${cormorant.variable} ${rajdhani.variable} ${libreBaskerville.variable}`}>
+      <body className="antialiased bg-[var(--ark-void)] text-[var(--text-primary)] font-body min-h-screen">
         {children}
       </body>
     </html>
