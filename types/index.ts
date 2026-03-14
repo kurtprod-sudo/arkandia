@@ -452,5 +452,25 @@ export interface GMEditAttributePayload {
   attributes: Partial<Omit<CharacterAttributes, 'character_id' | 'updated_at'>> & Record<string, unknown>
 }
 
+// ---------------------------------------------------------------------------
+// Jornal do Mundo (Gazeta do Horizonte)
+// ---------------------------------------------------------------------------
+
+export interface JournalSection {
+  tipo: 'manchete' | 'olhos_viram' | 'rumores' | 'mesa_editora'
+  conteudo: string
+}
+
+export interface JournalEdition {
+  id: string
+  edition_date: string
+  sections: JournalSection[]
+  status: 'draft' | 'published' | 'archived'
+  generated_by: 'ai' | 'gm'
+  published_at: string | null
+  created_at: string
+  updated_at: string
+}
+
 // Database type is in types/database.types.ts (follows Supabase generated format)
 // export type { Database } from './database.types'

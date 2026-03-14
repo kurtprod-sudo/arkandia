@@ -5,6 +5,7 @@ import { logout } from '@/app/auth/actions'
 import ArkButton from '@/components/ui/ArkButton'
 import ArkDivider from '@/components/ui/ArkDivider'
 import ArkBadge from '@/components/ui/ArkBadge'
+import type { JournalSection } from '@/types'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -27,12 +28,21 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
     .single()
 
-  const { data: publicEvents } = await supabase
-    .from('events')
-    .select('id, type, narrative_text, created_at')
-    .eq('is_public', true)
-    .order('created_at', { ascending: false })
-    .limit(10)
+  const [{ data: publicEvents }, { data: latestJournal }] = await Promise.all([
+    supabase
+      .from('events')
+      .select('id, type, narrative_text, created_at')
+      .eq('is_public', true)
+      .order('created_at', { ascending: false })
+      .limit(10),
+    supabase
+      .from('journal_editions')
+      .select('id, edition_date, sections, published_at')
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ])
 
   const STATUS_LABELS: Record<string, string> = {
     active: 'Vivo', injured: 'Ferido', dead: 'Morto',
@@ -115,10 +125,46 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        {/* World Journal */}
+        {/* Gazeta do Horizonte */}
+        {latestJournal && (() => {
+          const sections = latestJournal.sections as unknown as JournalSection[]
+          const manchete = sections.find((s) => s.tipo === 'manchete')
+          const dateStr = latestJournal.published_at
+            ? new Date(latestJournal.published_at).toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: 'long',
+              })
+            : latestJournal.edition_date
+          return (
+            <div className="bg-[var(--ark-surface)] backdrop-blur-xl rounded-sm p-6 border border-[var(--ark-border)]">
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-xs font-body text-[var(--text-secondary)] uppercase tracking-wider">
+                  Gazeta do Horizonte
+                </h2>
+                <span className="font-data text-[10px] text-[var(--text-label)] tracking-[0.15em] uppercase">
+                  {dateStr}
+                </span>
+              </div>
+              <ArkDivider variant="dark" className="mb-4" />
+              {manchete && (
+                <p className="font-display text-base text-[var(--text-primary)] mb-3 leading-snug">
+                  {manchete.conteudo}
+                </p>
+              )}
+              <Link
+                href="/journal"
+                className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors font-body"
+              >
+                Ler edição completa &rarr;
+              </Link>
+            </div>
+          )
+        })()}
+
+        {/* Eventos Recentes */}
         <div className="bg-[var(--ark-surface)] backdrop-blur-xl rounded-sm p-6 border border-[var(--ark-border)]">
           <h2 className="text-xs font-body text-[var(--text-secondary)] uppercase tracking-wider mb-1">
-            Jornal do Mundo
+            Eventos Recentes
           </h2>
           <ArkDivider variant="dark" className="mb-4" />
           {publicEvents && publicEvents.length > 0 ? (

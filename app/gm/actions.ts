@@ -131,3 +131,32 @@ export async function gmUpdateReputation(
   revalidatePath('/gm')
   return result
 }
+
+export async function gmGenerateJournal() {
+  await assertGM()
+  const { generateDailyEdition } = await import('@/lib/narrative/journal')
+  const result = await generateDailyEdition()
+  revalidatePath('/gm')
+  return result
+}
+
+export async function gmPublishJournal(editionId: string) {
+  await assertGM()
+  const { publishEdition } = await import('@/lib/narrative/journal')
+  const result = await publishEdition(editionId)
+  revalidatePath('/gm')
+  revalidatePath('/journal')
+  revalidatePath('/dashboard')
+  return result
+}
+
+export async function gmArchiveJournal(editionId: string) {
+  await assertGM()
+  const supabase = await createClient()
+  await supabase
+    .from('journal_editions')
+    .update({ status: 'archived' })
+    .eq('id', editionId)
+  revalidatePath('/gm')
+  return { success: true }
+}
