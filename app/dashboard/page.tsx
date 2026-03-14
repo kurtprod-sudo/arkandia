@@ -46,17 +46,24 @@ export default async function DashboardPage() {
       .maybeSingle(),
   ])
 
-  // Daily tasks + streak (só se tiver personagem)
+  // Daily tasks + streak + unread letters (só se tiver personagem)
   let dailyData: { tasks: import('@/types').DailyTask[]; completedCount: number; ticketGranted: boolean } | null = null
   let streakData: { currentStreak: number } | null = null
+  let unreadLetters = 0
 
   if (character) {
-    const [daily, streak] = await Promise.all([
+    const [daily, streak, { count }] = await Promise.all([
       getDailyTasks(character.id),
       updateLoginStreak(character.id),
+      supabase
+        .from('letters')
+        .select('id', { count: 'exact', head: true })
+        .eq('recipient_id', character.id)
+        .eq('is_read', false),
     ])
     dailyData = { tasks: daily.tasks, completedCount: daily.completedCount, ticketGranted: daily.ticketGranted }
     streakData = { currentStreak: streak.currentStreak }
+    unreadLetters = count ?? 0
   }
 
   const STATUS_LABELS: Record<string, string> = {
@@ -149,6 +156,31 @@ export default async function DashboardPage() {
             characterId={character.id}
             streak={streakData.currentStreak}
           />
+        )}
+
+        {/* Correspondência */}
+        {character && (
+          <Link href="/letters" className="block">
+            <div className="bg-[var(--ark-surface)] backdrop-blur-xl rounded-sm p-6 border border-[var(--ark-border)] hover:border-[var(--ark-border-bright)] transition-colors">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xs font-body text-[var(--text-secondary)] uppercase tracking-wider mb-1">
+                    Correspondência
+                  </h2>
+                  <p className="text-sm text-[var(--text-label)] font-body">
+                    {unreadLetters > 0
+                      ? `${unreadLetters} carta${unreadLetters > 1 ? 's' : ''} não lida${unreadLetters > 1 ? 's' : ''}`
+                      : 'Caixa vazia'}
+                  </p>
+                </div>
+                {unreadLetters > 0 && (
+                  <span className="px-2.5 py-1 text-sm font-data font-bold bg-[var(--ark-red)]/40 text-[var(--ark-red-glow)] border border-[var(--ark-red)]/60 rounded">
+                    {unreadLetters}
+                  </span>
+                )}
+              </div>
+            </div>
+          </Link>
         )}
 
         {/* Gazeta do Horizonte */}

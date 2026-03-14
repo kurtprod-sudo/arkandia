@@ -86,6 +86,7 @@ export type EventType =
   | 'auction_finished'
   | 'summon_performed'
   | 'title_granted'
+  | 'letter_sent'
 
 // ---------------------------------------------------------------------------
 // Tabelas do banco
@@ -884,6 +885,44 @@ export interface RankingEntry {
   rank_position: number | null
   metadata: Record<string, unknown>
   updated_at: string
+}
+
+// ---------------------------------------------------------------------------
+// Diário e Correspondência
+// ---------------------------------------------------------------------------
+
+export type DiaryReactionSymbol = 'chama' | 'espada' | 'estrela' | 'lacre' | 'corvo'
+
+export interface DiaryEntry {
+  id: string
+  character_id: string
+  title: string
+  content: string
+  is_lore_confirmed: boolean
+  lore_confirmed_by: string | null
+  lore_confirmed_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface DiaryReaction {
+  id: string
+  entry_id: string
+  character_id: string
+  symbol: DiaryReactionSymbol
+  created_at: string
+}
+
+export interface Letter {
+  id: string
+  sender_id: string
+  recipient_id: string
+  subject: string
+  content: string
+  parent_id: string | null
+  is_read: boolean
+  read_at: string | null
+  created_at: string
 }
 
 // Database type is in types/database.types.ts (follows Supabase generated format)

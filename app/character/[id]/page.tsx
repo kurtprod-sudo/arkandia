@@ -1,6 +1,8 @@
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import ArkBadge from '@/components/ui/ArkBadge'
+import ArkButton from '@/components/ui/ArkButton'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -88,8 +90,17 @@ export default async function PublicCharacterPage({ params }: Props) {
             />
           </div>
 
+          {/* Diário */}
+          <div className="text-center mt-6">
+            <Link href={`/diary/${character.id}`}>
+              <ArkButton variant="ghost" size="sm">
+                Ver Diário
+              </ArkButton>
+            </Link>
+          </div>
+
           {/* Nota de privacidade */}
-          <p className="text-xs text-[var(--text-label)] text-center mt-6 font-data">
+          <p className="text-xs text-[var(--text-label)] text-center mt-4 font-data">
             Atributos, HP, Éter e Habilidades são informação privada.
           </p>
         </div>

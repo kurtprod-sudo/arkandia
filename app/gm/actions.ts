@@ -444,3 +444,26 @@ export async function gmUpdateRankings() {
   revalidatePath('/gm')
   return result
 }
+
+export async function gmConfirmLore(entryId: string, gmCharacterId: string) {
+  await assertGM()
+  const supabase = await createClient()
+  await supabase
+    .from('diary_entries')
+    .update({
+      is_lore_confirmed: true,
+      lore_confirmed_by: gmCharacterId,
+      lore_confirmed_at: new Date().toISOString(),
+    })
+    .eq('id', entryId)
+  revalidatePath('/gm')
+  return { success: true }
+}
+
+export async function gmDeleteDiaryEntry(entryId: string) {
+  await assertGM()
+  const supabase = await createClient()
+  await supabase.from('diary_entries').delete().eq('id', entryId)
+  revalidatePath('/gm')
+  return { success: true }
+}

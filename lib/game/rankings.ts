@@ -209,7 +209,7 @@ async function upsertRankings(
         entity_name: entry.entity_name,
         score: entry.score,
         rank_position: i + 1,
-        metadata: entry.metadata,
+        metadata: entry.metadata as unknown as Record<string, never>,
         updated_at: now,
       }, { onConflict: 'category,entity_id' })
   }
