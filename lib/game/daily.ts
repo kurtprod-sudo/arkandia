@@ -156,7 +156,9 @@ export async function completeTask(
   // Concede ticket se 5/5 e ainda não concedeu
   if (allCompleted && !ticketGranted) {
     ticketGranted = true
-    // Registra como evento — sistema de summon será implementado na Fase 15
+    const { grantSummonTicket } = await import('./summon')
+    await grantSummonTicket(characterId)
+
     await createEvent(supabase, {
       type: 'daily_ticket_granted',
       actorId: characterId,

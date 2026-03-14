@@ -84,6 +84,7 @@ export type EventType =
   | 'item_sold'
   | 'item_crafted'
   | 'auction_finished'
+  | 'summon_performed'
 
 // ---------------------------------------------------------------------------
 // Tabelas do banco
@@ -174,6 +175,7 @@ export interface CharacterWallet {
   libras: number
   essencia: number
   premium_currency: number
+  summon_tickets: number
   updated_at: string
 }
 
@@ -787,6 +789,57 @@ export interface CraftingRecipe {
   is_active: boolean
   created_at: string
   items?: Item
+}
+
+// ---------------------------------------------------------------------------
+// Summon / Gacha
+// ---------------------------------------------------------------------------
+
+export type SummonCostType = 'gemas' | 'ticket'
+
+export interface SummonCatalog {
+  id: string
+  name: string
+  description: string
+  is_active: boolean
+  cost_gemas: number
+  cost_tickets: number
+  pity_threshold: number
+  created_at: string
+  updated_at: string
+}
+
+export interface SummonCatalogItem {
+  id: string
+  catalog_id: string
+  item_id: string
+  quantity: number
+  weight: number
+  is_pity_eligible: boolean
+  created_at: string
+  items?: Item
+}
+
+export interface SummonHistory {
+  id: string
+  character_id: string
+  catalog_id: string
+  item_id: string
+  quantity: number
+  cost_type: SummonCostType
+  cost_amount: number
+  was_pity: boolean
+  created_at: string
+  items?: Item
+}
+
+export interface SummonPity {
+  id: string
+  character_id: string
+  catalog_id: string
+  pulls_since_rare: number
+  total_pulls: number
+  updated_at: string
 }
 
 // Database type is in types/database.types.ts (follows Supabase generated format)

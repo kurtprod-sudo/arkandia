@@ -317,3 +317,81 @@ export async function gmFinalizeAuction(auctionId: string) {
   revalidatePath('/gm')
   return result
 }
+
+export async function gmCreateSummonCatalog(data: {
+  name: string
+  description: string
+  costGemas: number
+  costTickets: number
+  pityThreshold: number
+}) {
+  await assertGM()
+  const supabase = await createClient()
+  const { data: catalog, error } = await supabase
+    .from('summon_catalogs')
+    .insert({
+      name: data.name,
+      description: data.description,
+      cost_gemas: data.costGemas,
+      cost_tickets: data.costTickets,
+      pity_threshold: data.pityThreshold,
+      is_active: true,
+    })
+    .select()
+    .single()
+  revalidatePath('/summon')
+  revalidatePath('/gm')
+  return { success: !error, catalogId: catalog?.id, error: error?.message }
+}
+
+export async function gmAddCatalogItem(data: {
+  catalogId: string
+  itemId: string
+  quantity: number
+  weight: number
+  isPityEligible: boolean
+}) {
+  await assertGM()
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('summon_catalog_items')
+    .insert({
+      catalog_id: data.catalogId,
+      item_id: data.itemId,
+      quantity: data.quantity,
+      weight: data.weight,
+      is_pity_eligible: data.isPityEligible,
+    })
+  revalidatePath('/summon')
+  revalidatePath('/gm')
+  return { success: !error, error: error?.message }
+}
+
+export async function gmToggleCatalog(catalogId: string, isActive: boolean) {
+  await assertGM()
+  const supabase = await createClient()
+  await supabase
+    .from('summon_catalogs')
+    .update({ is_active: isActive })
+    .eq('id', catalogId)
+  revalidatePath('/summon')
+  revalidatePath('/gm')
+  return { success: true }
+}
+
+export async function gmGrantTicket(characterId: string, quantity = 1) {
+  await assertGM()
+  const supabase = await createClient()
+  const { data: wallet } = await supabase
+    .from('character_wallet')
+    .select('summon_tickets')
+    .eq('character_id', characterId)
+    .single()
+  if (!wallet) return { success: false, error: 'Carteira não encontrada.' }
+  await supabase
+    .from('character_wallet')
+    .update({ summon_tickets: (wallet.summon_tickets ?? 0) + quantity })
+    .eq('character_id', characterId)
+  revalidatePath('/gm')
+  return { success: true }
+}
