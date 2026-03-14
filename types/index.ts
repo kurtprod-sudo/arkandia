@@ -87,6 +87,8 @@ export type EventType =
   | 'summon_performed'
   | 'title_granted'
   | 'letter_sent'
+  | 'payment_created'
+  | 'payment_approved'
 
 // ---------------------------------------------------------------------------
 // Tabelas do banco
@@ -923,6 +925,28 @@ export interface Letter {
   is_read: boolean
   read_at: string | null
   created_at: string
+}
+
+// ---------------------------------------------------------------------------
+// Pagamentos (Gemas)
+// ---------------------------------------------------------------------------
+
+export type PaymentStatus = 'pending' | 'approved' | 'rejected' | 'cancelled' | 'expired'
+
+export interface Payment {
+  id: string
+  character_id: string
+  mp_payment_id: string | null
+  status: PaymentStatus
+  amount_brl: number
+  gemas_amount: number
+  qr_code: string | null
+  qr_code_base64: string | null
+  ticket_url: string | null
+  approved_at: string | null
+  expires_at: string
+  created_at: string
+  updated_at: string
 }
 
 // Database type is in types/database.types.ts (follows Supabase generated format)

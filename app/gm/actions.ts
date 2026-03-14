@@ -467,3 +467,30 @@ export async function gmDeleteDiaryEntry(entryId: string) {
   revalidatePath('/gm')
   return { success: true }
 }
+
+export async function gmGrantGemas(characterId: string, amount: number) {
+  const supabase = await assertGM()
+
+  const { data: wallet } = await supabase
+    .from('character_wallet')
+    .select('premium_currency')
+    .eq('character_id', characterId)
+    .single()
+
+  if (!wallet) return { success: false, error: 'Carteira não encontrada.' }
+
+  await supabase
+    .from('character_wallet')
+    .update({ premium_currency: (wallet.premium_currency ?? 0) + amount })
+    .eq('character_id', characterId)
+
+  await createEvent(supabase, {
+    type: 'currency_granted',
+    targetId: characterId,
+    metadata: { currency: 'premium_currency', amount, source: 'gm_grant' },
+    isPublic: false,
+  })
+
+  revalidatePath('/gm')
+  return { success: true }
+}

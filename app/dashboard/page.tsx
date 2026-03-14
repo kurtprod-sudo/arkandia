@@ -46,13 +46,14 @@ export default async function DashboardPage() {
       .maybeSingle(),
   ])
 
-  // Daily tasks + streak + unread letters (só se tiver personagem)
+  // Daily tasks + streak + unread letters + wallet (só se tiver personagem)
   let dailyData: { tasks: import('@/types').DailyTask[]; completedCount: number; ticketGranted: boolean } | null = null
   let streakData: { currentStreak: number } | null = null
   let unreadLetters = 0
+  let walletGemas = 0
 
   if (character) {
-    const [daily, streak, { count }] = await Promise.all([
+    const [daily, streak, { count }, { data: wallet }] = await Promise.all([
       getDailyTasks(character.id),
       updateLoginStreak(character.id),
       supabase
@@ -60,10 +61,16 @@ export default async function DashboardPage() {
         .select('id', { count: 'exact', head: true })
         .eq('recipient_id', character.id)
         .eq('is_read', false),
+      supabase
+        .from('character_wallet')
+        .select('premium_currency')
+        .eq('character_id', character.id)
+        .single(),
     ])
     dailyData = { tasks: daily.tasks, completedCount: daily.completedCount, ticketGranted: daily.ticketGranted }
     streakData = { currentStreak: streak.currentStreak }
     unreadLetters = count ?? 0
+    walletGemas = wallet?.premium_currency ?? 0
   }
 
   const STATUS_LABELS: Record<string, string> = {
@@ -178,6 +185,27 @@ export default async function DashboardPage() {
                     {unreadLetters}
                   </span>
                 )}
+              </div>
+            </div>
+          </Link>
+        )}
+
+        {/* Loja de Gemas */}
+        {character && (
+          <Link href="/shop" className="block">
+            <div className="bg-[var(--ark-surface)] backdrop-blur-xl rounded-sm p-6 border border-[var(--ark-border)] hover:border-[var(--ark-border-bright)] transition-colors">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xs font-body text-[var(--text-secondary)] uppercase tracking-wider mb-1">
+                    Loja de Gemas
+                  </h2>
+                  <p className="text-sm text-[var(--text-label)] font-body">
+                    Saldo: {walletGemas} Gemas
+                  </p>
+                </div>
+                <svg className="text-status-alive" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6 2L1 8l11 13L23 8l-5-6H6zm1.2 1.5h9.6l3.5 4.2L12 19.5 3.7 7.7l3.5-4.2z" />
+                </svg>
               </div>
             </div>
           </Link>
