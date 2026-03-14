@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { GEMA_PACKAGES } from '@/lib/payments/mercadopago'
 import ShopPanel from '@/components/shop/ShopPanel'
 
 export default async function ShopPage() {
@@ -34,13 +33,6 @@ export default async function ShopPage() {
     .gt('expires_at', new Date().toISOString())
     .maybeSingle()
 
-  const packages = GEMA_PACKAGES.map((p) => ({
-    id: p.id,
-    gemas: p.gemas,
-    price_brl: p.price_brl,
-    label: p.label,
-  }))
-
   return (
     <main className="min-h-screen bg-[var(--ark-void)] text-[var(--text-primary)]">
       <div className="max-w-2xl mx-auto px-4 py-8">
@@ -55,7 +47,6 @@ export default async function ShopPage() {
 
         <ShopPanel
           characterId={character.id}
-          packages={packages}
           pendingPayment={
             pendingPayment
               ? {

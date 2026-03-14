@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createPixPayment, type GemaPackageId } from '@/lib/payments/mercadopago'
+import { createPixPayment } from '@/lib/payments/mercadopago'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -10,16 +10,15 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
 
   const body = await req.json()
-  const { characterId, packageId, payerEmail } = body as {
+  const { characterId, gemasAmount } = body as {
     characterId: string
-    packageId: GemaPackageId
-    payerEmail: string
+    gemasAmount: number
   }
 
-  if (!characterId || !packageId || !payerEmail) {
+  if (!characterId || !gemasAmount) {
     return NextResponse.json({ error: 'Dados incompletos.' }, { status: 400 })
   }
 
-  const result = await createPixPayment(characterId, user.id, packageId, payerEmail)
+  const result = await createPixPayment(characterId, user.id, Number(gemasAmount))
   return NextResponse.json(result)
 }

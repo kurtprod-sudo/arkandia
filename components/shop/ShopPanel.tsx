@@ -3,13 +3,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import ArkButton from '@/components/ui/ArkButton'
 
-interface GemaPackage {
-  id: string
-  gemas: number
-  price_brl: number
-  label: string
-}
-
 interface PendingPaymentData {
   id: string
   qrCode?: string
@@ -24,19 +17,25 @@ type ShopState = 'selection' | 'qrcode' | 'success' | 'error'
 
 interface Props {
   characterId: string
-  packages: GemaPackage[]
   pendingPayment?: PendingPaymentData
 }
 
-export default function ShopPanel({ characterId, packages, pendingPayment }: Props) {
+const GEMAS_MIN = 50
+const GEMAS_MAX = 50000
+const GEMAS_PER_BRL = 10
+
+export default function ShopPanel({ characterId, pendingPayment }: Props) {
   const [state, setState] = useState<ShopState>(pendingPayment ? 'qrcode' : 'selection')
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
   const [paymentData, setPaymentData] = useState<PendingPaymentData | undefined>(pendingPayment)
-  const [email, setEmail] = useState('')
-  const [selectedPack, setSelectedPack] = useState<string | null>(null)
+  const [gemasInput, setGemasInput] = useState('')
   const [countdown, setCountdown] = useState('')
   const [creditedGemas, setCreditedGemas] = useState(0)
+
+  const gemasAmount = Number(gemasInput) || 0
+  const priceBrl = gemasAmount / GEMAS_PER_BRL
+  const isValid = gemasAmount >= GEMAS_MIN && gemasAmount <= GEMAS_MAX && gemasAmount % 10 === 0
 
   // Countdown timer
   useEffect(() => {
@@ -98,7 +97,7 @@ export default function ShopPanel({ characterId, packages, pendingPayment }: Pro
   }, [state, pollStatus])
 
   async function handleCreatePayment() {
-    if (!selectedPack || !email) return
+    if (!isValid) return
 
     setLoading(true)
     setErrorMsg('')
@@ -109,8 +108,7 @@ export default function ShopPanel({ characterId, packages, pendingPayment }: Pro
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           characterId,
-          packageId: selectedPack,
-          payerEmail: email,
+          gemasAmount,
         }),
       })
       const data = await res.json()
@@ -120,15 +118,14 @@ export default function ShopPanel({ characterId, packages, pendingPayment }: Pro
         return
       }
 
-      const pack = packages.find((p) => p.id === selectedPack)
       setPaymentData({
         id: data.paymentId,
         qrCode: data.qrCode,
         qrCodeBase64: data.qrCodeBase64,
         ticketUrl: data.ticketUrl,
         expiresAt: data.expiresAt,
-        gemasAmount: pack?.gemas ?? 0,
-        amountBrl: pack?.price_brl ?? 0,
+        gemasAmount,
+        amountBrl: priceBrl,
       })
       setState('qrcode')
     } catch {
@@ -151,15 +148,13 @@ export default function ShopPanel({ characterId, packages, pendingPayment }: Pro
       // ignore
     }
     setPaymentData(undefined)
-    setSelectedPack(null)
     setState('selection')
     setLoading(false)
   }
 
   function handleReset() {
     setPaymentData(undefined)
-    setSelectedPack(null)
-    setEmail('')
+    setGemasInput('')
     setErrorMsg('')
     setCreditedGemas(0)
     setState('selection')
@@ -169,59 +164,60 @@ export default function ShopPanel({ characterId, packages, pendingPayment }: Pro
   if (state === 'selection') {
     return (
       <div className="space-y-4">
-        {/* Package Grid */}
-        <div className="grid grid-cols-2 gap-3">
-          {packages.map((pack) => (
-            <button
-              key={pack.id}
-              onClick={() => setSelectedPack(pack.id)}
-              className={`p-4 rounded-sm border text-left transition-colors ${
-                selectedPack === pack.id
-                  ? 'border-[var(--ark-border-bright)] bg-[var(--ark-surface-hover)]'
-                  : 'border-[var(--ark-border)] bg-[var(--ark-surface)] hover:border-[var(--ark-border-bright)]'
-              }`}
-            >
-              <p className="font-display text-lg font-bold text-[var(--ark-gold-bright)]">
-                {pack.gemas}
-              </p>
-              <p className="font-body text-xs text-[var(--text-secondary)]">Gemas</p>
-              <p className="font-data text-sm text-[var(--text-primary)] mt-2">
-                R$ {pack.price_brl.toFixed(2).replace('.', ',')}
-              </p>
-            </button>
-          ))}
+        <div className="bg-[var(--ark-surface)] border border-[var(--ark-border)] rounded-sm p-4 space-y-4">
+          <label className="block">
+            <span className="font-body text-sm text-[var(--text-secondary)]">
+              Quantidade de Gemas
+            </span>
+            <input
+              type="number"
+              value={gemasInput}
+              onChange={(e) => setGemasInput(e.target.value)}
+              min={GEMAS_MIN}
+              max={GEMAS_MAX}
+              step={10}
+              placeholder={`${GEMAS_MIN} – ${GEMAS_MAX.toLocaleString('pt-BR')} (múltiplo de 10)`}
+              className="mt-1 w-full px-3 py-2 bg-[var(--ark-void)] border border-[var(--ark-border)] rounded-sm text-sm font-data text-[var(--text-primary)] placeholder:text-[var(--text-ghost)] focus:border-[var(--ark-border-bright)] focus:outline-none"
+            />
+          </label>
+
+          {/* Preview BRL */}
+          {gemasAmount > 0 && (
+            <div className="flex justify-between items-center border-t border-[var(--ark-border)] pt-3">
+              <span className="font-body text-sm text-[var(--text-secondary)]">Valor a pagar</span>
+              <span className={`font-data text-lg font-bold ${isValid ? 'text-[var(--ark-gold-bright)]' : 'text-[var(--text-label)]'}`}>
+                R$ {priceBrl.toFixed(2).replace('.', ',')}
+              </span>
+            </div>
+          )}
+
+          {gemasAmount > 0 && !isValid && (
+            <p className="text-xs text-[var(--ark-red-glow)] font-body">
+              {gemasAmount < GEMAS_MIN
+                ? `Mínimo de ${GEMAS_MIN} Gemas.`
+                : gemasAmount > GEMAS_MAX
+                  ? `Máximo de ${GEMAS_MAX.toLocaleString('pt-BR')} Gemas.`
+                  : 'Quantidade deve ser múltiplo de 10.'}
+            </p>
+          )}
+
+          {errorMsg && (
+            <p className="text-sm text-[var(--ark-red-glow)] font-body">{errorMsg}</p>
+          )}
+
+          <ArkButton
+            onClick={handleCreatePayment}
+            disabled={loading || !isValid}
+            size="lg"
+            className="w-full"
+          >
+            {loading ? 'Gerando PIX...' : 'Gerar PIX'}
+          </ArkButton>
         </div>
 
-        {/* Email + Confirm */}
-        {selectedPack && (
-          <div className="bg-[var(--ark-surface)] border border-[var(--ark-border)] rounded-sm p-4 space-y-3">
-            <label className="block">
-              <span className="font-body text-sm text-[var(--text-secondary)]">
-                E-mail do pagador (para o PIX)
-              </span>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
-                className="mt-1 w-full px-3 py-2 bg-[var(--ark-void)] border border-[var(--ark-border)] rounded-sm text-sm font-data text-[var(--text-primary)] placeholder:text-[var(--text-ghost)] focus:border-[var(--ark-border-bright)] focus:outline-none"
-              />
-            </label>
-
-            {errorMsg && (
-              <p className="text-sm text-[var(--ark-red-glow)] font-body">{errorMsg}</p>
-            )}
-
-            <ArkButton
-              onClick={handleCreatePayment}
-              disabled={loading || !email}
-              size="lg"
-              className="w-full"
-            >
-              {loading ? 'Gerando PIX...' : 'Pagar com PIX'}
-            </ArkButton>
-          </div>
-        )}
+        <p className="text-xs text-[var(--text-ghost)] text-center font-body">
+          R$ 1,00 = 10 Gemas &middot; Pagamento via PIX
+        </p>
       </div>
     )
   }

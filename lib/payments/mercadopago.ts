@@ -2,16 +2,9 @@ import { MercadoPagoConfig, Payment as MPPayment } from 'mercadopago'
 import { createClient } from '@/lib/supabase/server'
 import { createEvent } from '@/lib/game/events'
 
-const GEMA_PACKAGES = [
-  { id: 'pack_100',  gemas: 100,  price_brl: 9.90,   label: '100 Gemas' },
-  { id: 'pack_300',  gemas: 300,  price_brl: 24.90,  label: '300 Gemas' },
-  { id: 'pack_600',  gemas: 600,  price_brl: 44.90,  label: '600 Gemas' },
-  { id: 'pack_1500', gemas: 1500, price_brl: 99.90,  label: '1500 Gemas' },
-] as const
-
-export { GEMA_PACKAGES }
-
-export type GemaPackageId = typeof GEMA_PACKAGES[number]['id']
+const GEMAS_MIN = 50
+const GEMAS_MAX = 50000
+const GEMAS_PER_BRL = 10 // R$ 1,00 = 10 Gemas
 
 function getMP() {
   const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN
@@ -20,14 +13,22 @@ function getMP() {
   return new MPPayment(config)
 }
 
+function validateGemasAmount(amount: number): string | null {
+  if (!Number.isInteger(amount)) return 'Quantidade deve ser um número inteiro.'
+  if (amount < GEMAS_MIN) return `Mínimo de ${GEMAS_MIN} Gemas.`
+  if (amount > GEMAS_MAX) return `Máximo de ${GEMAS_MAX} Gemas.`
+  if (amount % 10 !== 0) return 'Quantidade deve ser múltiplo de 10.'
+  return null
+}
+
 /**
  * Cria um pagamento PIX no Mercado Pago e salva no banco.
+ * Proporção: R$ 1,00 = 10 Gemas.
  */
 export async function createPixPayment(
   characterId: string,
   userId: string,
-  packageId: GemaPackageId,
-  payerEmail: string
+  gemasAmount: number
 ): Promise<{
   success: boolean
   error?: string
@@ -37,6 +38,11 @@ export async function createPixPayment(
   ticketUrl?: string
   expiresAt?: string
 }> {
+  const validationError = validateGemasAmount(gemasAmount)
+  if (validationError) return { success: false, error: validationError }
+
+  const priceBrl = gemasAmount / GEMAS_PER_BRL
+
   const supabase = await createClient()
 
   // Verifica ownership
@@ -58,21 +64,18 @@ export async function createPixPayment(
     .maybeSingle()
   if (pending) return { success: false, error: 'Você já tem um pagamento pendente.' }
 
-  const pack = GEMA_PACKAGES.find((p) => p.id === packageId)
-  if (!pack) return { success: false, error: 'Pacote inválido.' }
-
   const expiresAt = new Date(Date.now() + 30 * 60 * 1000) // 30 min
 
   try {
     const mp = getMP()
     const response = await mp.create({
       body: {
-        transaction_amount: pack.price_brl,
-        description: `Arkandia — ${pack.label}`,
+        transaction_amount: priceBrl,
+        description: `${gemasAmount} Gemas — Arkandia`,
         payment_method_id: 'pix',
-        payer: { email: payerEmail },
+        payer: { email: `${characterId}@arkandia.game` },
         date_of_expiration: expiresAt.toISOString(),
-        external_reference: `arkandia_${characterId}_${pack.id}`,
+        external_reference: `arkandia_${characterId}_${Date.now()}`,
       },
     })
 
@@ -88,8 +91,8 @@ export async function createPixPayment(
         character_id: characterId,
         mp_payment_id: String(response.id ?? ''),
         status: 'pending',
-        amount_brl: pack.price_brl,
-        gemas_amount: pack.gemas,
+        amount_brl: priceBrl,
+        gemas_amount: gemasAmount,
         qr_code: qrCode,
         qr_code_base64: qrCodeBase64,
         ticket_url: ticketUrl,
@@ -105,9 +108,8 @@ export async function createPixPayment(
       actorId: characterId,
       metadata: {
         payment_id: payment.id,
-        package_id: pack.id,
-        amount_brl: pack.price_brl,
-        gemas: pack.gemas,
+        amount_brl: priceBrl,
+        gemas: gemasAmount,
       },
       isPublic: false,
     })
