@@ -218,3 +218,59 @@ export async function gmRemoveFromScenario(
   revalidatePath('/gm')
   return { success: true }
 }
+
+export async function gmAssignTerritory(
+  territoryId: string,
+  societyId: string | null
+) {
+  await assertGM()
+  const supabase = await createClient()
+
+  const safezoneUntil = societyId
+    ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24h safezone
+    : null
+
+  await supabase
+    .from('territories')
+    .update({
+      controlling_society_id: societyId,
+      safezone_until: safezoneUntil,
+    })
+    .eq('id', territoryId)
+
+  // Se atribuindo a uma sociedade, cria registro de produção
+  if (societyId) {
+    await supabase
+      .from('territory_production')
+      .upsert({
+        territory_id: territoryId,
+        society_id: societyId,
+        last_collected: new Date().toISOString(),
+        reinvestment_level: 0,
+      }, { onConflict: 'territory_id' })
+  } else {
+    // Remove produção ao retirar controle
+    await supabase
+      .from('territory_production')
+      .delete()
+      .eq('territory_id', territoryId)
+  }
+
+  revalidatePath('/map')
+  revalidatePath('/gm')
+  return { success: true }
+}
+
+export async function gmSetSocietyLevel(
+  societyId: string,
+  level: number
+) {
+  await assertGM()
+  const supabase = await createClient()
+  await supabase
+    .from('societies')
+    .update({ level })
+    .eq('id', societyId)
+  revalidatePath('/gm')
+  return { success: true }
+}

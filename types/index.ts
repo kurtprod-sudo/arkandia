@@ -76,6 +76,9 @@ export type EventType =
   | 'avatar_generated'
   | 'scenario_joined'
   | 'scenario_left'
+  | 'society_dissolved'
+  | 'territory_captured'
+  | 'production_collected'
 
 // ---------------------------------------------------------------------------
 // Tabelas do banco
@@ -376,6 +379,13 @@ export interface Society {
   name: string
   description: string
   leader_id: string
+  level: number
+  treasury_libras: number
+  tax_percent: number
+  recruitment_open: boolean
+  manifesto: string | null
+  dissolved_at: string | null
+  inactive_since: string | null
   created_at: string
 }
 
@@ -383,7 +393,31 @@ export interface SocietyMember {
   society_id: string
   character_id: string
   role: SocietyMemberRole
+  title: string | null
   joined_at: string
+}
+
+export type TerritoryCategory = 'forja' | 'arcano' | 'comercial' | 'militar' | 'reliquia' | 'estrategico'
+
+export interface Territory {
+  id: string
+  name: string
+  region: string
+  category: TerritoryCategory
+  controlling_society_id: string | null
+  safezone_until: string | null
+  base_production: Record<string, unknown>
+  description: string
+  created_at: string
+}
+
+export interface TerritoryProduction {
+  id: string
+  territory_id: string
+  society_id: string
+  last_collected: string
+  reinvestment_level: number
+  created_at: string
 }
 
 export interface GameEvent {
