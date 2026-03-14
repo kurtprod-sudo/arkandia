@@ -68,6 +68,9 @@ export type EventType =
   | 'expedition_started'
   | 'expedition_completed'
   | 'expedition_failed'
+  | 'daily_task_completed'
+  | 'daily_ticket_granted'
+  | 'streak_milestone'
 
 // ---------------------------------------------------------------------------
 // Tabelas do banco
@@ -450,6 +453,47 @@ export interface GMGrantCurrencyPayload {
 export interface GMEditAttributePayload {
   character_id: string
   attributes: Partial<Omit<CharacterAttributes, 'character_id' | 'updated_at'>> & Record<string, unknown>
+}
+
+// ---------------------------------------------------------------------------
+// Daily Tasks e Login Streak
+// ---------------------------------------------------------------------------
+
+export type TaskType =
+  | 'jornal'
+  | 'treino'
+  | 'coletar'
+  | 'desafio'
+  | 'faccao'
+  | 'mercado_volatil'
+  | 'eco_arquetipo'
+
+export interface DailyTask {
+  type: TaskType
+  label: string
+  description: string
+  completed: boolean
+}
+
+export interface DailyTaskRecord {
+  id: string
+  character_id: string
+  task_date: string
+  tasks: DailyTask[]
+  completed_count: number
+  ticket_granted: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface LoginStreak {
+  id: string
+  character_id: string
+  current_streak: number
+  longest_streak: number
+  last_login_date: string | null
+  total_logins: number
+  updated_at: string
 }
 
 // ---------------------------------------------------------------------------

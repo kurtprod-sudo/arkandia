@@ -6,6 +6,8 @@ import ArkButton from '@/components/ui/ArkButton'
 import ArkDivider from '@/components/ui/ArkDivider'
 import ArkBadge from '@/components/ui/ArkBadge'
 import type { JournalSection } from '@/types'
+import { getDailyTasks, updateLoginStreak } from '@/lib/game/daily'
+import DailyTasksWidget from '@/components/dashboard/DailyTasksWidget'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -43,6 +45,19 @@ export default async function DashboardPage() {
       .limit(1)
       .maybeSingle(),
   ])
+
+  // Daily tasks + streak (só se tiver personagem)
+  let dailyData: { tasks: import('@/types').DailyTask[]; completedCount: number; ticketGranted: boolean } | null = null
+  let streakData: { currentStreak: number } | null = null
+
+  if (character) {
+    const [daily, streak] = await Promise.all([
+      getDailyTasks(character.id),
+      updateLoginStreak(character.id),
+    ])
+    dailyData = { tasks: daily.tasks, completedCount: daily.completedCount, ticketGranted: daily.ticketGranted }
+    streakData = { currentStreak: streak.currentStreak }
+  }
 
   const STATUS_LABELS: Record<string, string> = {
     active: 'Vivo', injured: 'Ferido', dead: 'Morto',
@@ -123,6 +138,17 @@ export default async function DashboardPage() {
               <ArkButton size="lg">Criar Personagem</ArkButton>
             </Link>
           </div>
+        )}
+
+        {/* Daily Tasks */}
+        {character && dailyData && streakData && (
+          <DailyTasksWidget
+            tasks={dailyData.tasks}
+            completedCount={dailyData.completedCount}
+            ticketGranted={dailyData.ticketGranted}
+            characterId={character.id}
+            streak={streakData.currentStreak}
+          />
         )}
 
         {/* Gazeta do Horizonte */}
