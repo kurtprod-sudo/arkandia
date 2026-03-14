@@ -65,6 +65,9 @@ export type EventType =
   | 'maestria_acquired'
   | 'building_updated'
   | 'reputation_changed'
+  | 'expedition_started'
+  | 'expedition_completed'
+  | 'expedition_failed'
 
 // ---------------------------------------------------------------------------
 // Tabelas do banco
@@ -329,6 +332,34 @@ export interface CharacterReputation {
   stage: ReputationStage
   updated_at: string
   factions?: Faction
+}
+
+export interface ExpeditionType {
+  id: string
+  name: string
+  subtype: 'exploracao' | 'caca' | 'investigacao' | 'missao_faccao'
+  risk_level: 'seguro' | 'moderado' | 'perigoso' | 'extremo'
+  duration_hours: number
+  description: string
+  loot_table: Record<string, unknown>
+  success_formula: Record<string, unknown>
+  required_faction_slug: string | null
+  is_active: boolean
+  created_at: string
+}
+
+export interface Expedition {
+  id: string
+  character_id: string
+  type_id: string
+  status: 'active' | 'completed' | 'failed'
+  risk_level: string
+  started_at: string
+  ends_at: string
+  result: Record<string, unknown> | null
+  resolved_at: string | null
+  created_at: string
+  expedition_types?: ExpeditionType
 }
 
 export interface Society {
