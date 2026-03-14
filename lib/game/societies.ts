@@ -133,7 +133,7 @@ export async function joinSociety(
   }
 
   // Limite de membros por nível (10 + 5 por nível)
-  const maxMembers = 10 + (society.level - 1) * 5
+  const maxMembers = 10 + ((society.level ?? 1) - 1) * 5
   const { count } = await supabase
     .from('society_members')
     .select('id', { count: 'exact', head: true })
@@ -251,8 +251,8 @@ export async function dissolveSociety(
     .select('character_id')
     .eq('society_id', societyId)
 
-  if (members && members.length > 0 && society.treasury_libras > 0) {
-    const sharePerMember = Math.floor(society.treasury_libras / members.length)
+  if (members && members.length > 0 && (society.treasury_libras ?? 0) > 0) {
+    const sharePerMember = Math.floor((society.treasury_libras ?? 0) / members.length)
     for (const member of members) {
       const { data: wallet } = await supabase
         .from('character_wallet')
@@ -342,7 +342,7 @@ export async function depositToTreasury(
   if (society) {
     await supabase
       .from('societies')
-      .update({ treasury_libras: society.treasury_libras + amount })
+      .update({ treasury_libras: (society.treasury_libras ?? 0) + amount })
       .eq('id', character.society_id)
   }
 

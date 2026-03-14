@@ -79,6 +79,8 @@ export type EventType =
   | 'society_dissolved'
   | 'territory_captured'
   | 'production_collected'
+  | 'war_declared'
+  | 'war_finished'
 
 // ---------------------------------------------------------------------------
 // Tabelas do banco
@@ -650,6 +652,63 @@ export interface ScenarioMessage {
   character_id: string
   content: string
   is_ooc: boolean
+  created_at: string
+}
+
+// ---------------------------------------------------------------------------
+// Guerra de Territórios
+// ---------------------------------------------------------------------------
+
+export type TroopType = 'infantaria' | 'cavalaria' | 'arquearia' | 'cerco'
+
+export type WarSide = 'attacker' | 'defender'
+
+export type WarStatus = 'preparation' | 'active' | 'finished' | 'cancelled'
+
+export interface Troop {
+  id: string
+  society_id: string
+  troop_type: TroopType
+  quantity: number
+  updated_at: string
+}
+
+export interface WarDeclaration {
+  id: string
+  attacker_id: string
+  defender_id: string | null
+  target_territory_id: string
+  status: WarStatus
+  phase: number
+  declared_at: string
+  preparation_ends: string
+  finished_at: string | null
+  winner_id: string | null
+  created_at: string
+}
+
+export interface WarParticipant {
+  id: string
+  war_id: string
+  society_id: string
+  character_id: string
+  troops_committed: Partial<Record<TroopType, number>>
+  side: WarSide
+  created_at: string
+}
+
+export interface WarBattle {
+  id: string
+  war_id: string
+  phase: number
+  status: 'pending' | 'active' | 'finished'
+  attacker_power: number
+  defender_power: number
+  winner_side: WarSide | 'draw' | null
+  casualties: Record<string, Record<TroopType, number>>
+  narrative_text: string | null
+  started_at: string | null
+  finished_at: string | null
   created_at: string
 }
 

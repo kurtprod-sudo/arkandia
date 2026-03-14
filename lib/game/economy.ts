@@ -97,8 +97,8 @@ export async function collectTerritoryProduction(
 
     const { libras } = calculateProduction({
       baseProductionPerHour: basePerHour,
-      lastCollected: new Date(prod.last_collected),
-      reinvestmentLevel: prod.reinvestment_level,
+      lastCollected: new Date(prod.last_collected ?? now),
+      reinvestmentLevel: prod.reinvestment_level ?? 0,
       now,
     })
 
@@ -125,7 +125,7 @@ export async function collectTerritoryProduction(
   if (taxAmount > 0) {
     await supabase
       .from('societies')
-      .update({ treasury_libras: society.treasury_libras + taxAmount })
+      .update({ treasury_libras: (society.treasury_libras ?? 0) + taxAmount })
       .eq('id', societyId)
   }
 

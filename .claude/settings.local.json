@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(npx tsc:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(node -e \":*)",
+      "Bash(node scripts/update_db_types_war.js)",
+      "Bash(npx next:*)"
     ]
   }
 }

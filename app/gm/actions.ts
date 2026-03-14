@@ -274,3 +274,25 @@ export async function gmSetSocietyLevel(
   revalidatePath('/gm')
   return { success: true }
 }
+
+export async function gmResolveBattle(warId: string) {
+  await assertGM()
+  const { resolveBattle } = await import('@/lib/game/war')
+  const result = await resolveBattle(warId)
+  revalidatePath(`/war/${warId}`)
+  revalidatePath('/map')
+  revalidatePath('/gm')
+  return result
+}
+
+export async function gmCancelWar(warId: string) {
+  await assertGM()
+  const supabase = await createClient()
+  await supabase
+    .from('war_declarations')
+    .update({ status: 'cancelled', finished_at: new Date().toISOString() })
+    .eq('id', warId)
+  revalidatePath('/gm')
+  revalidatePath('/map')
+  return { success: true }
+}
