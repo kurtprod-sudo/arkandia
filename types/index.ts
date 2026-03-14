@@ -949,5 +949,38 @@ export interface Payment {
   updated_at: string
 }
 
+// ---------------------------------------------------------------------------
+// Painel GM — Views compostas
+// ---------------------------------------------------------------------------
+
+export interface GmCharacterView {
+  id: string
+  name: string
+  level: number
+  status: string
+  race_name: string
+  class_name: string
+  society_name: string | null
+  title: string | null
+  libras: number
+  essencia: number
+  gemas: number
+  tickets: number
+  ataque: number
+  defesa: number
+  magia: number
+  vitalidade: number
+  recovery_until: string | null
+}
+
+export interface GmPaymentView {
+  id: string
+  character_name: string
+  status: string
+  amount_brl: number
+  gemas_amount: number
+  created_at: string
+}
+
 // Database type is in types/database.types.ts (follows Supabase generated format)
 // export type { Database } from './database.types'

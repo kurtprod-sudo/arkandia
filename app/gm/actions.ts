@@ -468,6 +468,133 @@ export async function gmDeleteDiaryEntry(entryId: string) {
   return { success: true }
 }
 
+export async function gmGrantXP(characterId: string, amount: number) {
+  await assertGM()
+  const supabase = await createClient()
+  const { data: character } = await supabase
+    .from('characters')
+    .select('xp, level')
+    .eq('id', characterId)
+    .single()
+  if (!character) return { success: false, error: 'Personagem não encontrado.' }
+  await supabase
+    .from('characters')
+    .update({ xp: character.xp + amount })
+    .eq('id', characterId)
+  revalidatePath('/gm')
+  return { success: true }
+}
+
+export async function gmGrantLibras(characterId: string, amount: number) {
+  await assertGM()
+  const supabase = await createClient()
+  const { data: wallet } = await supabase
+    .from('character_wallet')
+    .select('libras')
+    .eq('character_id', characterId)
+    .single()
+  if (!wallet) return { success: false, error: 'Carteira não encontrada.' }
+  await supabase
+    .from('character_wallet')
+    .update({ libras: wallet.libras + amount })
+    .eq('character_id', characterId)
+  revalidatePath('/gm')
+  return { success: true }
+}
+
+export async function gmForceRecovery(characterId: string, hours: number) {
+  await assertGM()
+  const supabase = await createClient()
+  const recoveryUntil = new Date()
+  recoveryUntil.setHours(recoveryUntil.getHours() + hours)
+  await supabase
+    .from('characters')
+    .update({ recovery_until: recoveryUntil.toISOString() })
+    .eq('id', characterId)
+  revalidatePath('/gm')
+  return { success: true }
+}
+
+export async function gmClearRecovery(characterId: string) {
+  await assertGM()
+  const supabase = await createClient()
+  await supabase
+    .from('characters')
+    .update({ recovery_until: null })
+    .eq('id', characterId)
+  revalidatePath('/gm')
+  return { success: true }
+}
+
+export async function gmGrantToAll(
+  type: 'gemas' | 'tickets',
+  amount: number
+) {
+  await assertGM()
+  const supabase = await createClient()
+  const { data: characters } = await supabase
+    .from('characters')
+    .select('id')
+    .eq('status', 'active')
+  if (!characters) return { success: false, error: 'Nenhum personagem encontrado.' }
+
+  if (type === 'gemas') {
+    for (const char of characters) {
+      const { data: wallet } = await supabase
+        .from('character_wallet')
+        .select('premium_currency')
+        .eq('character_id', char.id)
+        .single()
+      if (wallet) {
+        await supabase
+          .from('character_wallet')
+          .update({ premium_currency: (wallet.premium_currency ?? 0) + amount })
+          .eq('character_id', char.id)
+      }
+    }
+  } else {
+    for (const char of characters) {
+      const { data: wallet } = await supabase
+        .from('character_wallet')
+        .select('summon_tickets')
+        .eq('character_id', char.id)
+        .single()
+      if (wallet) {
+        await supabase
+          .from('character_wallet')
+          .update({ summon_tickets: (wallet.summon_tickets ?? 0) + amount })
+          .eq('character_id', char.id)
+      }
+    }
+  }
+
+  revalidatePath('/gm')
+  return { success: true, affected: characters.length }
+}
+
+export async function gmForceAuction(auctionId: string) {
+  await assertGM()
+  const { finalizeAuction } = await import('@/lib/game/market')
+  const result = await finalizeAuction(auctionId)
+  revalidatePath('/gm')
+  revalidatePath('/market')
+  return result
+}
+
+export async function gmToggleRecruitment(
+  societyId: string,
+  open: boolean
+) {
+  await assertGM()
+  const supabase = await createClient()
+  await supabase
+    .from('societies')
+    .update({ recruitment_open: open })
+    .eq('id', societyId)
+  revalidatePath('/gm')
+  return { success: true }
+}
+
 export async function gmGrantGemas(characterId: string, amount: number) {
   const supabase = await assertGM()
 

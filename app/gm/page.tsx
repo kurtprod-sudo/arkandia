@@ -1,9 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import GMCharacterList from '@/components/gm/GMCharacterList'
-import GMEventFeed from '@/components/gm/GMEventFeed'
-import ArkDivider from '@/components/ui/ArkDivider'
+import GmPanel, { type GmPanelProps } from '@/components/gm/GmPanel'
 import { type CharacterWithAttributes, type GameEvent } from '@/types'
 
 export default async function GMPanelPage() {
@@ -23,22 +21,106 @@ export default async function GMPanelPage() {
 
   if (!profile || profile.role !== 'gm') redirect('/dashboard')
 
-  // Todos os personagens com atributos
-  const { data: characters } = await supabase
-    .from('characters')
-    .select(`
-      *,
-      character_attributes (*),
-      character_wallet (*)
-    `)
-    .order('created_at', { ascending: false })
+  // Parallel data fetching
+  const [
+    { data: characters },
+    { data: events },
+    { data: societies },
+    { data: territories },
+    { data: activeWars },
+    { data: titleDefs },
+    { data: summonCatalogs },
+    { data: unconfirmedLore },
+    { data: recentPayments },
+    { data: allScenarios },
+    { data: journalEditions },
+    { data: allItems },
+    { data: factions },
+  ] = await Promise.all([
+    // Todos os personagens com atributos
+    supabase
+      .from('characters')
+      .select('*, character_attributes (*), character_wallet (*)')
+      .order('created_at', { ascending: false }),
 
-  // Últimos 50 eventos
-  const { data: events } = await supabase
-    .from('events')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(50)
+    // Últimos 50 eventos
+    supabase
+      .from('events')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50),
+
+    // Sociedades ativas
+    supabase
+      .from('societies')
+      .select('id, name, level, treasury_libras, recruitment_open, dissolved_at')
+      .is('dissolved_at', null)
+      .order('name'),
+
+    // Territórios com sociedade controladora
+    supabase
+      .from('territories')
+      .select('id, name, region, category, controlling_society_id, safezone_until, societies (name)')
+      .order('region'),
+
+    // Guerras ativas
+    supabase
+      .from('war_declarations')
+      .select('id, status, created_at, attacker:societies!attacker_id (name), defender:societies!defender_id (name), territories:territories!target_territory_id (name)')
+      .in('status', ['declared', 'battle_phase']),
+
+    // Definições de título
+    supabase
+      .from('title_definitions')
+      .select('id, name, category, is_unique')
+      .order('category'),
+
+    // Catálogos de summon
+    supabase
+      .from('summon_catalogs')
+      .select('id, name, is_active, cost_gemas, pity_threshold')
+      .order('created_at', { ascending: false }),
+
+    // Lore não confirmada
+    supabase
+      .from('diary_entries')
+      .select('id, title, character_id, characters:characters!character_id (name)')
+      .eq('is_lore_confirmed', false)
+      .order('created_at', { ascending: false })
+      .limit(30),
+
+    // Pagamentos recentes
+    supabase
+      .from('payments')
+      .select('id, character_id, status, amount_brl, gemas_amount, created_at, characters:characters!character_id (name)')
+      .order('created_at', { ascending: false })
+      .limit(50),
+
+    // Cenários
+    supabase
+      .from('social_scenarios')
+      .select('id, name, location, is_active, scenario_presence (count)')
+      .order('created_at', { ascending: false }),
+
+    // Edições do jornal
+    supabase
+      .from('journal_editions')
+      .select('id, edition_date, status, published_at')
+      .order('edition_date', { ascending: false })
+      .limit(20),
+
+    // Todos os itens
+    supabase
+      .from('items')
+      .select('id, name, item_type, rarity')
+      .order('name'),
+
+    // Facções
+    supabase
+      .from('factions')
+      .select('id, slug, name')
+      .order('name'),
+  ])
 
   return (
     <main className="min-h-screen relative">
@@ -60,25 +142,21 @@ export default async function GMPanelPage() {
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 py-8 relative z-10">
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Character list — 2/3 */}
-          <div className="xl:col-span-2">
-            <h2 className="text-xs font-body text-[var(--text-secondary)] uppercase tracking-wider mb-1">
-              Personagens ({characters?.length ?? 0})
-            </h2>
-            <ArkDivider variant="dark" className="mb-4" />
-            <GMCharacterList characters={(characters ?? []) as CharacterWithAttributes[]} />
-          </div>
-
-          {/* Event feed — 1/3 */}
-          <div>
-            <h2 className="text-xs font-body text-[var(--text-secondary)] uppercase tracking-wider mb-1">
-              Feed de Eventos (últimos 50)
-            </h2>
-            <ArkDivider variant="dark" className="mb-4" />
-            <GMEventFeed events={(events ?? []) as GameEvent[]} />
-          </div>
-        </div>
+        <GmPanel
+          characters={(characters ?? []) as CharacterWithAttributes[]}
+          events={(events ?? []) as GameEvent[]}
+          societies={(societies ?? []) as GmPanelProps['societies']}
+          territories={(territories ?? []) as GmPanelProps['territories']}
+          activeWars={(activeWars ?? []) as GmPanelProps['activeWars']}
+          titleDefs={(titleDefs ?? []) as GmPanelProps['titleDefs']}
+          summonCatalogs={(summonCatalogs ?? []) as GmPanelProps['summonCatalogs']}
+          unconfirmedLore={(unconfirmedLore ?? []) as GmPanelProps['unconfirmedLore']}
+          recentPayments={(recentPayments ?? []) as GmPanelProps['recentPayments']}
+          allScenarios={(allScenarios ?? []) as GmPanelProps['allScenarios']}
+          journalEditions={(journalEditions ?? []) as GmPanelProps['journalEditions']}
+          allItems={(allItems ?? []) as GmPanelProps['allItems']}
+          factions={(factions ?? []) as GmPanelProps['factions']}
+        />
       </div>
     </main>
   )
