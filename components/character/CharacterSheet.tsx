@@ -13,7 +13,16 @@ import {
 import ArkBuildingSlots, { type BuildingSlotData } from './ArkBuildingSlots'
 import ArkResonanceCard from './ArkResonanceCard'
 import ArkReputationList from './ArkReputationList'
+import ArkTitlesList from './ArkTitlesList'
 import type { Character, CharacterAttributes, CharacterWallet, CharacterReputation } from '@/types'
+
+interface TitleView {
+  id: string
+  titleName: string
+  titleDescription: string
+  titleCategory: string
+  grantedAt: string
+}
 
 interface CharacterSheetProps {
   character: Character
@@ -26,6 +35,7 @@ interface CharacterSheetProps {
   reputations: CharacterReputation[]
   physicalTraits: string | null
   gemasBalance: number
+  titles: TitleView[]
 }
 
 const ATTR_ROWS: { key: keyof CharacterAttributes; label: string; abbr: string; color: string; Icon: typeof SwordIcon }[] = [
@@ -157,6 +167,7 @@ export default function CharacterSheet({
   reputations,
   physicalTraits,
   gemasBalance,
+  titles,
 }: CharacterSheetProps) {
   const [reworkOpen, setReworkOpen] = useState(false)
   const xpNeeded = xpToNextLevel(character.level)
@@ -379,6 +390,20 @@ export default function CharacterSheet({
           </svg>
         }>
           <ArkReputationList reputations={reputations} />
+        </SectionCard>
+
+        {/* Titles */}
+        <SectionCard label="TÍTULOS" icon={
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 1L9 4H12L9.5 7L10.5 11L7 8.5L3.5 11L4.5 7L2 4H5Z"
+              fill="#6e160f" stroke="#d3a539" strokeWidth="0.6"/>
+          </svg>
+        }>
+          <ArkTitlesList
+            characterId={character.id}
+            titles={titles}
+            activeTitle={character.title}
+          />
         </SectionCard>
 
         {/* Wallet */}

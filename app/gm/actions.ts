@@ -395,3 +395,52 @@ export async function gmGrantTicket(characterId: string, quantity = 1) {
   revalidatePath('/gm')
   return { success: true }
 }
+
+export async function gmGrantTitle(
+  characterId: string,
+  titleId: string
+) {
+  await assertGM()
+  const { grantTitle } = await import('@/lib/game/titles')
+  const result = await grantTitle(characterId, titleId, 'gm')
+  revalidatePath('/gm')
+  revalidatePath('/character')
+  return result
+}
+
+export async function gmRevokeTitle(
+  characterId: string,
+  titleId: string
+) {
+  await assertGM()
+  const supabase = await createClient()
+  await supabase
+    .from('character_titles')
+    .delete()
+    .eq('character_id', characterId)
+    .eq('title_id', titleId)
+  // Se era o título ativo, remove
+  const { data: titleDef } = await supabase
+    .from('title_definitions')
+    .select('name')
+    .eq('id', titleId)
+    .single()
+  if (titleDef) {
+    await supabase
+      .from('characters')
+      .update({ title: null })
+      .eq('id', characterId)
+      .eq('title', titleDef.name)
+  }
+  revalidatePath('/gm')
+  return { success: true }
+}
+
+export async function gmUpdateRankings() {
+  await assertGM()
+  const { updateAllRankings } = await import('@/lib/game/rankings')
+  const result = await updateAllRankings()
+  revalidatePath('/rankings')
+  revalidatePath('/gm')
+  return result
+}

@@ -28,6 +28,7 @@ export default async function CharacterSheetPage() {
     { data: wallet, error: walletError },
     { data: buildingRaw },
     { data: reputationsRaw },
+    { data: characterTitlesRaw },
   ] = await Promise.all([
     supabase
       .from('characters')
@@ -53,6 +54,11 @@ export default async function CharacterSheetPage() {
       .from('character_reputation')
       .select('*, factions(id, name, slug, type, is_hidden)')
       .eq('character_id', characterId),
+    supabase
+      .from('character_titles')
+      .select('*, title_definitions(name, description, category)')
+      .eq('character_id', characterId)
+      .order('granted_at', { ascending: false }),
   ])
 
   // Extract joined names before casting to Character type
@@ -82,6 +88,18 @@ export default async function CharacterSheetPage() {
   const reputations = (reputationsRaw ?? []).filter((r) => {
     const f = r.factions as Record<string, unknown> | null
     return f ? !f.is_hidden : true
+  })
+
+  // Map titles
+  const characterTitles = (characterTitlesRaw ?? []).map((ct) => {
+    const td = ct.title_definitions as Record<string, unknown> | null
+    return {
+      id: ct.id,
+      titleName: (td?.name as string) ?? '',
+      titleDescription: (td?.description as string) ?? '',
+      titleCategory: (td?.category as string) ?? '',
+      grantedAt: ct.granted_at ?? '',
+    }
   })
 
   if (process.env.NODE_ENV === 'development') {
@@ -145,6 +163,7 @@ export default async function CharacterSheetPage() {
           reputations={reputations as unknown as import('@/types').CharacterReputation[]}
           physicalTraits={character.physical_traits ?? null}
           gemasBalance={wallet.premium_currency}
+          titles={characterTitles}
         />
 
         {/* Milestone alerts */}

@@ -85,6 +85,7 @@ export type EventType =
   | 'item_crafted'
   | 'auction_finished'
   | 'summon_performed'
+  | 'title_granted'
 
 // ---------------------------------------------------------------------------
 // Tabelas do banco
@@ -839,6 +840,49 @@ export interface SummonPity {
   catalog_id: string
   pulls_since_rare: number
   total_pulls: number
+  updated_at: string
+}
+
+// ---------------------------------------------------------------------------
+// Rankings e Títulos
+// ---------------------------------------------------------------------------
+
+export type RankingCategory =
+  | 'maiores_guerreiros'
+  | 'sociedades_dominantes'
+  | 'exploradores'
+  | 'primeiros_maestria'
+  | 'herois_guerra'
+
+export interface TitleDefinition {
+  id: string
+  name: string
+  description: string
+  category: 'progressao' | 'guerra' | 'exploracao' | 'maestria' | 'especial' | 'gm'
+  trigger_type: 'automatico' | 'gm_manual' | 'primeiro_a'
+  trigger_condition: Record<string, unknown>
+  is_unique: boolean
+  created_at: string
+}
+
+export interface CharacterTitle {
+  id: string
+  character_id: string
+  title_id: string
+  granted_by: 'system' | 'gm'
+  granted_at: string
+  title_definitions?: TitleDefinition
+}
+
+export interface RankingEntry {
+  id: string
+  category: RankingCategory
+  entity_id: string
+  entity_type: 'character' | 'society'
+  entity_name: string
+  score: number
+  rank_position: number | null
+  metadata: Record<string, unknown>
   updated_at: string
 }
 
