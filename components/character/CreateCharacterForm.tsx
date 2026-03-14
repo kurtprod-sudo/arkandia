@@ -60,6 +60,7 @@ export default function CreateCharacterForm({ races, classes }: Props) {
   const [selectedRace, setSelectedRace] = useState<Race | null>(null)
   const [selectedClass, setSelectedClass] = useState<GameClass | null>(null)
   const [charName, setCharName] = useState('')
+  const [physicalTraits, setPhysicalTraits] = useState('')
 
   const [state, formAction] = useFormState<FormState, FormData>(
     async (_prev: FormState, formData: FormData) => {
@@ -202,6 +203,29 @@ export default function CreateCharacterForm({ races, classes }: Props) {
             onChange={(e) => setCharName(e.target.value)}
           />
 
+          <div className="space-y-2">
+            <label
+              className="block text-[11px] font-semibold tracking-[0.15em] uppercase mb-1.5 text-[var(--text-label)]"
+              style={{ fontFamily: 'var(--font-intelo)' }}
+            >
+              Caracter&iacute;sticas F&iacute;sicas <span className="text-[var(--text-ghost)] normal-case">(opcional)</span>
+            </label>
+            <textarea
+              name="charPhysicalTraitsPreview"
+              value={physicalTraits}
+              onChange={(e) => setPhysicalTraits(e.target.value)}
+              placeholder="Ex: cabelo branco longo, olhos vermelhos, cicatriz no rosto, compleição atlética..."
+              maxLength={300}
+              rows={3}
+              className="w-full px-3.5 py-2.5 rounded-sm bg-[rgba(7,5,15,0.6)] border border-[var(--ark-border)] text-[var(--text-primary)] text-sm placeholder:text-[var(--text-ghost)] focus:outline-none focus:border-[var(--ark-border-bright)] transition-all duration-200 resize-none"
+              style={{ fontFamily: 'var(--font-intelo)' }}
+            />
+            <p className="text-xs text-[var(--text-ghost)] font-body">
+              Essas caracter&iacute;sticas ser&atilde;o usadas para gerar seu avatar.
+              Voc&ecirc; pode alterar depois na ficha por 50 Gemas.
+            </p>
+          </div>
+
           {selectedClass && (
             <ClassAttributePreview classData={selectedClass} />
           )}
@@ -214,6 +238,7 @@ export default function CreateCharacterForm({ races, classes }: Props) {
           <input type="hidden" name="race_id" value={selectedRace?.id ?? ''} />
           <input type="hidden" name="class_id" value={selectedClass?.id ?? ''} />
           <input type="hidden" name="name" value={charName.trim()} />
+          <input type="hidden" name="physical_traits" value={physicalTraits} />
 
           {/* Resumo */}
           <div className="space-y-3">
@@ -243,6 +268,15 @@ export default function CreateCharacterForm({ races, classes }: Props) {
                 <span className="text-xs font-data text-[var(--text-label)] uppercase tracking-wider">Arma</span>
                 <span className="text-sm font-data text-[var(--text-secondary)]">
                   {selectedClass.weapon_type}
+                </span>
+              </div>
+            )}
+
+            {physicalTraits && (
+              <div className="flex items-start justify-between p-3 rounded-sm bg-[var(--ark-surface)] border border-[var(--ark-border)]">
+                <span className="text-xs font-data text-[var(--text-label)] uppercase tracking-wider flex-shrink-0">Apar&ecirc;ncia</span>
+                <span className="text-sm font-body text-[var(--text-secondary)] text-right max-w-[60%]">
+                  {physicalTraits}
                 </span>
               </div>
             )}

@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { buildInitialAttributes, buildInitialAttributesFromClass } from '@/lib/game/attributes'
 import { xpToNextLevel } from '@/lib/game/xp'
 import { createEvent } from '@/lib/game/events'
+import { generateAvatar } from '@/lib/narrative/avatar'
 import { type ProfessionType, type ProfessionBaseAttributes, type ProfessionBonuses } from '@/types'
 
 export async function createCharacter(formData: FormData) {
@@ -20,6 +21,7 @@ export async function createCharacter(formData: FormData) {
   const name = (formData.get('name') as string)?.trim()
   const raceId = formData.get('race_id') as string
   const classId = formData.get('class_id') as string
+  const physicalTraits = (formData.get('physical_traits') as string)?.trim() || null
 
   if (!name || name.length < 2 || name.length > 32) {
     return { error: 'Nome deve ter entre 2 e 32 caracteres.' }
@@ -75,6 +77,7 @@ export async function createCharacter(formData: FormData) {
       race_id: raceId,
       class_id: classId,
       profession: 'militar' as const, // legacy field — será removido em migration futura
+      physical_traits: physicalTraits,
       level: 1,
       xp: 0,
       xp_to_next_level: xpToNextLevel(1),
@@ -151,6 +154,18 @@ export async function createCharacter(formData: FormData) {
     isPublic: true,
     narrativeText: `${name} desperta em Arkandia como ${classData.name}, portando ${weaponType}.`,
   })
+
+  // Gera avatar em background — não await para não bloquear
+  const raceName = raceData.name as string
+  const classNameStr = classData.name as string
+  generateAvatar({
+    characterId: character.id,
+    raceName,
+    className: classNameStr,
+    physicalTraits,
+    triggerType: 'creation',
+    gemasSpent: 0,
+  }).catch((err) => console.error('[creation] avatar generation failed:', err))
 
   revalidatePath('/character')
   redirect('/character')

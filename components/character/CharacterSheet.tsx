@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { xpToNextLevel } from '@/lib/game/xp'
 import AttributeDistributor from './AttributeDistributor'
-import PortraitUpload from './PortraitUpload'
+import AvatarReworkModal from './AvatarReworkModal'
 import { ArkPortraitParticles } from '@/components/ui/ArkPortraitParticles'
 import {
   SwordIcon, MagicIcon, ShieldIcon, HeartIcon,
@@ -24,6 +24,8 @@ interface CharacterSheetProps {
   className: string | null
   building: BuildingSlotData[]
   reputations: CharacterReputation[]
+  physicalTraits: string | null
+  gemasBalance: number
 }
 
 const ATTR_ROWS: { key: keyof CharacterAttributes; label: string; abbr: string; color: string; Icon: typeof SwordIcon }[] = [
@@ -153,7 +155,10 @@ export default function CharacterSheet({
   className: charClassName,
   building,
   reputations,
+  physicalTraits,
+  gemasBalance,
 }: CharacterSheetProps) {
+  const [reworkOpen, setReworkOpen] = useState(false)
   const xpNeeded = xpToNextLevel(character.level)
   const moralColor = attrs.moral > 150 ? 'text-[var(--text-gold)]' : attrs.moral >= 50 ? 'text-status-injured' : 'text-[var(--ark-red-glow)]'
 
@@ -168,10 +173,20 @@ export default function CharacterSheet({
             className="absolute overflow-hidden"
             style={{ top: '25.1%', left: '14.3%', right: '14.3%', bottom: '9.8%', zIndex: 1 }}
           >
-            <PortraitUpload
-              characterInitial={character.name[0]}
-              currentUrl={character.avatar_url ?? null}
-            />
+            {character.avatar_url ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={character.avatar_url}
+                alt={character.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-[var(--ark-surface)]">
+                <p className="text-xs text-[var(--text-ghost)] italic font-body text-center px-2">
+                  Avatar sendo gerado...
+                </p>
+              </div>
+            )}
           </div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -189,6 +204,25 @@ export default function CharacterSheet({
           />
           <ArkPortraitParticles />
         </div>
+
+        {/* Rework button */}
+        {character.avatar_url && (
+          <button
+            type="button"
+            onClick={() => setReworkOpen(true)}
+            className="w-full max-w-[280px] mx-auto block text-[10px] font-data tracking-[0.15em] uppercase text-[var(--text-ghost)] hover:text-[var(--text-label)] transition-colors py-1"
+          >
+            Rework Visual — 50 Gemas
+          </button>
+        )}
+
+        <AvatarReworkModal
+          isOpen={reworkOpen}
+          onClose={() => setReworkOpen(false)}
+          characterId={character.id}
+          currentPhysicalTraits={physicalTraits}
+          currentGemas={gemasBalance}
+        />
 
         {/* Identity */}
         <div className="text-center">

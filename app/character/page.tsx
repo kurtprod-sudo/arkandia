@@ -143,6 +143,8 @@ export default async function CharacterSheetPage() {
           className={className}
           building={building}
           reputations={reputations as unknown as import('@/types').CharacterReputation[]}
+          physicalTraits={character.physical_traits ?? null}
+          gemasBalance={wallet.premium_currency}
         />
 
         {/* Milestone alerts */}

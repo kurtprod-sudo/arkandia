@@ -73,6 +73,7 @@ export type EventType =
   | 'streak_milestone'
   | 'combat_started'
   | 'combat_finished'
+  | 'avatar_generated'
 
 // ---------------------------------------------------------------------------
 // Tabelas do banco
@@ -134,6 +135,7 @@ export interface Character {
   is_resonance_unlocked?: boolean
   injured_until?: string | null
   recovery_until?: string | null
+  physical_traits?: string | null
   race?: Race
   created_at: string
 }
@@ -566,6 +568,20 @@ export interface CombatEffect {
   applied_at_turn: number
   expires_at_turn: number
   source_skill_id: string | null
+  created_at: string
+}
+
+// ---------------------------------------------------------------------------
+// Avatar Visual (IA)
+// ---------------------------------------------------------------------------
+
+export interface AvatarHistory {
+  id: string
+  character_id: string
+  image_url: string
+  prompt_used: string
+  trigger_type: 'creation' | 'rework' | 'maestria_lendaria' | 'item_especial'
+  gemas_spent: number
   created_at: string
 }
 
