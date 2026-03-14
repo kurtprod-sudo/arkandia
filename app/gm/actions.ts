@@ -160,3 +160,61 @@ export async function gmArchiveJournal(editionId: string) {
   revalidatePath('/gm')
   return { success: true }
 }
+
+export async function gmCreateScenario(data: {
+  name: string
+  description: string
+  location: string
+  maxPlayers: number
+}) {
+  await assertGM()
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('social_scenarios')
+    .insert({
+      name: data.name,
+      description: data.description,
+      location: data.location,
+      max_players: data.maxPlayers,
+      is_active: true,
+    })
+  revalidatePath('/scenarios')
+  revalidatePath('/gm')
+  return { success: !error, error: error?.message }
+}
+
+export async function gmCloseScenario(scenarioId: string) {
+  await assertGM()
+  const supabase = await createClient()
+
+  // Remove todos os presentes primeiro
+  await supabase
+    .from('scenario_presence')
+    .delete()
+    .eq('scenario_id', scenarioId)
+
+  // Desativa o cenário
+  await supabase
+    .from('social_scenarios')
+    .update({ is_active: false })
+    .eq('id', scenarioId)
+
+  revalidatePath('/scenarios')
+  revalidatePath('/gm')
+  return { success: true }
+}
+
+export async function gmRemoveFromScenario(
+  scenarioId: string,
+  characterId: string
+) {
+  await assertGM()
+  const supabase = await createClient()
+  await supabase
+    .from('scenario_presence')
+    .delete()
+    .eq('scenario_id', scenarioId)
+    .eq('character_id', characterId)
+  revalidatePath('/gm')
+  return { success: true }
+}

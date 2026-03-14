@@ -74,6 +74,8 @@ export type EventType =
   | 'combat_started'
   | 'combat_finished'
   | 'avatar_generated'
+  | 'scenario_joined'
+  | 'scenario_left'
 
 // ---------------------------------------------------------------------------
 // Tabelas do banco
@@ -582,6 +584,38 @@ export interface AvatarHistory {
   prompt_used: string
   trigger_type: 'creation' | 'rework' | 'maestria_lendaria' | 'item_especial'
   gemas_spent: number
+  created_at: string
+}
+
+// ---------------------------------------------------------------------------
+// Cenários Sociais
+// ---------------------------------------------------------------------------
+
+export interface SocialScenario {
+  id: string
+  name: string
+  description: string
+  location: string
+  max_players: number
+  is_active: boolean
+  is_private: boolean
+  created_by: string | null
+  created_at: string
+}
+
+export interface ScenarioPresence {
+  id: string
+  scenario_id: string
+  character_id: string
+  joined_at: string
+}
+
+export interface ScenarioMessage {
+  id: string
+  scenario_id: string
+  character_id: string
+  content: string
+  is_ooc: boolean
   created_at: string
 }
 
