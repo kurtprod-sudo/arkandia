@@ -527,7 +527,7 @@ export async function gmClearRecovery(characterId: string) {
 }
 
 export async function gmGrantToAll(
-  type: 'gemas' | 'tickets',
+  type: 'gemas' | 'tickets' | 'libras',
   amount: number
 ) {
   await assertGM()
@@ -543,39 +543,29 @@ export async function gmGrantToAll(
 
   const characterIds = characters.map((c) => c.id)
 
-  if (type === 'gemas') {
-    await Promise.all(
-      characterIds.map(async (id) => {
-        const { data: wallet } = await supabase
+  const columnMap = {
+    gemas: 'premium_currency',
+    tickets: 'summon_tickets',
+    libras: 'libras',
+  } as const
+
+  const column = columnMap[type]
+
+  await Promise.all(
+    characterIds.map(async (id) => {
+      const { data: wallet } = await supabase
+        .from('character_wallet')
+        .select(column)
+        .eq('character_id', id)
+        .single()
+      if (wallet) {
+        await supabase
           .from('character_wallet')
-          .select('premium_currency')
+          .update({ [column]: ((wallet as Record<string, number>)[column] ?? 0) + amount })
           .eq('character_id', id)
-          .single()
-        if (wallet) {
-          await supabase
-            .from('character_wallet')
-            .update({ premium_currency: (wallet.premium_currency ?? 0) + amount })
-            .eq('character_id', id)
-        }
-      })
-    )
-  } else {
-    await Promise.all(
-      characterIds.map(async (id) => {
-        const { data: wallet } = await supabase
-          .from('character_wallet')
-          .select('summon_tickets')
-          .eq('character_id', id)
-          .single()
-        if (wallet) {
-          await supabase
-            .from('character_wallet')
-            .update({ summon_tickets: (wallet.summon_tickets ?? 0) + amount })
-            .eq('character_id', id)
-        }
-      })
-    )
-  }
+      }
+    })
+  )
 
   revalidatePath('/gm')
   return { success: true, affected: characterIds.length }

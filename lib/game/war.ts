@@ -24,10 +24,10 @@ const BASE_POWER: Record<TroopType, number> = {
 
 // Custo de recrutamento em Libras do cofre
 const RECRUITMENT_COST: Record<TroopType, number> = {
-  infantaria: 50,
-  cavalaria:  120,
-  arquearia:  80,
-  cerco:      200,
+  infantaria: 30,
+  cavalaria:  80,
+  arquearia:  50,
+  cerco:      130,
 }
 
 /**

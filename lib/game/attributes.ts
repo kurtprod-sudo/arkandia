@@ -4,9 +4,9 @@ import { type CharacterAttributes, type ProfessionBaseAttributes } from '@/types
 // Cálculos de atributos derivados
 // ---------------------------------------------------------------------------
 
-/** HP máximo = Vitalidade * 10 */
+/** HP máximo = 80 + Vitalidade × 5 */
 export function calcHpMax(vitalidade: number): number {
-  return vitalidade * 10
+  return 80 + vitalidade * 5
 }
 
 /** Éter máximo base = definido pela classe + pontos distribuídos */
@@ -157,6 +157,20 @@ export function calcSkillDamage(input: DamageCalculationInput): DamageResult {
 // ---------------------------------------------------------------------------
 // Esquiva passiva baseada em Velocidade
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Ressonância — fórmulas de Éter e custo
+// ---------------------------------------------------------------------------
+
+/** Éter adicional por nível de Ressonância: 30n + 5n² */
+export function calcResonanceEter(resonanceLevel: number): number {
+  return 30 * resonanceLevel + 5 * resonanceLevel ** 2
+}
+
+/** Custo em Essências para upar Ressonância: 50n + 10n² */
+export function calcResonanceCost(targetLevel: number): number {
+  return 50 * targetLevel + 10 * targetLevel ** 2
+}
 
 /** Chance de esquiva (%) baseada em Velocidade. Cap: 40% */
 export function calcDodgeChance(velocidade: number): number {

@@ -5,9 +5,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createEvent } from './events'
-
-const RESONANCE_UPGRADE_COST = 50 // Essências por nível (valor provisório — mover para seed SQL)
-const RESONANCE_ETER_BONUS_PER_LEVEL = 10 // Éter máximo ganho por nível de Ressonância
+import { calcResonanceEter, calcResonanceCost } from './attributes'
 
 /**
  * Ativa a Ressonância de um personagem (GM ou evento narrativo).
@@ -72,17 +70,18 @@ export async function upgradeResonanceLevel(
     .eq('character_id', characterId)
     .single()
 
-  if (!wallet || wallet.essencia < RESONANCE_UPGRADE_COST) {
-    return { success: false, error: 'Essência insuficiente.' }
-  }
-
   const currentLevel = character.resonance_level ?? 1
   const newLevel = currentLevel + 1
+  const cost = calcResonanceCost(newLevel)
+
+  if (!wallet || wallet.essencia < cost) {
+    return { success: false, error: 'Essência insuficiente.' }
+  }
 
   // Debita Essência
   await supabase
     .from('character_wallet')
-    .update({ essencia: wallet.essencia - RESONANCE_UPGRADE_COST })
+    .update({ essencia: wallet.essencia - cost })
     .eq('character_id', characterId)
 
   // Atualiza level de Ressonância
@@ -99,7 +98,8 @@ export async function upgradeResonanceLevel(
     .single()
 
   if (attrs) {
-    const newEterMax = attrs.eter_max + RESONANCE_ETER_BONUS_PER_LEVEL
+    const eterBonus = calcResonanceEter(newLevel) - calcResonanceEter(currentLevel)
+    const newEterMax = attrs.eter_max + eterBonus
     await supabase
       .from('character_attributes')
       .update({ eter_max: newEterMax })
@@ -109,7 +109,7 @@ export async function upgradeResonanceLevel(
   await createEvent(supabase, {
     type: 'resonance_upgraded',
     actorId: characterId,
-    metadata: { new_level: newLevel, essencia_cost: RESONANCE_UPGRADE_COST },
+    metadata: { new_level: newLevel, essencia_cost: cost },
     isPublic: false,
     narrativeText: `Ressonância aprofundada. Nível ${newLevel} atingido.`,
   })

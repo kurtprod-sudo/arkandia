@@ -470,7 +470,7 @@ export async function processTurn(
   }
 
   if (action.type === 'ataque_basico' || action.type === 'timeout') {
-    // Ataque básico: Base 5 + Ataque × 0.8, sem custo de Éter
+    // Ataque básico: Base 8 + Ataque × 0.6, sem custo de Éter
     const dodgeChance = calcDodgeChance(opponentAttrs.velocidade)
     const dodgeRoll = Math.random() * 100
     if (dodgeRoll <= dodgeChance) {
@@ -478,8 +478,8 @@ export async function processTurn(
       damageDealt = 0
     } else {
       const result = calcSkillDamage({
-        baseDamage: 5,
-        ataqueFactor: 0.8,
+        baseDamage: 8,
+        ataqueFactor: 0.6,
         attackerAtaque: actorAttrs.ataque,
         attackerMagia: actorAttrs.magia,
         targetDefesa: opponentAttrs.defesa,

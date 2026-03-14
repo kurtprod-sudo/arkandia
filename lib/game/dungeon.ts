@@ -369,7 +369,7 @@ export async function resolveDungeonPhase(
 
   // Dificuldade da fase: escala por fase e multiplicador
   const phaseDifficulty = Math.floor(
-    100 * multiplier * (session.current_phase / totalPhases)
+    50 * multiplier * (0.5 + session.current_phase / totalPhases)
   )
 
   // Roll de sucesso da fase
