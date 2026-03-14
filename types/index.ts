@@ -89,6 +89,8 @@ export type EventType =
   | 'letter_sent'
   | 'payment_created'
   | 'payment_approved'
+  | 'dungeon_created'
+  | 'dungeon_finished'
 
 // ---------------------------------------------------------------------------
 // Tabelas do banco
@@ -979,6 +981,66 @@ export interface GmPaymentView {
   status: string
   amount_brl: number
   gemas_amount: number
+  created_at: string
+}
+
+// ---------------------------------------------------------------------------
+// Dungeons em Grupo
+// ---------------------------------------------------------------------------
+
+export type DungeonDifficulty = 'normal' | 'dificil' | 'lendario'
+export type DungeonStatus = 'recruiting' | 'active' | 'finished' | 'failed' | 'cancelled'
+export type DungeonResult = 'success' | 'partial' | 'failure'
+export type ParticipantStatus = 'invited' | 'ready' | 'active' | 'fallen' | 'survived'
+
+export interface DungeonType {
+  id: string
+  name: string
+  description: string
+  difficulty: DungeonDifficulty
+  min_players: number
+  max_players: number
+  min_level: number
+  duration_minutes: number
+  phases: number
+  base_xp_reward: number
+  base_libras_reward: number
+  loot_table: unknown[]
+  is_active: boolean
+  created_at: string
+}
+
+export interface DungeonSession {
+  id: string
+  dungeon_type_id: string
+  leader_id: string
+  status: DungeonStatus
+  difficulty: DungeonDifficulty
+  current_phase: number
+  started_at: string | null
+  finished_at: string | null
+  result: DungeonResult | null
+  phase_log: unknown[]
+  created_at: string
+  updated_at: string
+}
+
+export interface DungeonParticipant {
+  id: string
+  session_id: string
+  character_id: string
+  status: ParticipantStatus
+  hp_final: number | null
+  joined_at: string
+}
+
+export interface DungeonReward {
+  id: string
+  session_id: string
+  character_id: string
+  xp_granted: number
+  libras_granted: number
+  items_granted: unknown[]
   created_at: string
 }
 

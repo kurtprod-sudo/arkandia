@@ -595,6 +595,36 @@ export async function gmToggleRecruitment(
   return { success: true }
 }
 
+export async function gmResolveDungeonPhase(sessionId: string) {
+  await assertGM()
+  const { resolveDungeonPhase } = await import('@/lib/game/dungeon')
+  const result = await resolveDungeonPhase(sessionId)
+  revalidatePath('/gm')
+  return result
+}
+
+export async function gmCancelDungeon(sessionId: string) {
+  await assertGM()
+  const supabase = await createClient()
+  await supabase
+    .from('dungeon_sessions')
+    .update({
+      status: 'cancelled',
+      finished_at: new Date().toISOString(),
+    })
+    .eq('id', sessionId)
+  // Restaura vitais de todos os participantes
+  const { data: participants } = await supabase
+    .from('dungeon_participants')
+    .select('character_id')
+    .eq('session_id', sessionId)
+  for (const p of participants ?? []) {
+    await supabase.rpc('restore_combat_vitals', { p_character_id: p.character_id })
+  }
+  revalidatePath('/gm')
+  return { success: true }
+}
+
 export async function gmGrantGemas(characterId: string, amount: number) {
   const supabase = await assertGM()
 
