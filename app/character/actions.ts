@@ -95,7 +95,7 @@ export async function createCharacter(formData: FormData) {
 
   // Aplica atributos da classe (o trigger já criou o registro zerado)
   const classScaling = (classData.scaling as Record<string, number>) ?? {}
-  const attrs = buildInitialAttributesFromClass(character.id, classScaling)
+  const attrs = buildInitialAttributesFromClass(character.id, classScaling, classData.name)
 
   const { error: attrError } = await supabase
     .from('character_attributes')

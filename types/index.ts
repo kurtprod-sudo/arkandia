@@ -91,6 +91,8 @@ export type EventType =
   | 'payment_approved'
   | 'dungeon_created'
   | 'dungeon_finished'
+  | 'hunting_completed'
+  | 'hunting_died'
 
 // ---------------------------------------------------------------------------
 // Tabelas do banco
@@ -1041,6 +1043,81 @@ export interface DungeonReward {
   xp_granted: number
   libras_granted: number
   items_granted: unknown[]
+  created_at: string
+}
+
+// ---------------------------------------------------------------------------
+// Hunting (Missões PvE)
+// ---------------------------------------------------------------------------
+
+export type HuntingRiskLevel = 'baixo' | 'medio' | 'alto' | 'extremo'
+export type NpcTier = 'fraco' | 'medio' | 'forte' | 'elite'
+export type HuntingSessionStatus = 'active' | 'finished' | 'died'
+
+export interface HuntingZone {
+  id: string
+  name: string
+  description: string
+  location: string
+  min_level: number
+  max_level: number | null
+  risk_level: HuntingRiskLevel
+  cooldown_minutes: number
+  is_active: boolean
+  created_at: string
+}
+
+export interface NpcType {
+  id: string
+  zone_id: string
+  name: string
+  tier: NpcTier
+  level: number
+  base_hp: number
+  base_ataque: number
+  base_magia: number
+  base_defesa: number
+  base_velocidade: number
+  base_eter: number
+  skills: unknown[]
+  loot_table: unknown[]
+  behavior: 'balanced' | 'aggressive' | 'defensive' | 'support'
+  xp_reward: number
+  narrative_text: string | null
+  created_at: string
+}
+
+export interface HuntingSession {
+  id: string
+  character_id: string
+  zone_id: string
+  mode: 'manual' | 'auto'
+  status: HuntingSessionStatus
+  kills: number
+  max_kills: number
+  loot_accumulated: unknown[]
+  xp_accumulated: number
+  libras_accumulated: number
+  essencia_accumulated: number
+  started_at: string
+  finished_at: string | null
+  current_npc_id: string | null
+  current_npc_hp: number | null
+  created_at: string
+  updated_at: string
+  hunting_zones?: HuntingZone
+}
+
+export interface HuntingCombatTurn {
+  id: string
+  session_id: string
+  npc_kill_number: number
+  turn_number: number
+  actor: 'player' | 'npc'
+  action_type: string
+  damage_dealt: number
+  effect_applied: string | null
+  narrative_text: string | null
   created_at: string
 }
 

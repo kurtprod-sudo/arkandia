@@ -27,42 +27,54 @@ const ATTRIBUTE_DEFAULTS: Required<Omit<CharacterAttributes, 'character_id' | 'u
   capitania: 0,
 }
 
+// Tabela de atributos iniciais por classe (nível 1, sem bônus racial)
+// Referência: GDD_Balanceamento §2
+const CLASS_BASE_ATTRIBUTES: Record<string, Partial<Record<string, number>>> = {
+  'Lanceiro':   { ataque: 20, magia: 10, defesa: 10, vitalidade: 10, velocidade: 20, precisao: 15, tenacidade: 10, capitania: 10, eter_max: 50 },
+  'Espadachim': { ataque: 20, magia: 10, defesa: 10, vitalidade: 10, velocidade: 10, precisao: 20, tenacidade: 15, capitania: 10, eter_max: 50 },
+  'Lutador':    { ataque: 20, magia: 10, defesa: 10, vitalidade: 20, velocidade: 10, precisao: 10, tenacidade: 15, capitania: 10, eter_max: 40 },
+  'Bardo':      { ataque: 10, magia: 20, defesa: 10, vitalidade: 10, velocidade: 10, precisao: 15, tenacidade: 10, capitania: 10, eter_max: 80 },
+  'Atirador':   { ataque: 20, magia: 10, defesa: 10, vitalidade: 10, velocidade: 15, precisao: 20, tenacidade: 10, capitania: 10, eter_max: 50 },
+  'Arqueiro':   { ataque: 20, magia: 10, defesa: 10, vitalidade: 10, velocidade: 15, precisao: 20, tenacidade: 10, capitania: 10, eter_max: 50 },
+  'Assassino':  { ataque: 20, magia: 10, defesa: 10, vitalidade: 10, velocidade: 20, precisao: 15, tenacidade: 10, capitania: 10, eter_max: 45 },
+  'Druida':     { ataque: 20, magia: 15, defesa: 10, vitalidade: 20, velocidade: 10, precisao: 10, tenacidade: 10, capitania: 10, eter_max: 55 },
+  'Destruidor': { ataque: 20, magia: 10, defesa: 15, vitalidade: 20, velocidade: 10, precisao: 10, tenacidade: 10, capitania: 10, eter_max: 45 },
+  'Escudeiro':  { ataque: 10, magia: 10, defesa: 20, vitalidade: 20, velocidade: 10, precisao: 10, tenacidade: 10, capitania: 10, eter_max: 45 },
+  'Mago':       { ataque: 10, magia: 20, defesa: 10, vitalidade: 10, velocidade: 10, precisao: 15, tenacidade: 10, capitania: 10, eter_max: 90 },
+}
+
 /**
  * Constrói os atributos iniciais de um personagem a partir da Classe escolhida.
  * Referência: GDD_Personagem §3 e §4
  */
 export function buildInitialAttributesFromClass(
   characterId: string,
-  classScaling: Record<string, number>
+  classScaling: Record<string, number>,
+  className?: string
 ): Omit<CharacterAttributes, 'updated_at'> {
-  const ataque = classScaling.ataque ?? ATTRIBUTE_DEFAULTS.ataque
-  const magia = classScaling.magia ?? ATTRIBUTE_DEFAULTS.magia
-  const eterMax = classScaling.eter_max ?? ATTRIBUTE_DEFAULTS.eter_max
-  const defesa = classScaling.defesa ?? ATTRIBUTE_DEFAULTS.defesa
-  const vitalidade = classScaling.vitalidade ?? ATTRIBUTE_DEFAULTS.vitalidade
-  const velocidade = classScaling.velocidade ?? ATTRIBUTE_DEFAULTS.velocidade
-  const precisao = classScaling.precisao ?? ATTRIBUTE_DEFAULTS.precisao
-  const tenacidade = classScaling.tenacidade ?? ATTRIBUTE_DEFAULTS.tenacidade
-  const capitania = classScaling.capitania ?? ATTRIBUTE_DEFAULTS.capitania
+  // Tenta usar a tabela base por nome de classe
+  const base = className ? (CLASS_BASE_ATTRIBUTES[className] ?? {}) : {}
+
+  const ataque     = base.ataque     ?? classScaling.ataque     ?? ATTRIBUTE_DEFAULTS.ataque
+  const magia      = base.magia      ?? classScaling.magia      ?? ATTRIBUTE_DEFAULTS.magia
+  const eterMax    = base.eter_max   ?? classScaling.eter_max   ?? ATTRIBUTE_DEFAULTS.eter_max
+  const defesa     = base.defesa     ?? classScaling.defesa     ?? ATTRIBUTE_DEFAULTS.defesa
+  const vitalidade = base.vitalidade ?? classScaling.vitalidade ?? ATTRIBUTE_DEFAULTS.vitalidade
+  const velocidade = base.velocidade ?? classScaling.velocidade ?? ATTRIBUTE_DEFAULTS.velocidade
+  const precisao   = base.precisao   ?? classScaling.precisao   ?? ATTRIBUTE_DEFAULTS.precisao
+  const tenacidade = base.tenacidade ?? classScaling.tenacidade ?? ATTRIBUTE_DEFAULTS.tenacidade
+  const capitania  = base.capitania  ?? classScaling.capitania  ?? ATTRIBUTE_DEFAULTS.capitania
 
   const hpMax = calcHpMax(vitalidade)
 
   return {
     character_id: characterId,
-    ataque,
-    magia,
-    eter_max: eterMax,
-    eter_atual: eterMax,
-    defesa,
-    vitalidade,
-    hp_max: hpMax,
-    hp_atual: hpMax,
-    velocidade,
-    precisao,
-    tenacidade,
-    capitania,
-    moral: 100,
-    attribute_points: 0,
+    ataque, magia,
+    eter_max: eterMax, eter_atual: eterMax,
+    defesa, vitalidade,
+    hp_max: hpMax, hp_atual: hpMax,
+    velocidade, precisao, tenacidade, capitania,
+    moral: 100, attribute_points: 0,
   }
 }
 
