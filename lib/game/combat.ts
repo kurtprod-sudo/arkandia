@@ -60,6 +60,13 @@ export async function startCombat(
     .single()
   if (!challenger) return { success: false, error: 'Personagem não encontrado.' }
 
+  // Busca classe do challenger para Range State inicial
+  const { data: challengerClassData } = await supabase
+    .from('characters')
+    .select('classes(name)')
+    .eq('id', challengerId)
+    .single()
+
   // Verifica recuperação do challenger
   if (challenger.recovery_until) {
     const recoveryUntil = new Date(challenger.recovery_until)
@@ -154,6 +161,25 @@ export async function startCombat(
     narrativeText: `${challenger.name} desafiou ${defender.name} para um ${modality.replace('_', ' ')}.`,
   })
 
+  // Registra Range State inicial baseado na classe
+  const MELEE_CLASSES = ['Lutador', 'Espadachim', 'Destruidor', 'Escudeiro', 'Druida']
+  const RANGED_CLASSES = ['Arqueiro', 'Atirador']
+  const challengerClassName = ((challengerClassData?.classes as Record<string, unknown>)?.name as string) ?? ''
+  const initialRange: 'curto' | 'medio' | 'longo' =
+    MELEE_CLASSES.includes(challengerClassName) ? 'curto' :
+    RANGED_CLASSES.includes(challengerClassName) ? 'longo' :
+    'medio'
+
+  await supabase.from('combat_turns').insert({
+    session_id: session.id,
+    turn_number: 0,
+    actor_id: challengerId,
+    action_type: 'mudar_range',
+    range_state: initialRange,
+    damage_dealt: 0,
+    narrative_text: `Range inicial: ${initialRange}.`,
+  })
+
   return { success: true, sessionId: session.id }
 }
 
@@ -186,11 +212,13 @@ export async function acceptCombat(
   const turnExpiresAt = new Date()
   turnExpiresAt.setSeconds(turnExpiresAt.getSeconds() + TURN_TIMER_SECONDS)
 
+  // Garante active_player_id ao ativar
   await supabase
     .from('combat_sessions')
     .update({
       status: 'active',
       turn_expires_at: turnExpiresAt.toISOString(),
+      active_player_id: session.active_player_id ?? session.challenger_id,
     })
     .eq('id', sessionId)
 
@@ -252,6 +280,124 @@ export async function processTurn(
 
   if (!actorAttrs || !opponentAttrs) {
     return { success: false, error: 'Erro ao carregar atributos.' }
+  }
+
+  // Busca efeitos ativos de ambos
+  const { data: actorEffects } = await supabase
+    .from('combat_effects')
+    .select('*')
+    .eq('session_id', sessionId)
+    .eq('character_id', actor.id)
+    .gte('expires_at_turn', session.current_turn)
+
+  const { data: opponentEffects } = await supabase
+    .from('combat_effects')
+    .select('*')
+    .eq('session_id', sessionId)
+    .eq('character_id', opponentId)
+    .gte('expires_at_turn', session.current_turn)
+
+  // Verifica efeitos que impedem ação
+  for (const effect of actorEffects ?? []) {
+    switch (effect.effect_type) {
+      case 'stun':
+      case 'sono':
+        await recordTurn(supabase, sessionId, session.current_turn,
+          actor.id, 'ataque_basico', 0, effect.effect_type,
+          `${actor.name} está imobilizado por ${effect.effect_type}.`)
+        await advanceTurn(supabase, sessionId, session.current_turn, opponentId)
+        return {
+          success: true,
+          turnResult: {
+            damageDealt: 0,
+            effectApplied: effect.effect_type,
+            combatEnded: false,
+            winnerId: null,
+            narrativeText: `${actor.name} está imobilizado por ${effect.effect_type}.`,
+          },
+        }
+
+      case 'silencio':
+        if (action.type === 'skill') {
+          return { success: false, error: 'Silenciado — não pode usar Skills.' }
+        }
+        break
+
+      case 'raiz':
+        if (action.type === 'mudar_range') {
+          return { success: false, error: 'Enraizado — não pode mudar Range State.' }
+        }
+        break
+
+      case 'provocacao':
+        if (action.type !== 'ataque_basico' && action.type !== 'timeout') {
+          return { success: false, error: 'Provocado — obrigado a usar Ataque Básico.' }
+        }
+        break
+    }
+  }
+
+  // Processa DoTs do ator (dano que ele sofre antes de agir)
+  let dotDamageToActor = 0
+  for (const effect of actorEffects ?? []) {
+    switch (effect.effect_type) {
+      case 'veneno':
+        dotDamageToActor += (effect.stacks ?? 1) * 3
+        break
+      case 'queimadura':
+        dotDamageToActor += Math.floor(actorAttrs.hp_max * 0.04)
+        break
+      case 'sangramento':
+        dotDamageToActor += 5
+        break
+      case 'corrosao_eterica': {
+        const newEter = Math.max(0, actorAttrs.eter_atual - 5)
+        await supabase
+          .from('character_attributes')
+          .update({ eter_atual: newEter })
+          .eq('character_id', actor.id)
+        actorAttrs.eter_atual = newEter
+        break
+      }
+    }
+  }
+
+  if (dotDamageToActor > 0) {
+    const newActorHp = Math.max(0, actorAttrs.hp_atual - dotDamageToActor)
+    await supabase
+      .from('character_attributes')
+      .update({ hp_atual: newActorHp })
+      .eq('character_id', actor.id)
+    actorAttrs.hp_atual = newActorHp
+
+    if (newActorHp === 0) {
+      await recordTurn(supabase, sessionId, session.current_turn,
+        actor.id, 'ataque_basico', 0, null,
+        `${actor.name} sucumbiu aos efeitos de status.`)
+      return await finishCombat(
+        supabase, sessionId, opponentId, actor.id, 'hp_zero', session.modality
+      )
+    }
+  }
+
+  // Processa buffs do ator (HoT e recarga de Éter)
+  for (const effect of actorEffects ?? []) {
+    if (effect.effect_type === 'regeneracao') {
+      const newHp = Math.min(actorAttrs.hp_max, actorAttrs.hp_atual + 8)
+      await supabase
+        .from('character_attributes')
+        .update({ hp_atual: newHp })
+        .eq('character_id', actor.id)
+      actorAttrs.hp_atual = newHp
+    }
+    if (effect.effect_type === 'recarga') {
+      const newEter = Math.min(actorAttrs.eter_max, actorAttrs.eter_atual + 5)
+      await supabase
+        .from('character_attributes')
+        .update({ eter_atual: newEter })
+        .eq('character_id', actor.id)
+      actorAttrs.eter_atual = newEter
+    }
   }
 
   let damageDealt = 0
@@ -370,34 +516,47 @@ export async function processTurn(
       return { success: false, error: 'Éter insuficiente.' }
     }
 
-    // Calcula dano com fórmula da skill
-    const formula = (skill.formula ?? {}) as Record<string, number>
-    skillFormula = formula
+    // Calcula dano com fórmula da skill — verifica Range State
+    const currentRangeState = await getCurrentRangeState(supabase, sessionId)
+    const skillRange = skill.range_state as string
+
+    if (skillRange && skillRange !== 'all' && skillRange !== currentRangeState) {
+      skillFormula = { ...(skill.formula as Record<string, number> ?? {}), _range_penalty: 0.5 }
+    } else {
+      skillFormula = (skill.formula ?? {}) as Record<string, number>
+    }
+
     const dodgeChance = calcDodgeChance(opponentAttrs.velocidade)
     const dodgeRoll = Math.random() * 100
 
-    if (dodgeRoll <= dodgeChance && !formula.is_true_damage) {
+    if (dodgeRoll <= dodgeChance && !skillFormula.is_true_damage) {
       narrativeText = `${skill.name} desviada.`
       damageDealt = 0
     } else {
       const result = calcSkillDamage({
-        baseDamage: formula.base ?? 0,
-        ataqueFactor: formula.ataque_factor,
-        magiaFactor: formula.magia_factor,
-        defensaFactor: formula.defesa_factor,
+        baseDamage: skillFormula.base ?? 0,
+        ataqueFactor: skillFormula.ataque_factor,
+        magiaFactor: skillFormula.magia_factor,
+        defensaFactor: skillFormula.defesa_factor,
         attackerAtaque: actorAttrs.ataque,
         attackerMagia: actorAttrs.magia,
         targetDefesa: opponentAttrs.defesa,
-        defensePenetration: formula.defense_penetration_percent,
-        isTrueDamage: !!formula.is_true_damage,
+        defensePenetration: skillFormula.defense_penetration_percent,
+        isTrueDamage: !!skillFormula.is_true_damage,
       })
-      damageDealt = Math.floor(result.afterDefense)
-      narrativeText = `${skill.name}: ${damageDealt} de dano.`
+
+      if (skillFormula._range_penalty) {
+        damageDealt = Math.floor(result.afterDefense * skillFormula._range_penalty)
+        narrativeText = `${skill.name}: ${damageDealt} de dano (fora do range ideal).`
+      } else {
+        damageDealt = Math.floor(result.afterDefense)
+        narrativeText = `${skill.name}: ${damageDealt} de dano.`
+      }
 
       // Aplica efeito de status se houver
-      if (formula.effect_type) {
-        effectApplied = String(formula.effect_type)
-        narrativeText += ` Efeito: ${formula.effect_type}.`
+      if (skillFormula.effect_type) {
+        effectApplied = String(skillFormula.effect_type)
+        narrativeText += ` Efeito: ${skillFormula.effect_type}.`
       }
     }
 
@@ -406,6 +565,29 @@ export async function processTurn(
       .from('character_attributes')
       .update({ eter_atual: actorAttrs.eter_atual - (skill.eter_cost ?? 0) })
       .eq('character_id', actor.id)
+  }
+
+  // Verifica escudo etéreo do oponente
+  const shieldEffect = (opponentEffects ?? []).find(
+    (e) => e.effect_type === 'escudo_etereo'
+  )
+  if (shieldEffect && damageDealt > 0) {
+    const shieldValue = (shieldEffect.stacks ?? 1) * 20
+    if (shieldValue >= damageDealt) {
+      await supabase
+        .from('combat_effects')
+        .update({ stacks: Math.max(0, (shieldEffect.stacks ?? 1) - 1) })
+        .eq('id', shieldEffect.id)
+      damageDealt = 0
+      narrativeText += ' Escudo etéreo absorveu o dano.'
+    } else {
+      damageDealt -= shieldValue
+      await supabase
+        .from('combat_effects')
+        .delete()
+        .eq('id', shieldEffect.id)
+      narrativeText += ` Escudo etéreo absorveu ${shieldValue} de dano.`
+    }
   }
 
   // Aplica dano ao oponente
@@ -632,4 +814,26 @@ async function advanceTurn(
       turn_expires_at: turnExpiresAt.toISOString(),
     })
     .eq('id', sessionId)
+}
+
+/**
+ * Retorna o Range State atual da sessão
+ * baseado no último turno de mudança de range.
+ * Default: 'medio' se nunca mudou.
+ */
+async function getCurrentRangeState(
+  supabase: SupabaseClient<Database>,
+  sessionId: string
+): Promise<'curto' | 'medio' | 'longo'> {
+  const { data } = await supabase
+    .from('combat_turns')
+    .select('range_state')
+    .eq('session_id', sessionId)
+    .eq('action_type', 'mudar_range')
+    .not('range_state', 'is', null)
+    .order('turn_number', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  return (data?.range_state as 'curto' | 'medio' | 'longo') ?? 'medio'
 }

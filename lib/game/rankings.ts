@@ -37,6 +37,8 @@ async function updateMaioresGuerreiros() {
     .from('events')
     .select('actor_id, metadata')
     .eq('type', 'combat_finished')
+    .order('created_at', { ascending: false })
+    .limit(10000)
 
   const winsMap: Record<string, { wins: number; name: string }> = {}
 

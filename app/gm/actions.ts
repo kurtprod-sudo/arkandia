@@ -532,44 +532,53 @@ export async function gmGrantToAll(
 ) {
   await assertGM()
   const supabase = await createClient()
+
   const { data: characters } = await supabase
     .from('characters')
     .select('id')
     .eq('status', 'active')
-  if (!characters) return { success: false, error: 'Nenhum personagem encontrado.' }
+  if (!characters || characters.length === 0) {
+    return { success: false, error: 'Nenhum personagem ativo.' }
+  }
+
+  const characterIds = characters.map((c) => c.id)
 
   if (type === 'gemas') {
-    for (const char of characters) {
-      const { data: wallet } = await supabase
-        .from('character_wallet')
-        .select('premium_currency')
-        .eq('character_id', char.id)
-        .single()
-      if (wallet) {
-        await supabase
+    await Promise.all(
+      characterIds.map(async (id) => {
+        const { data: wallet } = await supabase
           .from('character_wallet')
-          .update({ premium_currency: (wallet.premium_currency ?? 0) + amount })
-          .eq('character_id', char.id)
-      }
-    }
+          .select('premium_currency')
+          .eq('character_id', id)
+          .single()
+        if (wallet) {
+          await supabase
+            .from('character_wallet')
+            .update({ premium_currency: (wallet.premium_currency ?? 0) + amount })
+            .eq('character_id', id)
+        }
+      })
+    )
   } else {
-    for (const char of characters) {
-      const { data: wallet } = await supabase
-        .from('character_wallet')
-        .select('summon_tickets')
-        .eq('character_id', char.id)
-        .single()
-      if (wallet) {
-        await supabase
+    await Promise.all(
+      characterIds.map(async (id) => {
+        const { data: wallet } = await supabase
           .from('character_wallet')
-          .update({ summon_tickets: (wallet.summon_tickets ?? 0) + amount })
-          .eq('character_id', char.id)
-      }
-    }
+          .select('summon_tickets')
+          .eq('character_id', id)
+          .single()
+        if (wallet) {
+          await supabase
+            .from('character_wallet')
+            .update({ summon_tickets: (wallet.summon_tickets ?? 0) + amount })
+            .eq('character_id', id)
+        }
+      })
+    )
   }
 
   revalidatePath('/gm')
-  return { success: true, affected: characters.length }
+  return { success: true, affected: characterIds.length }
 }
 
 export async function gmForceAuction(auctionId: string) {

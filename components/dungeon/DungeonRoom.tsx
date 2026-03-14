@@ -116,19 +116,39 @@ export default function DungeonRoom({
           table: 'dungeon_participants',
           filter: `session_id=eq.${sessionId}`,
         },
-        (payload) => {
+        async (payload) => {
           if (payload.eventType === 'INSERT') {
             const row = payload.new as Record<string, unknown>
+            const charId = row.character_id as string
+
             setParticipants((prev) => {
-              if (prev.find((p) => p.characterId === row.character_id)) return prev
+              if (prev.find((p) => p.characterId === charId)) return prev
               return [...prev, {
-                characterId: row.character_id as string,
-                name: '?',
+                characterId: charId,
+                name: '...',
                 level: 0,
                 status: row.status as string,
                 title: null,
               }]
             })
+
+            // Busca nome real do personagem
+            const fetchClient = createClient()
+            const { data: char } = await fetchClient
+              .from('characters')
+              .select('name, level, title')
+              .eq('id', charId)
+              .single()
+
+            if (char) {
+              setParticipants((prev) =>
+                prev.map((p) =>
+                  p.characterId === charId
+                    ? { ...p, name: char.name, level: char.level, title: char.title ?? null }
+                    : p
+                )
+              )
+            }
           } else if (payload.eventType === 'UPDATE') {
             const row = payload.new as Record<string, unknown>
             setParticipants((prev) =>
@@ -151,32 +171,6 @@ export default function DungeonRoom({
       supabase.removeChannel(participantsChannel)
     }
   }, [sessionId, characterId])
-
-  // Phase timer
-  useEffect(() => {
-    if (session.status !== 'active') {
-      if (timerRef.current) clearInterval(timerRef.current)
-      return
-    }
-
-    setTimer(PHASE_TIMER_SECONDS)
-    timerRef.current = setInterval(() => {
-      setTimer((prev) => {
-        if (prev <= 1) {
-          // Timer expirado — auto-resolve
-          if (isLeader) {
-            handleResolvePhase()
-          }
-          return PHASE_TIMER_SECONDS
-        }
-        return prev - 1
-      })
-    }, 1000)
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current)
-    }
-  }, [session.status, session.currentPhase, isLeader, handleResolvePhase])
 
   const handleAcceptInvite = useCallback(async () => {
     setLoading(true)
@@ -283,6 +277,32 @@ export default function DungeonRoom({
     }
     setLoading(false)
   }, [sessionId])
+
+  // Phase timer
+  useEffect(() => {
+    if (session.status !== 'active') {
+      if (timerRef.current) clearInterval(timerRef.current)
+      return
+    }
+
+    setTimer(PHASE_TIMER_SECONDS)
+    timerRef.current = setInterval(() => {
+      setTimer((prev) => {
+        if (prev <= 1) {
+          // Timer expirado — auto-resolve
+          if (isLeader) {
+            handleResolvePhase()
+          }
+          return PHASE_TIMER_SECONDS
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [session.status, session.currentPhase, isLeader, handleResolvePhase])
 
   const formatTimer = (s: number) => {
     const m = Math.floor(s / 60)
