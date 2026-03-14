@@ -71,6 +71,8 @@ export type EventType =
   | 'daily_task_completed'
   | 'daily_ticket_granted'
   | 'streak_milestone'
+  | 'combat_started'
+  | 'combat_finished'
 
 // ---------------------------------------------------------------------------
 // Tabelas do banco
@@ -514,6 +516,57 @@ export interface JournalEdition {
   published_at: string | null
   created_at: string
   updated_at: string
+}
+
+// ---------------------------------------------------------------------------
+// Combate PvP
+// ---------------------------------------------------------------------------
+
+export type CombatModality =
+  'duelo_livre' | 'duelo_ranqueado' | 'emboscada' | 'torneio'
+
+export type CombatStatus =
+  'pending' | 'active' | 'finished' | 'cancelled'
+
+export interface CombatSession {
+  id: string
+  challenger_id: string
+  defender_id: string
+  modality: CombatModality
+  status: CombatStatus
+  current_turn: number
+  active_player_id: string | null
+  turn_expires_at: string | null
+  winner_id: string | null
+  finished_at: string | null
+  created_at: string
+}
+
+export interface CombatTurn {
+  id: string
+  session_id: string
+  turn_number: number
+  actor_id: string
+  action_type: string
+  skill_id: string | null
+  range_state: string | null
+  damage_dealt: number
+  effect_applied: string | null
+  narrative_text: string | null
+  created_at: string
+}
+
+export interface CombatEffect {
+  id: string
+  session_id: string
+  character_id: string
+  effect_type: string
+  stacks: number
+  duration_turns: number
+  applied_at_turn: number
+  expires_at_turn: number
+  source_skill_id: string | null
+  created_at: string
 }
 
 // Database type is in types/database.types.ts (follows Supabase generated format)
