@@ -81,6 +81,9 @@ export type EventType =
   | 'production_collected'
   | 'war_declared'
   | 'war_finished'
+  | 'item_sold'
+  | 'item_crafted'
+  | 'auction_finished'
 
 // ---------------------------------------------------------------------------
 // Tabelas do banco
@@ -710,6 +713,80 @@ export interface WarBattle {
   started_at: string | null
   finished_at: string | null
   created_at: string
+}
+
+// ---------------------------------------------------------------------------
+// Mercado e Economia
+// ---------------------------------------------------------------------------
+
+export type ItemType = 'material' | 'equipamento' | 'consumivel' | 'especial' | 'pergaminho'
+
+export type ItemRarity = 'comum' | 'incomum' | 'raro' | 'epico' | 'lendario'
+
+export interface Item {
+  id: string
+  name: string
+  description: string
+  item_type: ItemType
+  rarity: ItemRarity
+  is_tradeable: boolean
+  metadata: Record<string, unknown>
+  created_at: string
+}
+
+export interface InventoryEntry {
+  id: string
+  character_id: string
+  item_id: string
+  quantity: number
+  updated_at: string
+  items?: Item
+}
+
+export interface MarketListing {
+  id: string
+  seller_id: string
+  item_id: string
+  quantity: number
+  price_libras: number
+  status: 'active' | 'sold' | 'cancelled'
+  sold_at: string | null
+  created_at: string
+  items?: Item
+}
+
+export interface AuctionListing {
+  id: string
+  seller_id: string
+  item_id: string
+  quantity: number
+  starting_price: number
+  current_bid: number
+  current_bidder: string | null
+  ends_at: string
+  status: 'active' | 'finished' | 'cancelled'
+  created_at: string
+  items?: Item
+}
+
+export interface AuctionBid {
+  id: string
+  auction_id: string
+  bidder_id: string
+  amount: number
+  created_at: string
+}
+
+export interface CraftingRecipe {
+  id: string
+  name: string
+  result_item_id: string
+  result_quantity: number
+  ingredients: Array<{ item_id: string; quantity: number }>
+  required_level: number
+  is_active: boolean
+  created_at: string
+  items?: Item
 }
 
 // Database type is in types/database.types.ts (follows Supabase generated format)

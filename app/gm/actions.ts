@@ -296,3 +296,24 @@ export async function gmCancelWar(warId: string) {
   revalidatePath('/map')
   return { success: true }
 }
+
+export async function gmGrantItem(
+  characterId: string,
+  itemId: string,
+  quantity: number
+) {
+  await assertGM()
+  const { addToInventory } = await import('@/lib/game/market')
+  const result = await addToInventory(characterId, itemId, quantity)
+  revalidatePath('/gm')
+  return result
+}
+
+export async function gmFinalizeAuction(auctionId: string) {
+  await assertGM()
+  const { finalizeAuction } = await import('@/lib/game/market')
+  const result = await finalizeAuction(auctionId)
+  revalidatePath('/market')
+  revalidatePath('/gm')
+  return result
+}
