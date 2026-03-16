@@ -167,6 +167,45 @@ export function calcSkillDamage(input: DamageCalculationInput): DamageResult {
 }
 
 // ---------------------------------------------------------------------------
+// Bônus raciais
+// ---------------------------------------------------------------------------
+
+/**
+ * Aplica bônus raciais sobre atributos base.
+ * Referência: GDD_Balanceamento §3
+ */
+export function applyRacialBonuses(
+  attrs: Omit<CharacterAttributes, 'updated_at'>,
+  racePassives: Record<string, unknown>
+): Omit<CharacterAttributes, 'updated_at'> {
+  const result = { ...attrs }
+
+  if (typeof racePassives.ataque_bonus_base === 'number') {
+    result.ataque += racePassives.ataque_bonus_base
+  }
+  if (typeof racePassives.magia_bonus_base === 'number') {
+    result.magia += racePassives.magia_bonus_base
+  }
+  if (typeof racePassives.defesa_bonus_base === 'number') {
+    result.defesa += racePassives.defesa_bonus_base
+  }
+  if (typeof racePassives.vitalidade_bonus_base === 'number') {
+    result.vitalidade += racePassives.vitalidade_bonus_base
+    result.hp_max = calcHpMax(result.vitalidade)
+    result.hp_atual = result.hp_max
+  }
+  if (typeof racePassives.tenacidade_bonus_base === 'number') {
+    result.tenacidade += racePassives.tenacidade_bonus_base
+  }
+  if (typeof racePassives.eter_bonus_base === 'number') {
+    result.eter_max += racePassives.eter_bonus_base
+    result.eter_atual = result.eter_max
+  }
+
+  return result
+}
+
+// ---------------------------------------------------------------------------
 // Esquiva passiva baseada em Velocidade
 // ---------------------------------------------------------------------------
 

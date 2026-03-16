@@ -5,6 +5,9 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createEvent } from './events'
+import { createNotification } from './notifications'
+import { grantXp } from './levelup'
+import { modifyReputation, hasMinimumReputation } from './reputation'
 
 // Horas de recuperação por nível de risco em caso de falha
 const INJURY_HOURS: Record<string, number> = {
@@ -106,6 +109,21 @@ export async function startExpedition(
     .eq('is_active', true)
     .single()
   if (!expType) return { success: false, error: 'Tipo de expedição não encontrado.' }
+
+  // Valida reputação mínima para expedições de facção
+  if (expType.required_faction_slug) {
+    const minStage = expType.risk_level === 'perigoso' || expType.risk_level === 'extremo'
+      ? 'aliado' as const
+      : 'reconhecido' as const
+    const hasRep = await hasMinimumReputation(characterId, expType.required_faction_slug, minStage)
+    if (!hasRep) {
+      const labels = { reconhecido: 'Reconhecido', aliado: 'Aliado' }
+      return {
+        success: false,
+        error: `Reputação insuficiente. Necessário: ${labels[minStage]} com a facção.`,
+      }
+    }
+  }
 
   // Calcula ends_at
   const endsAt = new Date()
@@ -274,19 +292,9 @@ export async function resolveExpedition(
     if (essenciaLoss > 0) narrativeText += ` -${essenciaLoss} Essências.`
   }
 
-  // Aplica XP e Libras
+  // Aplica XP (com level up automático)
   if (xpGained > 0) {
-    const { data: charData } = await supabase
-      .from('characters')
-      .select('xp, level, xp_to_next_level')
-      .eq('id', expedition.character_id)
-      .single()
-    if (charData) {
-      await supabase
-        .from('characters')
-        .update({ xp: charData.xp + xpGained })
-        .eq('id', expedition.character_id)
-    }
+    await grantXp(expedition.character_id, xpGained, supabase)
   }
 
   if (librasGained > 0) {
@@ -332,6 +340,35 @@ export async function resolveExpedition(
     isPublic: expeditionSuccess,
     narrativeText,
   })
+
+  await createNotification({
+    characterId: expedition.character_id,
+    type: 'expedition_done',
+    title: expeditionSuccess ? 'Expedição concluída' : 'Expedição falhou',
+    body: narrativeText,
+    actionUrl: '/expeditions',
+  })
+
+  // Concede/remove reputação para expedições de facção
+  if (expType.required_faction_slug) {
+    if (expeditionSuccess) {
+      await modifyReputation(
+        expedition.character_id,
+        expType.required_faction_slug as string,
+        15,
+        `Expedição completada: ${expType.name as string}`,
+        'expedition'
+      )
+    } else {
+      await modifyReputation(
+        expedition.character_id,
+        expType.required_faction_slug as string,
+        -5,
+        `Expedição falhou: ${expType.name as string}`,
+        'expedition'
+      )
+    }
+  }
 
   return {
     success: true,

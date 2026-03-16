@@ -5,6 +5,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createEvent } from './events'
+import { createNotification } from './notifications'
 import type { ReputationStage } from '@/types'
 
 // Thresholds de pontos por estágio
@@ -85,9 +86,23 @@ export async function updateReputation(
     }
   }
 
-  // Registra evento se houve mudança de estágio
+  // Registra no log de auditoria
+  await supabase.from('reputation_events').insert({
+    character_id: characterId,
+    faction_id: faction.id,
+    delta,
+    reason: `reputation_update`,
+    source: 'quest',
+  }).catch(() => {}) // silently fail if table doesn't exist yet
+
+  // Registra evento e notifica se houve mudança de estágio
   const oldStage = getReputationStage(currentPoints)
   if (oldStage !== newStage) {
+    const STAGE_LABELS: Record<ReputationStage, string> = {
+      hostil: 'Hostil', neutro: 'Neutro', reconhecido: 'Reconhecido',
+      aliado: 'Aliado', venerado: 'Venerado',
+    }
+
     await createEvent(supabase, {
       type: 'reputation_changed',
       actorId: characterId,
@@ -102,6 +117,14 @@ export async function updateReputation(
       narrativeText: delta > 0
         ? `Reputação com ${faction.name} avançou para ${newStage}.`
         : `Reputação com ${faction.name} caiu para ${newStage}.`,
+    })
+
+    await createNotification({
+      characterId,
+      type: 'general',
+      title: `Reputação: ${faction.name}`,
+      body: `Seu estágio mudou para ${STAGE_LABELS[newStage]}.`,
+      actionUrl: '/character?tab=reputation',
     })
   }
 
@@ -173,6 +196,98 @@ export async function isFactionBlocked(
   }
 
   return false
+}
+
+/**
+ * Inicializa reputação neutra com todas as facções públicas
+ * para um personagem recém-criado.
+ */
+export async function initializeReputation(characterId: string): Promise<void> {
+  const supabase = await createClient()
+
+  const { data: factions } = await supabase
+    .from('factions')
+    .select('id')
+    .eq('is_hidden', false)
+
+  if (!factions || factions.length === 0) return
+
+  const rows = factions.map((f) => ({
+    character_id: characterId,
+    faction_id: f.id,
+    points: 0,
+    stage: 'neutro' as ReputationStage,
+  }))
+
+  await supabase
+    .from('character_reputation')
+    .upsert(rows, { onConflict: 'character_id,faction_id', ignoreDuplicates: true })
+}
+
+/**
+ * Verifica se um personagem tem reputação mínima com uma facção.
+ * Usado para validar acesso a expedições de facção.
+ */
+export async function hasMinimumReputation(
+  characterId: string,
+  factionSlug: string,
+  minimumStage: ReputationStage
+): Promise<boolean> {
+  const STAGE_ORDER: Record<ReputationStage, number> = {
+    hostil: 0, neutro: 1, reconhecido: 2, aliado: 3, venerado: 4,
+  }
+
+  const supabase = await createClient()
+
+  const { data: faction } = await supabase
+    .from('factions')
+    .select('id')
+    .eq('slug', factionSlug)
+    .single()
+  if (!faction) return false
+
+  const { data: rep } = await supabase
+    .from('character_reputation')
+    .select('stage')
+    .eq('character_id', characterId)
+    .eq('faction_id', faction.id)
+    .maybeSingle()
+
+  const currentStage = (rep?.stage as ReputationStage) ?? 'neutro'
+  return STAGE_ORDER[currentStage] >= STAGE_ORDER[minimumStage]
+}
+
+/**
+ * Modifica reputação com registro de fonte e motivo.
+ * Wrapper sobre updateReputation que registra em reputation_events.
+ */
+export async function modifyReputation(
+  characterId: string,
+  factionSlug: string,
+  delta: number,
+  reason: string,
+  source: 'expedition' | 'war' | 'narrative' | 'gm' | 'quest'
+): Promise<{ success: boolean; error?: string; newStage?: ReputationStage }> {
+  const supabase = await createClient()
+
+  // Busca facção para log
+  const { data: faction } = await supabase
+    .from('factions')
+    .select('id')
+    .eq('slug', factionSlug)
+    .single()
+
+  if (faction) {
+    await supabase.from('reputation_events').insert({
+      character_id: characterId,
+      faction_id: faction.id,
+      delta,
+      reason,
+      source,
+    }).catch(() => {})
+  }
+
+  return updateReputation(characterId, factionSlug, delta)
 }
 
 // Re-export STAGE_THRESHOLDS for potential future use

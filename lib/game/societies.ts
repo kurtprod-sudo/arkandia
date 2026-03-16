@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createEvent } from './events'
+import { createNotification } from './notifications'
 
 const SOCIETY_CREATION_COST = 500 // Libras
 const MIN_LEVEL_TO_FOUND = 10

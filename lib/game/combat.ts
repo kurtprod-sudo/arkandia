@@ -8,6 +8,7 @@ import { type Database } from '@/types/database.types'
 import { createClient } from '@/lib/supabase/server'
 import { createEvent } from './events'
 import { calcSkillDamage, calcDodgeChance } from './attributes'
+import { createNotification } from './notifications'
 
 // Timer de turno: 60 segundos (decisão canônica)
 export const TURN_TIMER_SECONDS = 60
@@ -159,6 +160,15 @@ export async function startCombat(
     metadata: { session_id: session.id, modality },
     isPublic: true,
     narrativeText: `${challenger.name} desafiou ${defender.name} para um ${modality.replace('_', ' ')}.`,
+  })
+
+  await createNotification({
+    characterId: defenderId,
+    type: 'duel_received',
+    title: 'Desafio recebido',
+    body: `${challenger.name} desafiou você para um ${modality.replace('_', ' ')}.`,
+    actionUrl: '/combat',
+    metadata: { session_id: session.id },
   })
 
   // Registra Range State inicial baseado na classe

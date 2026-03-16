@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createEvent } from './events'
+import { createNotification } from './notifications'
 
 export type TroopType = 'infantaria' | 'cavalaria' | 'arquearia' | 'cerco'
 export type WarSide = 'attacker' | 'defender'
@@ -184,6 +185,24 @@ export async function declareWar(
     isPublic: true,
     narrativeText,
   })
+
+  // Notifica membros da Sociedade defensora
+  if (defenderSocietyId) {
+    const { data: defenderMembers } = await supabase
+      .from('society_members')
+      .select('character_id')
+      .eq('society_id', defenderSocietyId)
+    for (const member of defenderMembers ?? []) {
+      await createNotification({
+        characterId: member.character_id,
+        type: 'war_declared',
+        title: 'Guerra declarada',
+        body: narrativeText,
+        actionUrl: '/society',
+        metadata: { war_id: war.id },
+      })
+    }
+  }
 
   return { success: true, warId: war.id }
 }

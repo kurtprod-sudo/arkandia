@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createEvent } from '@/lib/game/events'
+import { grantXp } from '@/lib/game/levelup'
 import { type GMGrantCurrencyPayload, type GMEditAttributePayload } from '@/types'
 
 async function assertGM() {
@@ -130,6 +131,14 @@ export async function gmUpdateReputation(
   const result = await updateReputation(characterId, factionSlug, delta)
   revalidatePath('/gm')
   return result
+}
+
+export async function gmInitializeReputation(characterId: string) {
+  await assertGM()
+  const { initializeReputation } = await import('@/lib/game/reputation')
+  await initializeReputation(characterId)
+  revalidatePath('/gm')
+  return { success: true }
 }
 
 export async function gmGenerateJournal() {
@@ -470,19 +479,9 @@ export async function gmDeleteDiaryEntry(entryId: string) {
 
 export async function gmGrantXP(characterId: string, amount: number) {
   await assertGM()
-  const supabase = await createClient()
-  const { data: character } = await supabase
-    .from('characters')
-    .select('xp, level')
-    .eq('id', characterId)
-    .single()
-  if (!character) return { success: false, error: 'Personagem não encontrado.' }
-  await supabase
-    .from('characters')
-    .update({ xp: character.xp + amount })
-    .eq('id', characterId)
+  const result = await grantXp(characterId, amount)
   revalidatePath('/gm')
-  return { success: true }
+  return { success: true, ...result }
 }
 
 export async function gmGrantLibras(characterId: string, amount: number) {
@@ -645,6 +644,69 @@ export async function gmGrantGemas(characterId: string, amount: number) {
     targetId: characterId,
     metadata: { currency: 'premium_currency', amount, source: 'gm_grant' },
     isPublic: false,
+  })
+
+  revalidatePath('/gm')
+  return { success: true }
+}
+
+export async function gmGrantEnhancedItem(
+  characterId: string,
+  itemId: string,
+  quantity: number,
+  enhancement: number
+) {
+  await assertGM()
+  const supabase = await createClient()
+
+  const { data: existing } = await supabase
+    .from('inventory')
+    .select('id, quantity')
+    .eq('character_id', characterId)
+    .eq('item_id', itemId)
+    .maybeSingle()
+
+  let inventoryId: string
+
+  if (existing) {
+    await supabase
+      .from('inventory')
+      .update({ quantity: existing.quantity + quantity })
+      .eq('id', existing.id)
+    inventoryId = existing.id
+  } else {
+    const { data: newEntry } = await supabase
+      .from('inventory')
+      .insert({ character_id: characterId, item_id: itemId, quantity })
+      .select('id')
+      .single()
+    if (!newEntry) return { success: false, error: 'Erro ao adicionar item.' }
+    inventoryId = newEntry.id
+  }
+
+  if (enhancement > 0) {
+    await supabase.from('item_enhancements').upsert({
+      character_id: characterId,
+      item_id: itemId,
+      inventory_id: inventoryId,
+      enhancement,
+    }, { onConflict: 'inventory_id' })
+  }
+
+  revalidatePath('/gm')
+  return { success: true }
+}
+
+export async function gmUnlockSecondaryWeapon(characterId: string) {
+  await assertGM()
+  const supabase = await createClient()
+
+  await createEvent(supabase, {
+    type: 'gm_override',
+    targetId: characterId,
+    metadata: { action: 'unlock_secondary_weapon' },
+    isPublic: false,
+    narrativeText: 'Arma secundária desbloqueada pelo GM.',
   })
 
   revalidatePath('/gm')

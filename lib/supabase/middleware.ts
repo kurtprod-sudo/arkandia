@@ -32,9 +32,12 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
+  // Injeta pathname no header para o layout server component
+  supabaseResponse.headers.set('x-next-pathname', pathname)
+
   // Rotas protegidas que requerem autenticação
-  const protectedPaths = ['/dashboard', '/character', '/gm']
-  const isProtected = protectedPaths.some((p) => pathname.startsWith(p))
+  const protectedPaths = ['/home', '/dashboard', '/character', '/gm', '/world', '/battle', '/lobby', '/crafting', '/society', '/sanctuary', '/market', '/rankings', '/shop', '/events', '/notifications', '/expeditions', '/combat', '/dungeon', '/hunting', '/letters', '/diary', '/scenarios', '/journal', '/map', '/territories', '/summon', '/titles']
+  const isProtected = protectedPaths.some((p) => pathname === p || pathname.startsWith(p + '/'))
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone()
@@ -52,15 +55,22 @@ export async function updateSession(request: NextRequest) {
 
     if (!profile || profile.role !== 'gm') {
       const url = request.nextUrl.clone()
-      url.pathname = '/dashboard'
+      url.pathname = '/home'
       return NextResponse.redirect(url)
     }
   }
 
-  // Se autenticado e tentar acessar /auth, redireciona para dashboard
+  // Se autenticado e tentar acessar /auth, redireciona para home
   if (user && pathname.startsWith('/auth')) {
     const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
+    url.pathname = '/home'
+    return NextResponse.redirect(url)
+  }
+
+  // Redireciona /dashboard para /home
+  if (pathname === '/dashboard' && user) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/home'
     return NextResponse.redirect(url)
   }
 

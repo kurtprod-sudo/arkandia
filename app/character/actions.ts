@@ -3,10 +3,11 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { buildInitialAttributes, buildInitialAttributesFromClass } from '@/lib/game/attributes'
+import { buildInitialAttributes, buildInitialAttributesFromClass, applyRacialBonuses } from '@/lib/game/attributes'
 import { xpToNextLevel } from '@/lib/game/xp'
 import { createEvent } from '@/lib/game/events'
 import { generateAvatar } from '@/lib/narrative/avatar'
+import { initializeReputation } from '@/lib/game/reputation'
 import { type ProfessionType, type ProfessionBaseAttributes, type ProfessionBonuses } from '@/types'
 
 export async function createCharacter(formData: FormData) {
@@ -95,7 +96,17 @@ export async function createCharacter(formData: FormData) {
 
   // Aplica atributos da classe (o trigger já criou o registro zerado)
   const classScaling = (classData.scaling as Record<string, number>) ?? {}
-  const attrs = buildInitialAttributesFromClass(character.id, classScaling, classData.name)
+  const baseAttrs = buildInitialAttributesFromClass(character.id, classScaling, classData.name)
+
+  // Busca passives da raça para aplicar bônus raciais
+  const { data: racePassivesData } = await supabase
+    .from('races')
+    .select('passives')
+    .eq('id', raceId)
+    .single()
+
+  const racePassives = (racePassivesData?.passives as Record<string, unknown>) ?? {}
+  const attrs = applyRacialBonuses(baseAttrs, racePassives)
 
   const { error: attrError } = await supabase
     .from('character_attributes')
@@ -154,6 +165,9 @@ export async function createCharacter(formData: FormData) {
     isPublic: true,
     narrativeText: `${name} desperta em Arkandia como ${classData.name}, portando ${weaponType}.`,
   })
+
+  // Inicializa reputação neutra com todas as facções públicas
+  await initializeReputation(character.id)
 
   // Gera avatar em background — não await para não bloquear
   const raceName = raceData.name as string

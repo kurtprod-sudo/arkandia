@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
+import { headers } from 'next/headers'
 import './globals.css'
+import AppShellWrapper from '@/components/layout/AppShellWrapper'
 
 const intelo = localFont({
   src: [
@@ -30,15 +32,20 @@ export const metadata: Metadata = {
   description: 'RPG Híbrido — o mundo te aguarda.',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const headersList = await headers()
+  const pathname = headersList.get('x-next-pathname') ?? headersList.get('x-invoke-path') ?? '/'
+
   return (
     <html lang="pt-BR" className={intelo.variable}>
       <body className="antialiased bg-[var(--ark-void)] text-[var(--text-primary)] font-body min-h-screen">
-        {children}
+        <AppShellWrapper pathname={pathname}>
+          {children}
+        </AppShellWrapper>
       </body>
     </html>
   )

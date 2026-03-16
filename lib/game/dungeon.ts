@@ -5,6 +5,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createEvent } from './events'
+import { createNotification } from './notifications'
+import { grantXp } from './levelup'
 
 export type DungeonDifficulty = 'normal' | 'dificil' | 'lendario'
 export type DungeonStatus = 'recruiting' | 'active' | 'finished' | 'failed' | 'cancelled'
@@ -204,6 +206,21 @@ export async function inviteToDungeon(
     session_id: sessionId,
     character_id: targetCharacterId,
     status: 'invited',
+  })
+
+  const { data: leaderChar } = await supabase
+    .from('characters')
+    .select('name')
+    .eq('id', leaderId)
+    .single()
+
+  await createNotification({
+    characterId: targetCharacterId,
+    type: 'dungeon_invite',
+    title: 'Convite para Dungeon',
+    body: `${leaderChar?.name ?? 'Alguém'} convidou você para uma dungeon.`,
+    actionUrl: '/dungeon',
+    metadata: { session_id: sessionId },
   })
 
   return { success: true }
@@ -525,18 +542,8 @@ async function finishDungeon(
   const survivors = (allParticipants ?? []).filter((p) => p.status === 'active')
 
   for (const participant of survivors) {
-    // XP
-    const { data: character } = await supabase
-      .from('characters')
-      .select('xp')
-      .eq('id', participant.character_id)
-      .single()
-    if (character) {
-      await supabase
-        .from('characters')
-        .update({ xp: character.xp + xpReward })
-        .eq('id', participant.character_id)
-    }
+    // XP (com level up automático)
+    await grantXp(participant.character_id, xpReward, supabase)
 
     // Libras
     const { data: wallet } = await supabase

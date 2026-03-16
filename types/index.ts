@@ -361,6 +361,23 @@ export interface CharacterReputation {
   factions?: Faction
 }
 
+export type ReputationSource =
+  | 'expedition'
+  | 'war'
+  | 'narrative'
+  | 'gm'
+  | 'quest'
+
+export interface ReputationEvent {
+  id: string
+  character_id: string
+  faction_id: string
+  delta: number
+  reason: string
+  source: ReputationSource
+  created_at: string
+}
+
 export interface ExpeditionType {
   id: string
   name: string
@@ -1119,6 +1136,75 @@ export interface HuntingCombatTurn {
   effect_applied: string | null
   narrative_text: string | null
   created_at: string
+}
+
+// ---------------------------------------------------------------------------
+// Notificações
+// ---------------------------------------------------------------------------
+
+export type NotificationType =
+  | 'expedition_done'
+  | 'duel_received'
+  | 'letter_received'
+  | 'dungeon_invite'
+  | 'society_invite'
+  | 'war_declared'
+  | 'level_up'
+  | 'hunting_done'
+  | 'resonance_unlocked'
+  | 'general'
+
+export interface Notification {
+  id: string
+  character_id: string
+  type: NotificationType
+  title: string
+  body: string
+  is_read: boolean
+  action_url: string | null
+  metadata: Record<string, unknown>
+  created_at: string
+}
+
+// ---------------------------------------------------------------------------
+// Equipamentos
+// ---------------------------------------------------------------------------
+
+export type EquipmentSlotKey =
+  | 'arma_principal'
+  | 'arma_secundaria'
+  | 'elmo'
+  | 'armadura'
+  | 'calca'
+  | 'bota'
+  | 'acessorio_1'
+  | 'acessorio_2'
+
+export interface EquipmentSlotDefinition {
+  id: string
+  slot_key: EquipmentSlotKey
+  label: string
+  slot_order: number
+  is_locked: boolean
+}
+
+export interface CharacterEquipment {
+  id: string
+  character_id: string
+  slot_key: EquipmentSlotKey
+  item_id: string
+  enhancement: number
+  equipped_at: string
+  items?: Item
+}
+
+export interface ItemEnhancement {
+  id: string
+  character_id: string
+  item_id: string
+  inventory_id: string
+  enhancement: number
+  updated_at: string
 }
 
 // Database type is in types/database.types.ts (follows Supabase generated format)

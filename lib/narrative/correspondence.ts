@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createEvent } from '@/lib/game/events'
+import { createNotification } from '@/lib/game/notifications'
 
 /**
  * Envia uma carta a outro personagem.
@@ -67,6 +68,15 @@ export async function sendLetter(
     },
     isPublic: false,
     narrativeText: `${sender.name} enviou uma carta a ${recipient.name}.`,
+  })
+
+  await createNotification({
+    characterId: recipientId,
+    type: 'letter_received',
+    title: 'Nova carta',
+    body: `${sender.name} enviou uma carta: "${subject}".`,
+    actionUrl: '/letters',
+    metadata: { letter_id: letter.id },
   })
 
   return { success: true, letterId: letter.id }

@@ -6,6 +6,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { calcSkillDamage, calcDodgeChance } from './attributes'
 import { createEvent } from './events'
+import { createNotification } from './notifications'
+import { grantXp } from './levelup'
 
 const AUTO_MAX_KILLS = 20        // Limite de kills no Modo Auto
 const ZONE_COOLDOWN_MINUTES = 30 // Minutos de espera entre zonas
@@ -575,6 +577,14 @@ export async function collectAndExit(
     narrativeText: `${session.kills as number} criaturas abatidas. +${xp} XP, +${libras} Libras.`,
   })
 
+  await createNotification({
+    characterId: character.id,
+    type: 'hunting_done',
+    title: 'Hunting concluído',
+    body: `${session.kills as number} criaturas abatidas. +${xp} XP, +${libras} Libras.`,
+    actionUrl: '/battle',
+  })
+
   return {
     success: true,
     sessionFinished: true,
@@ -881,18 +891,9 @@ async function grantSessionRewards(
   libras: number,
   essencia: number
 ) {
+  // XP (com level up automático)
   if (xp > 0) {
-    const { data: char } = await supabase
-      .from('characters')
-      .select('xp')
-      .eq('id', characterId)
-      .single()
-    if (char) {
-      await supabase
-        .from('characters')
-        .update({ xp: char.xp + xp })
-        .eq('id', characterId)
-    }
+    await grantXp(characterId, xp, supabase)
   }
 
   if (libras > 0 || essencia > 0) {
