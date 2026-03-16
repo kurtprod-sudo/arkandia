@@ -18,6 +18,8 @@ export type AchievementEventType =
   | 'summon_performed' | 'summon_lendario' | 'society_joined' | 'war_won'
   | 'resonance_unlocked' | 'world_event_participated' | 'libras_milestone'
   | 'lore_found' | 'first_login'
+  | 'campaign_chapter_complete' | 'campaign_complete' | 'campaign_stage_complete'
+  | 'hunting_session_complete'
 
 export interface AchievementCheckMeta {
   newLevel?: number
@@ -248,6 +250,17 @@ export async function checkAchievements(
     if (eventType === 'daily_tasks_streak') await tryIncrement(characterId, 'daily_tasks_30', sb)
     if (eventType === 'world_event_participated') await tryUnlock(characterId, 'first_world_event', sb)
     if (eventType === 'lore_found') await tryUnlock(characterId, 'secret_lore', sb)
+
+    if (eventType === 'campaign_chapter_complete') {
+      await tryUnlock(characterId, 'first_campaign_chapter', sb)
+    }
+    if (eventType === 'campaign_complete') {
+      await tryUnlock(characterId, 'campaign_inicial_complete', sb)
+    }
+    if (eventType === 'campaign_stage_complete') {
+      await tryUnlock(characterId, 'first_campaign_stage', sb)
+    }
+    // hunting_session_complete — already covered by hunting_kill
   } catch {
     // Never throw — achievements are non-critical
   }

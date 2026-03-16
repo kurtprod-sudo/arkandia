@@ -12,6 +12,7 @@ export type WeeklyMissionType =
   | 'hunting_kills' | 'send_letters' | 'complete_daily_tasks'
   | 'bazaar_trades' | 'win_war_battle' | 'recruit_troops'
   | 'complete_troop_expedition'
+  | 'complete_campaign_chapters' | 'complete_campaign_stages'
 
 export type WeeklyMissionDifficulty = 'facil' | 'medio' | 'dificil'
 

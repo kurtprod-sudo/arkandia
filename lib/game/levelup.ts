@@ -82,6 +82,9 @@ export async function grantXp(
 
     const { checkAchievements } = await import('./achievements')
     await checkAchievements(characterId, 'level_up', { newLevel: result.newLevel }, supabase).catch(() => {})
+
+    const { updateMirror } = await import('./coliseu')
+    await updateMirror(characterId).catch(() => {})
   }
 
   // Concede Essências por nível (40/nível) — Referência: GDD_Balanceamento §10

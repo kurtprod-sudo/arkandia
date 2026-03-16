@@ -576,6 +576,11 @@ export async function collectAndExit(
     actionUrl: '/battle',
   })
 
+  const { checkAchievements } = await import('./achievements')
+  await checkAchievements(character.id, 'hunting_session_complete', { kills: session.kills as number }).catch(() => {})
+  const { updateSocietyMissionProgress } = await import('./society_missions')
+  await updateSocietyMissionProgress(character.id, 'collective_hunting_kills').catch(() => {})
+
   return {
     success: true,
     sessionFinished: true,

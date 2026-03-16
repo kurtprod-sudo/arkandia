@@ -540,9 +540,9 @@ export async function completeStage(
 
   // Hook chain
   const { checkAchievements } = await import('./achievements')
-  await checkAchievements(characterId, 'expedition_complete', { chapterNumber, stageNumber }).catch(() => {})
+  await checkAchievements(characterId, 'campaign_stage_complete', { chapter: chapterNumber, stage: stageNumber, difficulty }).catch(() => {})
   const { updateWeeklyProgress } = await import('./weekly')
-  await updateWeeklyProgress(characterId, 'complete_expeditions').catch(() => {})
+  await updateWeeklyProgress(characterId, 'complete_campaign_stages').catch(() => {})
   const { updateSocietyMissionProgress } = await import('./society_missions')
   await updateSocietyMissionProgress(characterId, 'collective_expeditions').catch(() => {})
 

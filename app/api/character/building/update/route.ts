@@ -15,5 +15,9 @@ export async function POST(req: NextRequest) {
   }
 
   const result = await updateBuilding(character_id, user.id, slots)
+  if (result.success) {
+    const { updateMirror } = await import('@/lib/game/coliseu')
+    await updateMirror(character_id).catch(() => {})
+  }
   return NextResponse.json(result, { status: result.success ? 200 : 400 })
 }

@@ -25,6 +25,7 @@ export default async function HomePage() {
   if (!character) redirect('/character/create')
 
   // Fetch all data in parallel
+  const today = new Date().toISOString().split('T')[0]
   const [
     { data: attrs },
     { data: wallet },
@@ -33,6 +34,7 @@ export default async function HomePage() {
     { count: unreadLetters },
     { data: recentNotifications },
     { count: unreadNotifCount },
+    { data: dailyChallenge },
   ] = await Promise.all([
     supabase
       .from('character_attributes')
@@ -74,6 +76,12 @@ export default async function HomePage() {
       .select('id', { count: 'exact', head: true })
       .eq('character_id', character.id)
       .eq('is_read', false),
+    supabase
+      .from('daily_challenges')
+      .select('id, npc_snapshot, combat_session_id, completed, won, current_streak')
+      .eq('character_id', character.id)
+      .eq('challenge_date', today)
+      .maybeSingle(),
   ])
 
   // Daily tasks + streak + weekly
@@ -272,7 +280,14 @@ export default async function HomePage() {
           />
 
           {/* Daily Challenge */}
-          <DailyChallengeWidget challenge={null} />
+          <DailyChallengeWidget challenge={dailyChallenge ? {
+            id: dailyChallenge.id,
+            npcSnapshot: dailyChallenge.npc_snapshot as unknown as { name: string; challengePhrase: string },
+            combatSessionId: dailyChallenge.combat_session_id,
+            completed: dailyChallenge.completed,
+            won: dailyChallenge.won,
+            currentStreak: dailyChallenge.current_streak,
+          } : null} />
 
           {/* Weekly Missions */}
           <WeeklyMissionsWidget weeklyMissions={weeklyMissions} />

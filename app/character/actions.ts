@@ -365,6 +365,9 @@ export async function distributeAttribute(payload: {
     metadata: { attribute: payload.attribute, amount: payload.amount },
   })
 
+  const { updateMirror } = await import('@/lib/game/coliseu')
+  await updateMirror(payload.character_id).catch(() => {})
+
   revalidatePath('/character')
   return { success: true }
 }

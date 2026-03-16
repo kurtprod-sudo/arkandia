@@ -383,9 +383,10 @@ export async function completeChapter(
 
     // Hook chain
     const { checkAchievements } = await import('./achievements')
-    await checkAchievements(characterId, 'expedition_complete', { campaignSlug }).catch(() => {})
+    await checkAchievements(characterId, 'campaign_chapter_complete', { chapter: chapterNum, campaignSlug }).catch(() => {})
+    await checkAchievements(characterId, 'campaign_complete', { campaignSlug }).catch(() => {})
     const { updateWeeklyProgress } = await import('./weekly')
-    await updateWeeklyProgress(characterId, 'complete_expeditions').catch(() => {})
+    await updateWeeklyProgress(characterId, 'complete_campaign_chapters').catch(() => {})
 
     return { success: true, campaignCompleted: true }
   }
@@ -407,9 +408,9 @@ export async function completeChapter(
 
   // Hook chain
   const { checkAchievements } = await import('./achievements')
-  await checkAchievements(characterId, 'expedition_complete', { chapter: chapterNum }).catch(() => {})
+  await checkAchievements(characterId, 'campaign_chapter_complete', { chapter: chapterNum, campaignSlug }).catch(() => {})
   const { updateWeeklyProgress } = await import('./weekly')
-  await updateWeeklyProgress(characterId, 'complete_expeditions').catch(() => {})
+  await updateWeeklyProgress(characterId, 'complete_campaign_chapters').catch(() => {})
   const { updateSocietyMissionProgress } = await import('./society_missions')
   await updateSocietyMissionProgress(characterId, 'collective_expeditions').catch(() => {})
 

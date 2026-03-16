@@ -358,6 +358,15 @@ export async function challengeMirror(
     actionUrl: '/coliseu',
   })
 
+  if (combat.result === 'win') {
+    const { checkAchievements } = await import('./achievements')
+    await checkAchievements(challengerId, 'pvp_win', { modality: 'coliseu' }).catch(() => {})
+    const { updateWeeklyProgress } = await import('./weekly')
+    await updateWeeklyProgress(challengerId, 'win_pvp_ranked').catch(() => {})
+    const { updateSocietyMissionProgress } = await import('./society_missions')
+    await updateSocietyMissionProgress(challengerId, 'collective_pvp_wins').catch(() => {})
+  }
+
   return { success: true, result: combat.result, pointsDelta: delta, newPoints: newCPoints, log: combat.log }
 }
 
