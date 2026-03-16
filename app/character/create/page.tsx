@@ -23,14 +23,16 @@ export default async function CreateCharacterPage() {
   if (existing) redirect('/character')
 
   // Busca raças e classes disponíveis
-  const { data: races } = await supabase
-    .from('races')
-    .select('*')
-    .order('name')
+  const racesResult = await supabase
+  .from('races')
+  .select('*')
+  .order('name')
 
-    // DEBUG TEMPORÁRIO — remover depois
-    console.log('[CREATE] races:', races?.length, 'error:', racesError?.message, 'code:', racesError?.code)
-    
+console.log('[CREATE] races count:', racesResult.data?.length, 'error:', racesResult.error?.message)
+
+const races = racesResult.data
+
+
 
   const { data: classes } = await supabase
     .from('classes')
