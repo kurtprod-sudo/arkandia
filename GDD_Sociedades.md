@@ -1,5 +1,5 @@
 # GDD_Sociedades — Arkandia: Sociedades e Guildas
-> Versão 1.0 — Março 2026
+> Versão 1.1 — Março 2026
 > Documento de referência canônico para o sistema de Sociedades de Arkandia.
 > Sociedades são as organizações de jogadores — equivalentes a guildas, mas com identidade narrativa e mecânica próprias.
 > Referência cruzada: GDD_Sistemas §2 (guerra), GDD_Mundo §8 (facções NPC), GDD_Personagem §12 (ficha).
@@ -149,5 +149,40 @@ Sociedades acumulam reputação com facções NPC da mesma forma que personagens
 
 ---
 
-*Fim do GDD_Sociedades v1.0*
+## 10. Missões Coletivas de Sociedade
+
+### Filosofia
+
+Missões coletivas existem para criar engajamento de grupo sem exigir horário combinado. Cada membro contribui no seu próprio ritmo durante a semana.
+
+### Estrutura
+
+- 3 missões ativas por Sociedade por semana
+- Renovam segunda-feira à meia-noite
+- Progresso visível para todos os membros em tempo real
+
+### Tipos de missão coletiva
+
+| Tipo | Exemplo |
+|---|---|
+| Expedições | "Membros completam 30 expedições" |
+| Combate | "Membros vencem 20 duelos ranqueados" |
+| Recrutamento | "Sociedade recruta 50 tropas" |
+| Hunting | "Membros acumulam 500 kills em zonas" |
+| Crafting | "Membros produzem 15 itens" |
+| Economia | "Cofre da Sociedade recebe 2.000 Libras" |
+
+### Recompensas
+
+- Cofre da Sociedade recebe bônus de Libras ao completar
+- Todos os membros que contribuíram recebem XP
+- Missões especiais podem conceder item exclusivo ao cofre
+
+### Missões definidas pelo GM
+
+O GM pode criar missões coletivas especiais para eventos específicos (ex: "durante o Torneio, Sociedades completam missões de guerra especiais").
+
+---
+
+*Fim do GDD_Sociedades v1.1*
 *Documentos relacionados: GDD_Mundo.md | GDD_Personagem.md | GDD_Sistemas.md*

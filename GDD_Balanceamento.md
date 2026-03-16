@@ -1,5 +1,5 @@
 # GDD_Balanceamento — Arkandia: Números e Fórmulas
-> Versão 1.0 — Março 2026
+> Versão 1.1 — Março 2026
 > Documento canônico de todos os valores numéricos do Arkandia.
 > Os GDDs de design (GDD_Personagem, GDD_Sistemas) descrevem **o quê** e **por quê**.
 > Este documento descreve **quanto** — os números exatos que tornam o design real.
@@ -234,6 +234,9 @@ XP_necessário(nível) = 500 × nível²
 | Expedição extrema (12h) | 600–900 |
 | Vitória PvP ranqueado | 200 |
 | Derrota PvP ranqueado | 60 |
+| Vitória PvP emboscada | 150 |
+| Derrota PvP emboscada | 40 |
+| Duelo livre | 0 |
 | Dungeon normal (sucesso) | 200 |
 | Dungeon difícil (sucesso) | 450 |
 | Dungeon lendária (sucesso) | 900 |
@@ -714,6 +717,14 @@ Senão: Ataque Básico
 
 Variantes de comportamento definidas no campo `behavior` dos seeds de NPC.
 
+### Limites de sessão (valores canônicos)
+
+- **Modo Auto:** máximo de 20 kills por sessão
+- **Modo Manual:** sem limite de kills
+- **Cooldown entre zonas:** 30 minutos ou consumir Poção de Cura
+- **HP e Éter:** não restauram entre NPCs na mesma sessão
+- **Morte:** perde TODO o loot acumulado da sessão
+
 ---
 
 ## 17. Sociedades — Limites e Progressão
@@ -742,8 +753,80 @@ Futuramente: via cofre da Sociedade (valor a definir em iteração futura).
 | Versão | Data | Mudanças |
 |---|---|---|
 | 1.0 | Março 2026 | Criação do documento. Calibração completa dos números base após revisão global do projeto (Fases 1–21). |
+| 1.1 | Março 2026 | Adicionado: reputação de facções, enhancement de equipamentos, fragmentos de maestria, XP PvP detalhado, limites de hunting. |
 
 ---
 
-*Fim do GDD_Balanceamento v1.0*
+## 19. Reputação de Facções — Thresholds
+
+| Estágio | Range de pontos |
+|---|---|
+| **Hostil** | Menor que 0 |
+| **Neutro** | 0 a 99 |
+| **Reconhecido** | 100 a 299 |
+| **Aliado** | 300 a 699 |
+| **Venerado** | 700+ |
+
+**Cap máximo:** -999 a 999.
+
+**Conflito automático:** ao ganhar reputação com uma facção, facções declaradas conflitantes perdem metade do delta (arredondado para baixo).
+
+---
+
+## 20. Enhancement de Equipamentos
+
+### Bônus por nível
+
+Fator de bônus: **+5% por nível** de enhancement acima de 0.
+
+```
+stat_final = floor(stat_base × (1 + nivel × 0.05))
+```
+
+Exemplo: item com ATQ+5, enhancement +4 → `floor(5 × 1.20) = 6`
+
+### Custo de melhoria por nível
+
+| Nível | Libras | Material adicional |
+|---|---|---|
+| +1 | 50 | — |
+| +2 | 100 | — |
+| +3 | 200 | — |
+| +4 | 400 | — |
+| +5 | 800 | Minério Etéreo (1x) |
+| +6 | 1.500 | Minério Etéreo (1x) |
+| +7 | 3.000 | Minério Etéreo (1x) |
+| +8 | 6.000 | Minério Etéreo (1x) |
+| +9 | 12.000 | Componente Arcano (1x) |
+| +10 | 25.000 | Componente Arcano (1x) |
+| +11 | 50.000 | Componente Arcano (1x) |
+| +12 | 100.000 | Componente Arcano (1x) |
+
+**Sem chance de falha** em nenhum nível. Custo sempre em Libras — nunca em Gemas.
+
+---
+
+## 21. Fragmentos de Maestria de Prestígio
+
+Fragmentos são drops raros de dungeons que podem ser trocados por Pergaminhos de Classe de Prestígio.
+
+### Drop por dificuldade de dungeon
+
+| Dificuldade | Chance | Quantidade |
+|---|---|---|
+| Normal | 0% | — |
+| Difícil | 10% | 1 fragmento |
+| Lendária | 25% | 2 fragmentos |
+
+Drop aplicado por sobrevivente ao final da dungeon.
+
+### Troca
+
+**10 fragmentos = 1 Pergaminho de Classe de Prestígio**
+
+Troca realizada manualmente pelo jogador via interface. Fragmentos são vinculados ao personagem — intransferíveis.
+
+---
+
+*Fim do GDD_Balanceamento v1.1*
 *Documentos relacionados: GDD_Personagem.md | GDD_Sistemas.md | GDD_Mundo.md | GDD_Narrativa.md*

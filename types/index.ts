@@ -532,19 +532,25 @@ export interface GMEditAttributePayload {
 // ---------------------------------------------------------------------------
 
 export type TaskType =
-  | 'jornal'
-  | 'treino'
-  | 'coletar'
-  | 'desafio'
-  | 'faccao'
-  | 'mercado_volatil'
-  | 'eco_arquetipo'
+  | 'complete_expedition'
+  | 'win_pvp'
+  | 'hunting_kills'
+  | 'complete_dungeon'
+  | 'send_letter'
+  | 'write_diary'
+  | 'join_scenario'
+  | 'craft_item'
+  | 'login_streak'
+  | 'use_summon'
 
 export interface DailyTask {
   type: TaskType
   label: string
   description: string
   completed: boolean
+  xp_reward: number
+  essencia_reward: number
+  libras_reward: number
 }
 
 export interface DailyTaskRecord {
@@ -1204,6 +1210,93 @@ export interface ItemEnhancement {
   item_id: string
   inventory_id: string
   enhancement: number
+  updated_at: string
+}
+
+// ---------------------------------------------------------------------------
+// Moderação
+// ---------------------------------------------------------------------------
+
+export interface ModerationLog {
+  id: string
+  moderator_id: string
+  target_user_id: string
+  action: 'ban' | 'unban' | 'silence' | 'unsilence' | 'warn'
+  reason: string
+  duration_hours: number | null
+  expires_at: string | null
+  created_at: string
+}
+
+// ---------------------------------------------------------------------------
+// Loja NPC, Eco do Arquétipo, Temporadas, Fragmentos
+// ---------------------------------------------------------------------------
+
+export interface NpcShopItem {
+  id: string
+  name: string
+  description: string
+  item_id: string | null
+  reward_type: 'item' | 'libras' | 'essencia' | 'ticket' | 'xp'
+  reward_amount: number | null
+  price_libras: number
+  price_gemas: number
+  rarity: string
+  is_active: boolean
+  created_at: string
+}
+
+export interface DailyNpcShop {
+  id: string
+  character_id: string
+  shop_date: string
+  item_id: string
+  purchased: boolean
+  purchased_at: string | null
+  created_at: string
+  npc_shop_items?: NpcShopItem
+}
+
+export interface ArchetypeEcho {
+  id: string
+  character_id: string
+  echo_date: string
+  archetype: string
+  content: string
+  essencia_reward: number
+  claimed: boolean
+  claimed_at: string | null
+  created_at: string
+}
+
+export interface Season {
+  id: string
+  name: string
+  theme: string
+  lore_text: string | null
+  starts_at: string
+  ends_at: string
+  is_active: boolean
+  created_at: string
+}
+
+export interface SeasonalLegendary {
+  id: string
+  season_id: string
+  maestria_id: string
+  price_gemas: number
+  is_exclusive: boolean
+  purchased_by: string | null
+  purchased_at: string | null
+  created_at: string
+  maestrias?: Maestria
+}
+
+export interface MaestriaFragment {
+  id: string
+  character_id: string
+  fragment_type: string
+  quantity: number
   updated_at: string
 }
 

@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createEvent } from './events'
 import { calcSkillDamage, calcDodgeChance } from './attributes'
 import { createNotification } from './notifications'
+import { grantXp } from './levelup'
 
 // Timer de turno: 60 segundos (decisão canônica)
 export const TURN_TIMER_SECONDS = 60
@@ -765,6 +766,21 @@ async function finishCombat(
     isPublic: true,
     narrativeText,
   })
+
+  // XP por combate PvP — Referência: GDD_Balanceamento §6
+  const XP_PVP: Record<string, { winner: number; loser: number }> = {
+    duelo_livre:     { winner: 0,   loser: 0  },
+    duelo_ranqueado: { winner: 200, loser: 60 },
+    emboscada:       { winner: 150, loser: 40 },
+    torneio:         { winner: 200, loser: 60 },
+  }
+  const xpRewards = XP_PVP[modality] ?? { winner: 0, loser: 0 }
+  if (xpRewards.winner > 0) {
+    await grantXp(winnerId, xpRewards.winner, supabase)
+  }
+  if (xpRewards.loser > 0) {
+    await grantXp(loserId, xpRewards.loser, supabase)
+  }
 
   return {
     success: true,

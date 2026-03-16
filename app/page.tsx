@@ -220,6 +220,15 @@ export default function HomePage() {
               />
               <FormField label="Email" name="email" type="email" autoComplete="email" required />
               <FormField label="Senha" name="password" type="password" autoComplete="new-password" required minLength={8} />
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '11px', fontFamily: 'var(--font-intelo), sans-serif', color: 'rgba(255,255,255,0.5)' }}>
+                <input type="checkbox" required style={{ marginTop: '2px', flexShrink: 0 }} />
+                <span>
+                  Li e aceito os{' '}
+                  <a href="/terms" target="_blank" style={{ color: '#d3a539', textDecoration: 'underline' }}>Termos de Uso</a>
+                  {' '}e a{' '}
+                  <a href="/privacy" target="_blank" style={{ color: '#d3a539', textDecoration: 'underline' }}>Política de Privacidade</a>.
+                </span>
+              </label>
               <SubmitButton label="Registrar" pendingLabel="Registrando..." />
               {registerState?.error && (
                 <p style={{

@@ -81,6 +81,35 @@ export async function grantXp(
     })
   }
 
+  // Aplica bônus de Éter por nível para raças com eter_bonus_per_level (ex: Elfo)
+  if (result.levelsGained > 0) {
+    const { data: raceData } = await supabase
+      .from('characters')
+      .select('races(passives)')
+      .eq('id', characterId)
+      .single()
+
+    const passives = ((raceData?.races as Record<string, unknown> | null)
+      ?.passives as Record<string, unknown> | null) ?? {}
+    const eterBonusPerLevel = (passives.eter_bonus_per_level as number) ?? 0
+
+    if (eterBonusPerLevel > 0) {
+      const totalEterBonus = eterBonusPerLevel * result.levelsGained
+      const { data: attrs } = await supabase
+        .from('character_attributes')
+        .select('eter_max')
+        .eq('character_id', characterId)
+        .single()
+
+      if (attrs) {
+        await supabase
+          .from('character_attributes')
+          .update({ eter_max: attrs.eter_max + totalEterBonus })
+          .eq('character_id', characterId)
+      }
+    }
+  }
+
   return {
     levelsGained: result.levelsGained,
     newLevel: result.newLevel,

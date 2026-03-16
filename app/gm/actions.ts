@@ -712,3 +712,86 @@ export async function gmUnlockSecondaryWeapon(characterId: string) {
   revalidatePath('/gm')
   return { success: true }
 }
+
+export async function gmBanUser(
+  targetUserId: string,
+  reason: string,
+  durationHours: number | null
+) {
+  await assertGM()
+  const { banUser } = await import('@/lib/game/moderation')
+  const result = await banUser(targetUserId, reason, durationHours)
+  revalidatePath('/gm')
+  return result
+}
+
+export async function gmUnbanUser(targetUserId: string, reason: string) {
+  await assertGM()
+  const { unbanUser } = await import('@/lib/game/moderation')
+  const result = await unbanUser(targetUserId, reason)
+  revalidatePath('/gm')
+  return result
+}
+
+export async function gmSilenceUser(
+  targetUserId: string,
+  reason: string,
+  durationHours: number
+) {
+  await assertGM()
+  const { silenceUser } = await import('@/lib/game/moderation')
+  const result = await silenceUser(targetUserId, reason, durationHours)
+  revalidatePath('/gm')
+  return result
+}
+
+export async function gmUnsilenceUser(targetUserId: string, reason: string) {
+  await assertGM()
+  const { unsilenceUser } = await import('@/lib/game/moderation')
+  const result = await unsilenceUser(targetUserId, reason)
+  revalidatePath('/gm')
+  return result
+}
+
+export async function gmCreateSeason(data: {
+  name: string; theme: string; loreText: string; startsAt: string; endsAt: string
+}) {
+  await assertGM()
+  const supabase = await createClient()
+  await supabase.from('seasons').update({ is_active: false }).eq('is_active', true)
+  await supabase.from('seasons').insert({
+    name: data.name, theme: data.theme, lore_text: data.loreText,
+    starts_at: data.startsAt, ends_at: data.endsAt, is_active: true,
+  })
+  revalidatePath('/gm')
+  return { success: true }
+}
+
+export async function gmAddSeasonalLegendary(data: {
+  seasonId: string; maestriaId: string; priceGemas: number
+}) {
+  await assertGM()
+  const supabase = await createClient()
+  await supabase.from('seasonal_legendaries').insert({
+    season_id: data.seasonId, maestria_id: data.maestriaId,
+    price_gemas: data.priceGemas, is_exclusive: true,
+  })
+  revalidatePath('/gm')
+  return { success: true }
+}
+
+export async function gmAddNpcShopItem(data: {
+  name: string; description: string; rewardType: string; rewardAmount: number
+  priceLibras: number; priceGemas: number; rarity: string
+}) {
+  await assertGM()
+  const supabase = await createClient()
+  await supabase.from('npc_shop_items').insert({
+    name: data.name, description: data.description,
+    reward_type: data.rewardType, reward_amount: data.rewardAmount,
+    price_libras: data.priceLibras, price_gemas: data.priceGemas,
+    rarity: data.rarity,
+  })
+  revalidatePath('/gm')
+  return { success: true }
+}

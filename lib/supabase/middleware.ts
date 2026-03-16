@@ -36,13 +36,32 @@ export async function updateSession(request: NextRequest) {
   supabaseResponse.headers.set('x-next-pathname', pathname)
 
   // Rotas protegidas que requerem autenticação
-  const protectedPaths = ['/home', '/dashboard', '/character', '/gm', '/world', '/battle', '/lobby', '/crafting', '/society', '/sanctuary', '/market', '/rankings', '/shop', '/events', '/notifications', '/expeditions', '/combat', '/dungeon', '/hunting', '/letters', '/diary', '/scenarios', '/journal', '/map', '/territories', '/summon', '/titles']
+  const protectedPaths = ['/home', '/dashboard', '/character', '/gm', '/world', '/battle', '/lobby', '/crafting', '/society', '/sanctuary', '/market', '/rankings', '/shop', '/events', '/notifications', '/expeditions', '/combat', '/dungeon', '/hunting', '/letters', '/diary', '/scenarios', '/journal', '/map', '/territories', '/summon', '/titles', '/onboarding', '/banned']
   const isProtected = protectedPaths.some((p) => pathname === p || pathname.startsWith(p + '/'))
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/'
     return NextResponse.redirect(url)
+  }
+
+  // Verificação de ban — redireciona para /banned se banido
+  if (user && isProtected && pathname !== '/banned') {
+    const { data: banProfile } = await supabase
+      .from('profiles')
+      .select('is_banned, banned_until')
+      .eq('id', user.id)
+      .single()
+
+    if (banProfile?.is_banned) {
+      const banExpired = banProfile.banned_until
+        && new Date(banProfile.banned_until) < new Date()
+      if (!banExpired) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/banned'
+        return NextResponse.redirect(url)
+      }
+    }
   }
 
   // Rota GM: verifica role na tabela profiles

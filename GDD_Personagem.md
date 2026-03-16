@@ -1,5 +1,5 @@
 # GDD_Personagem — Arkandia: Criação e Progressão
-> Versão 1.0 — Março 2026
+> Versão 1.1 — Março 2026
 > Documento de referência canônico para raças, classes, ressonâncias, skills, maestrias e progressão de personagem.
 > Este arquivo é a fonte primária de verdade sobre o sistema de personagem de Arkandia.
 > Todo conteúdo gerado por IA, toda migração SQL e toda lógica em /lib/game devem ser consistentes com este documento.
@@ -462,6 +462,14 @@ Cada Arquétipo tem passivas qualitativas únicas ao ser a Ressonância de um pe
 | Vínculo | Fusão, transferência, pactos | Buffs compartilhados, juras mágicas |
 | Ruína | Quebra, corrosão, anulação | Penetração, desfazer magias, colapso |
 
+### Eco do Arquétipo
+
+A partir do nível 5 (quando a Ressonância desperta), o personagem pode acessar o **Eco do Arquétipo** uma vez por dia.
+
+O Eco é um fragmento narrativo único gerado pela IA — escrito em segunda pessoa, como se o Arquétipo falasse diretamente ao personagem. Cada Eco é irrepetível.
+
+**Recompensa:** 5 Essências ao reivindicar o Eco do dia.
+
 ---
 
 ## 7. Sistema de Skills
@@ -681,39 +689,79 @@ O caráter esgotável das Lendárias cria exclusividade real — não cosmética
 
 ### Filosofia do crafting
 
-O crafting de Arkandia é direto: **se você tem os materiais, você crafta**. Não há aleatoridade no processo de crafting em si. A aleatoridade está na obtenção dos materiais — o que cria a tensão de progressão sem frustração arbitrária no ato de criar.
+O crafting de Arkandia é direto: **se você tem os materiais, você crafta**. Não há aleatoridade no processo de crafting em si. A aleatoridade está na obtenção dos materiais.
+
+### Slots de equipamento
+
+Todo personagem tem **8 slots de equipamento**:
+
+| Slot | Tipo de item | Status inicial |
+|---|---|---|
+| Arma Principal | Definida pela Classe | Ativo |
+| Arma Secundária | Definida pela Classe | Bloqueado |
+| Elmo | Cabeça | Ativo |
+| Armadura | Torso | Ativo |
+| Calça | Pernas | Ativo |
+| Bota | Pés | Ativo |
+| Acessório I | Anel / Amuleto | Ativo |
+| Acessório II | Anel / Amuleto | Ativo |
+
+Arma Secundária é bloqueada por design inicial — desbloqueio futuro via feature específica (ambidestria).
+
+### Stats de equipamento
+
+Equipamentos têm stats fixos por nome — sem variação aleatória. Um item equipado aplica seus stats diretamente nos atributos do personagem. Desequipar remove os bônus imediatamente.
+
+**Stats possíveis por slot:**
+- Armas: ATQ ou MAG (dependendo da Classe)
+- Armaduras: DEF, VIT
+- Elmo: DEF, VIT
+- Calça: DEF, VEL
+- Bota: VEL, PRE
+- Acessórios: qualquer atributo
+
+### Sistema de Melhoria (+1 ao +12)
+
+Equipamentos podem ser melhorados de +1 a +12. Sem chance de falha. Custo sempre em Libras.
+
+**Bônus por nível de enhancement:** cada nível aplica +5% sobre o stat base do item.
+```
+stat_final = floor(stat_base × (1 + nivel × 0.05))
+```
+
+**Materiais necessários:**
+- +1 a +4: apenas Libras
+- +5 a +8: Libras + Minério Etéreo (1x)
+- +9 a +12: Libras + Componente Arcano (1x)
+
+Ver GDD_Balanceamento §20 para tabela de custos completa.
+
+### Fragmentos de Maestria de Prestígio
+
+Drops raros obtidos em dungeons difícil e lendária. Acumulam no inventário do personagem. Troca: **10 fragmentos = 1 Pergaminho de Classe de Prestígio**. Ver GDD_Balanceamento §21 para chances de drop.
 
 ### Tipos de equipamento
 
-**Equipamentos comuns**
-Craftados com materiais básicos. Sem skills vinculadas. Melhoram atributos de forma direta.
+**Equipamentos comuns** — Craftados com materiais básicos. Stats diretos de atributo.
 
-**Equipamentos especiais (armas lendárias)**
-Craftados com materiais raros. Concedem 1 skill ativa exclusiva que só pode ser equipada na Building enquanto o equipamento estiver em uso. A skill não é aprendida — ela existe no equipamento. Exemplos: Balmung, Gáe Bolg, Tyrfing.
+**Equipamentos especiais (armas lendárias)** — Craftados com materiais raros. Concedem 1 skill ativa exclusiva que só pode ser equipada na Building enquanto o equipamento estiver em uso. A skill não é aprendida — existe no equipamento. Exemplos: Balmung, Gáe Bolg, Tyrfing.
 
-**Armaduras e acessórios**
-Modificam atributos e podem ter passivas fixas. Não concedem skills ativas.
+**Armaduras e acessórios** — Modificam atributos. Podem ter passivas fixas definidas no item.
 
-### Obtenção de materiais — as fontes
+### Fontes de materiais
 
 | Fonte | Método | Aleatoridade |
 |---|---|---|
-| Monstros em missões | Drop ao derrotar | Sim — chance de drop por item |
-| Expedições | Loot ao completar | Sim — tabela de loot por expedição |
-| Territórios controlados | Produção passiva | Parcial — tipo de material é fixo, quantidade varia |
-| Sistema de Summon | Gacha dedicado | Sim — catálogo rotativo |
+| Hunting (NPCs) | Drop ao derrotar | Sim |
+| Expedições | Loot ao completar | Sim |
+| Territórios controlados | Produção passiva | Parcial |
+| Summon | Gacha | Sim |
 
 ### Sistema de Summon
 
-O Summon é o principal sistema de gacha de Arkandia para obtenção de materiais e equipamentos. Funciona como catálogo rotativo com probabilidades definidas. Pode entregar:
-- Materiais de crafting (comuns a raros)
-- Equipamentos completos
-- Libras
-- Essências
-- Itens especiais de temporada
+O Summon é o principal sistema de gacha de Arkandia para obtenção de materiais e equipamentos. Funciona como catálogo rotativo com probabilidades definidas.
 
-**Moeda de Summon:** Gemas (premium) ou tickets especiais obtidos em eventos
-**Detalhes de probabilidades e catálogos:** escopo do GDD_Sistemas e do time de monetização
+**Moeda de Summon:** Gemas (premium) ou Tickets de Summon obtidos em daily tasks e eventos.
 
 ---
 
@@ -819,5 +867,5 @@ Todo personagem tem um log de eventos significativos — gerado automaticamente 
 
 ---
 
-*Fim do GDD_Personagem v1.0*
+*Fim do GDD_Personagem v1.1*
 *Documentos relacionados: GDD_Mundo.md | GDD_Sistemas.md | GDD_Narrativa.md*

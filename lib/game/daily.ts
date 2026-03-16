@@ -1,70 +1,113 @@
 import { createClient } from '@/lib/supabase/server'
 import { createEvent } from './events'
+import { grantXp } from './levelup'
 import type { Json } from '@/types/database.types'
 
 export type TaskType =
-  | 'jornal'
-  | 'treino'
-  | 'coletar'
-  | 'desafio'
-  | 'faccao'
-  | 'mercado_volatil'
-  | 'eco_arquetipo'
+  | 'complete_expedition'
+  | 'win_pvp'
+  | 'hunting_kills'
+  | 'complete_dungeon'
+  | 'send_letter'
+  | 'write_diary'
+  | 'join_scenario'
+  | 'craft_item'
+  | 'login_streak'
+  | 'use_summon'
 
 export interface DailyTask {
   type: TaskType
   label: string
   description: string
   completed: boolean
+  xp_reward: number
+  essencia_reward: number
+  libras_reward: number
 }
 
-const TASK_DEFINITIONS: Record<TaskType, { label: string; description: string }> = {
-  jornal: {
-    label: 'Ler o Jornal',
-    description: 'Leia a edição de hoje da Gazeta do Horizonte.',
+interface TaskDefinition {
+  label: string
+  description: string
+  xp_reward: number
+  essencia_reward: number
+  libras_reward: number
+  auto_complete?: boolean
+}
+
+const TASK_DEFINITIONS: Record<TaskType, TaskDefinition> = {
+  complete_expedition: {
+    label: 'Expedicionário',
+    description: 'Complete 1 expedição (qualquer nível de risco).',
+    xp_reward: 30, essencia_reward: 5, libras_reward: 0,
   },
-  treino: {
-    label: 'Treino Diário',
-    description: 'Complete uma expedição de qualquer tipo.',
+  win_pvp: {
+    label: 'Duelo',
+    description: 'Vença 1 duelo livre ou ranqueado.',
+    xp_reward: 40, essencia_reward: 8, libras_reward: 0,
   },
-  coletar: {
-    label: 'Coleta de Recursos',
-    description: 'Colete recursos de produção passiva.',
+  hunting_kills: {
+    label: 'Caçador',
+    description: 'Abata 5 criaturas em zonas de caça.',
+    xp_reward: 35, essencia_reward: 6, libras_reward: 20,
   },
-  desafio: {
-    label: 'Desafio do Dia',
-    description: 'Vença um duelo PvP ranqueado.',
+  complete_dungeon: {
+    label: 'Explorador',
+    description: 'Participe de 1 dungeon (qualquer dificuldade).',
+    xp_reward: 50, essencia_reward: 10, libras_reward: 0,
   },
-  faccao: {
-    label: 'Missão de Facção',
-    description: 'Complete uma missão de facção.',
+  send_letter: {
+    label: 'Correspondente',
+    description: 'Envie 1 carta para outro personagem.',
+    xp_reward: 20, essencia_reward: 3, libras_reward: 0,
   },
-  mercado_volatil: {
-    label: 'Mercado Volátil',
-    description: 'Faça uma transação no Bazaar ou Leilão.',
+  write_diary: {
+    label: 'Cronista',
+    description: 'Escreva 1 entrada no seu diário.',
+    xp_reward: 20, essencia_reward: 3, libras_reward: 0,
   },
-  eco_arquetipo: {
-    label: 'Eco do Arquétipo',
-    description: 'Consulte o Eco do seu Arquétipo de Ressonância.',
+  join_scenario: {
+    label: 'Presença Social',
+    description: 'Entre em 1 cenário social.',
+    xp_reward: 15, essencia_reward: 2, libras_reward: 10,
+  },
+  craft_item: {
+    label: 'Artesão',
+    description: 'Produza 1 item via crafting.',
+    xp_reward: 25, essencia_reward: 4, libras_reward: 0,
+  },
+  login_streak: {
+    label: 'Presença Constante',
+    description: 'Login diário — concluída automaticamente.',
+    xp_reward: 20, essencia_reward: 2, libras_reward: 0,
+    auto_complete: true,
+  },
+  use_summon: {
+    label: 'Invocador',
+    description: 'Realize 1 invocação no Santuário.',
+    xp_reward: 15, essencia_reward: 2, libras_reward: 0,
   },
 }
 
-const ALL_TASK_TYPES: TaskType[] = [
-  'jornal', 'treino', 'coletar', 'desafio',
-  'faccao', 'mercado_volatil', 'eco_arquetipo',
-]
+const ALL_TASK_TYPES: TaskType[] = Object.keys(TASK_DEFINITIONS) as TaskType[]
 
 /**
- * Sorteia 5 tasks do pool de 7.
+ * Sorteia 5 tasks do pool de 10.
+ * Tasks com auto_complete são marcadas como concluídas ao gerar.
  */
 function drawDailyTasks(): DailyTask[] {
   const shuffled = [...ALL_TASK_TYPES].sort(() => Math.random() - 0.5)
-  return shuffled.slice(0, 5).map((type) => ({
-    type,
-    label: TASK_DEFINITIONS[type].label,
-    description: TASK_DEFINITIONS[type].description,
-    completed: false,
-  }))
+  return shuffled.slice(0, 5).map((type) => {
+    const def = TASK_DEFINITIONS[type]
+    return {
+      type,
+      label: def.label,
+      description: def.description,
+      completed: !!def.auto_complete,
+      xp_reward: def.xp_reward,
+      essencia_reward: def.essencia_reward,
+      libras_reward: def.libras_reward,
+    }
+  })
 }
 
 /**
@@ -98,19 +141,21 @@ export async function getDailyTasks(characterId: string): Promise<{
 
   // Cria tasks do dia
   const tasks = drawDailyTasks()
+  const autoCompletedCount = tasks.filter((t) => t.completed).length
+
   await supabase
     .from('daily_tasks')
     .insert({
       character_id: characterId,
       task_date: today,
       tasks: tasks as unknown as Json,
-      completed_count: 0,
+      completed_count: autoCompletedCount,
       ticket_granted: false,
     })
 
   return {
     tasks,
-    completedCount: 0,
+    completedCount: autoCompletedCount,
     ticketGranted: false,
     taskDate: today,
   }
@@ -153,6 +198,28 @@ export async function completeTask(
   const allCompleted = newCount >= 5
   let ticketGranted = daily.ticket_granted
 
+  // Concede recompensas individuais da task
+  const def = TASK_DEFINITIONS[taskType]
+  if (def.xp_reward > 0) {
+    await grantXp(characterId, def.xp_reward)
+  }
+  if (def.essencia_reward > 0 || def.libras_reward > 0) {
+    const { data: wallet } = await supabase
+      .from('character_wallet')
+      .select('essencia, libras')
+      .eq('character_id', characterId)
+      .single()
+    if (wallet) {
+      await supabase
+        .from('character_wallet')
+        .update({
+          essencia: wallet.essencia + def.essencia_reward,
+          libras: wallet.libras + def.libras_reward,
+        })
+        .eq('character_id', characterId)
+    }
+  }
+
   // Concede ticket se 5/5 e ainda não concedeu
   if (allCompleted && !ticketGranted) {
     ticketGranted = true
@@ -183,7 +250,7 @@ export async function completeTask(
     actorId: characterId,
     metadata: { task_type: taskType, tasks_completed: newCount },
     isPublic: false,
-    narrativeText: `Tarefa diária completada: ${TASK_DEFINITIONS[taskType].label}.`,
+    narrativeText: `Tarefa diária completada: ${def.label}.`,
   })
 
   return { success: true, allCompleted, ticketGranted }

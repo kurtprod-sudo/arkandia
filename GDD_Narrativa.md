@@ -1,5 +1,5 @@
 # GDD_Narrativa — Arkandia: Voz, Narrativa e IA
-> Versão 1.0 — Março 2026
+> Versão 1.1 — Março 2026
 > Documento de referência canônico para a camada narrativa de Arkandia.
 > Define a voz do mundo, o sistema do Jornal, as ações narrativas, os contextos de geração de conteúdo por IA, as diretrizes de conduta da IA e o glossário canônico.
 > Todo prompt enviado à Anthropic API e toda instrução de sistema para a IA narrativa devem ser consistentes com este documento.
@@ -771,5 +771,48 @@ Combate, urgência, revelação: frases curtas. Descrição de lugar, momento de
 
 ---
 
-*Fim do GDD_Narrativa v1.0*
+## 10. Onboarding Narrativo
+
+### Filosofia
+
+O onboarding de Arkandia não é um tutorial de mecânicas. É uma sequência narrativa de boas-vindas que acontece uma única vez — após a criação do personagem, antes do primeiro acesso à Home. O jogador está 100% focado. Sem distrações da interface. O objetivo é criar identidade emocional com o mundo antes de qualquer ação.
+
+### Estrutura — Wizard de 4 Cards
+
+**Card 1 — "Ellia acorda"**
+Tema: o mundo. Tom: cosmológico, ancestral. Introduz Ellia como mundo-cicatriz emergido da colisão dos Arquétipos. Sem mecânicas.
+
+**Card 2 — "O Éter em você"**
+Tema: identidade do personagem. Tom: pessoal, revelador. Introduz o conceito de que todo ser em Ellia já é mágico. O personagem não escolheu ter poder — nasceu com ele.
+
+**Card 3 — "A Expedição Régia convoca"**
+Tema: ponto de entrada no mundo. Tom: narrativo, com tensão suave. Contextualiza por que o personagem está em Vallaeon e o que a Expedição Régia representa.
+
+**Card 4 — "Primeiros passos"**
+Tema: orientação inicial. Tom: encorajador, direto. Apresenta 3 sugestões de primeiros passos (expedição, ficha, daily tasks). Botão "Entrar em Ellia" encerra o onboarding.
+
+### Regras de tom para os cards
+
+- Escrito em segunda pessoa ("você")
+- Sem jargão de mecânica ("XP", "stats", "level")
+- Máximo 3 parágrafos por card
+- Termina com frase de impacto curta
+- Linguagem: densa, poética, com peso narrativo
+
+---
+
+## 11. Eco do Arquétipo — Diretrizes de Geração
+
+O Eco é gerado via IA uma vez por dia por personagem. O prompt de geração deve sempre incluir:
+
+- Contexto do Arquétipo (sua natureza filosófica e narrativa)
+- Nome do personagem
+- Nível de Ressonância atual
+- Instrução de tom: segunda pessoa, 3 a 5 parágrafos, atmosférico, sem mecânicas, finaliza com ensinamento ou questão aberta
+
+O Eco **não deve mencionar** mecânicas de jogo, atributos ou sistemas — apenas narrativa pura do Arquétipo se dirigindo ao personagem.
+
+---
+
+*Fim do GDD_Narrativa v1.1*
 *Documentos relacionados: GDD_Mundo.md | GDD_Personagem.md | GDD_Sistemas.md*

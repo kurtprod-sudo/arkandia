@@ -110,6 +110,16 @@ export async function sendMessage(
   if (!content.trim()) return { success: false, error: 'Mensagem vazia.' }
   if (content.length > 500) return { success: false, error: 'Mensagem muito longa.' }
 
+  // Verifica silêncio
+  const { data: { user: authUser } } = await supabase.auth.getUser()
+  if (authUser) {
+    const { checkSilenceStatus } = await import('./moderation')
+    const isSilenced = await checkSilenceStatus(authUser.id)
+    if (isSilenced) {
+      return { success: false, error: 'Você está silenciado e não pode enviar mensagens.' }
+    }
+  }
+
   // Verifica ownership
   const { data: character } = await supabase
     .from('characters')

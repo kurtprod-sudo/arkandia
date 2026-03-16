@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import AppShell from './AppShell'
 
-const NO_SHELL_ROUTES = ['/', '/auth', '/character/create']
+const NO_SHELL_ROUTES = ['/', '/auth', '/character/create', '/banned', '/onboarding', '/terms', '/privacy']
 
 interface AppShellWrapperProps {
   children: React.ReactNode

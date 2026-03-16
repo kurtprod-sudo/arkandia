@@ -1,5 +1,5 @@
 # GDD_Sistemas — Arkandia: Mecânicas e Sistemas
-> Versão 1.0 — Março 2026
+> Versão 1.1 — Março 2026
 > Documento de referência canônico para todos os sistemas mecânicos de Arkandia.
 > Combate, guerra, expedições, economia, progressão diária e engajamento.
 > Todo conteúdo técnico em /lib/game e toda migração SQL devem ser consistentes com este documento.
@@ -215,6 +215,7 @@ Sem morte permanente. Ao ser derrotado:
 | **Missão com Combate** | Sequência de combates em turnos contra NPCs controlados pelo sistema. Mesmo engine do PvP |
 | **Dungeon em Grupo** | 2 a 4 jogadores em instância com chefes. Combate em turnos, realtime coordenado |
 | **Evento de Mundo** | PvE coletivo ativado pelo GM — boss global, invasão de facção. Participação aberta |
+| **Campanha Inicial** | Sequência de capítulos narrativos com combates e choices. Cobre níveis 1–10. Ver §7 Campanha Inicial |
 
 ---
 
@@ -587,6 +588,40 @@ O Summon é o sistema de gacha para obtenção de materiais e equipamentos:
 
 ---
 
+### 4.7 Loja NPC Diária (Mercado Volátil)
+
+Uma vez por dia, um item especial fica disponível para cada personagem por 24 horas. O item é sorteado de um pool configurado pelo GM.
+
+**Tipos de recompensa disponíveis:**
+- Libras bônus
+- Essências
+- Ticket de Summon
+- XP bônus
+- Itens do inventário
+
+**Preço:** em Libras ou Gemas (definido pelo GM por item)
+**Renovação:** meia-noite horário do servidor
+**Propósito:** criar urgência de login diário (item não retorna)
+
+---
+
+### 4.8 Loja Sazonal de Maestrias Lendárias
+
+Catálogo de Maestrias Lendárias disponíveis por tempo limitado (temporada de 30 dias). Sem gacha — preço fixo em Gemas.
+
+**Funcionamento:**
+- O GM cria a temporada com nome, tema e datas
+- Cada Lendária tem preço fixo em Gemas
+- Ao ser comprada, é removida do catálogo (exclusividade real)
+- Jogador vê o que tem antes de comprar — sem aleatoriedade
+- Nova temporada = novo catálogo com novas Lendárias
+
+**Restrições possíveis por item:**
+- Nível mínimo do personagem
+- Nível mínimo de Ressonância
+
+---
+
 ## 5. Progressão Diária
 
 ### Filosofia
@@ -599,56 +634,29 @@ O jogador deve ter motivo para abrir o site todos os dias, mesmo que por poucos 
 
 O jogador recebe **5 daily tasks** por dia. Renovam à meia-noite (horário do servidor). Completar todas as 5 concede **recompensa bônus** além das recompensas individuais.
 
-As 5 tasks diárias são sorteadas de um pool de 7 tipos — o jogador não vê o pool completo, apenas as 5 do dia:
+As 5 tasks diárias são sorteadas de um pool de 10 tipos — o jogador não vê o pool completo, apenas as 5 do dia. Duas tasks especiais (Mercado Volátil e Eco do Arquétipo) funcionam em paralelo, sempre disponíveis quando aplicável.
 
----
+#### Pool de Daily Tasks (10 tasks, 5 sorteadas por dia)
 
-#### TASK 1 — Consultar o Jornal
-**Ação:** Ler a edição do dia do Jornal do Mundo (gerado pela IA narrativa)
-**Recompensa:** Pequena quantidade de Essência
-**Propósito:** Criar hábito de lore diário. O jogador absorve narrativa do mundo passivamente
+| Task | Ação requerida | Recompensa base |
+|---|---|---|
+| **Expedicionário** | Complete 1 expedição | XP + Essência |
+| **Duelo** | Vença 1 duelo livre ou ranqueado | XP + Essência |
+| **Caçador** | Abata 5 criaturas em zonas de caça | XP + Libras |
+| **Explorador** | Participe de 1 dungeon | XP + Essência |
+| **Correspondente** | Envie 1 carta | XP + Essência |
+| **Cronista** | Escreva 1 entrada no diário | XP + Essência |
+| **Presença Social** | Entre em 1 cenário social | XP + Libras |
+| **Artesão** | Produza 1 item via crafting | XP + Essência |
+| **Presença Constante** | Login diário (auto-completada) | XP + Essência |
+| **Invocador** | Realize 1 invocação no Santuário | XP + Essência |
 
----
+#### Tasks especiais (sempre disponíveis)
 
-#### TASK 2 — Treino Diário
-**Ação:** Ativar o treino do personagem — animação narrativa baseada na Classe
-**Recompensa:** XP bônus
-**Propósito:** Progressão diária garantida mesmo sem jogo ativo. Sabor diferente por Classe (Espadachim treina kata, Bardo ensaia uma melodia, Lutador faz meditação de combate)
-
----
-
-#### TASK 3 — Coletar Produção
-**Ação:** Coletar o que território ou expedição produziu
-**Recompensa:** Os próprios recursos produzidos + pequeno bônus de Libras pela coleta em dia
-**Propósito:** Obriga o login de forma satisfatória — sempre tem algo esperando
-
----
-
-#### TASK 4 — Desafio de Combate
-**Ação:** Enfrentar NPC gerado pelo sistema com dificuldade escalada ao level do personagem
-**Recompensa:** Libras + chance de drop de material
-**Propósito:** Mantém o jogador praticando o sistema de combate mesmo sem PvP ativo
-
----
-
-#### TASK 5 — Ação de Facção
-**Ação:** Completar pequena missão de reputação para facção à escolha (entre as que o personagem tem Reconhecido ou mais)
-**Recompensa:** Ponto de reputação + Libras
-**Propósito:** Progressão de reputação com facções sem depender de missões longas
-
----
-
-#### TASK 6 — Mercado Volátil
-**Ação:** Um item raro aparece na loja NPC do sistema por apenas 24h a preço especial
-**Recompensa:** Acesso ao item — o jogador decide se compra
-**Propósito:** Urgência de login. O item não retorna naquele dia se o jogador não abrir o site
-
----
-
-#### TASK 7 — Eco do Arquétipo
-**Ação:** Meditação narrativa baseada na Ressonância do personagem (disponível apenas após nível 5)
-**Recompensa:** Fragmento de lore exclusivo da Ressonância + Essência
-**Propósito:** Aprofundamento narrativo individual. Cada Eco é gerado pela IA — único por dia por personagem
+| Task | Ação | Recompensa |
+|---|---|---|
+| **Mercado Volátil** | Compre o item da Loja NPC do dia | Acesso ao item |
+| **Eco do Arquétipo** | Leia e reivindique o Eco do dia (pós nível 5) | Essência |
 
 ---
 
@@ -802,7 +810,176 @@ Cada personagem tem um diário público opcional:
 
 ---
 
-## 7. Diretrizes de Implementação
+### 6.8 Eco do Arquétipo
+
+Disponível após o personagem desbloquear a Ressonância (nível 5). Uma vez por dia, o Arquétipo do personagem gera um fragmento narrativo único via IA — escrito em segunda pessoa, como se o Arquétipo falasse diretamente ao personagem.
+
+**Recompensa:** 5 Essências ao reivindicar
+**Propósito:** Aprofundamento narrativo individual. Cada Eco é único por personagem por dia.
+
+---
+
+### 6.9 Conquistas (Achievements)
+
+Sistema de ~50 conquistas automáticas verificadas via triggers de evento. Cobrem progressão, combate, exploração, social e marcos raros.
+
+**Como funcionam:**
+- Verificadas automaticamente quando eventos relevantes ocorrem
+- Concedem títulos automaticamente quando a conquista tem título associado
+- Exibidas na ficha pública (conquistas raras em destaque)
+- Tela `/achievements` com progresso e conquistas desbloqueadas
+
+---
+
+### 6.10 Missões Semanais
+
+Complementam as daily tasks para jogadores que não jogam todos os dias mas entram algumas vezes por semana.
+
+**Estrutura:**
+- Pool de 10 missões, 5 sorteadas por semana
+- Renovam segunda-feira à meia-noite
+- Recompensas maiores que daily tasks (Essências, Libras, Tickets, XP)
+- Exemplos: "complete 3 dungeons esta semana", "vença 5 duelos ranqueados", "alcance 500 kills em hunting"
+
+---
+
+### 6.11 Modo Espelho (PvP Assíncrono)
+
+Permite competição PvP sem exigir presença simultânea dos jogadores.
+
+**Funcionamento:**
+- Personagem registra um Espelho — cópia dos atributos e Building atuais
+- Outros jogadores desafiam o Espelho enquanto o dono está offline
+- O sistema resolve o combate automaticamente usando IA simples
+- Dono recebe notificação do resultado ao voltar
+- Recompensas menores que PvP ao vivo
+- Ranking de Espelhos separado do ranking PvP ao vivo
+
+---
+
+### 6.12 Bestiário
+
+Registro de criaturas derrotadas no sistema de Hunting.
+
+**Funcionamento:**
+- Cada NPC derrotado pela primeira vez registra entrada no Bestiário
+- Entrada contém: nome, lore, ilustração (gerada por IA), drops conhecidos, quantidade total derrotada
+- Acessível via ficha do personagem
+- Título automático concedido ao completar o bestiário de uma zona
+
+---
+
+### 6.13 Battle Pass (Passe de Temporada)
+
+Sistema sazonal de recompensas com duração de 30 dias.
+
+**Estrutura:**
+- Trilha de 40 recompensas que avança com XP de temporada
+- XP de temporada ganho em qualquer atividade do jogo
+- Versão gratuita: recompensas básicas (Libras, Essências, XP)
+- Versão premium (Gemas): recompensas melhores + cosméticos exclusivos
+- Cada temporada tem tema narrativo alinhado ao lore de Ellia
+- Recompensas de temporada não retornam em temporadas futuras
+
+---
+
+### 6.14 Ranking Sazonal com Reset
+
+Os rankings resetam ao fim de cada temporada (30 dias).
+
+**Funcionamento:**
+- Top 3 de cada categoria recebem recompensas especiais e título de temporada permanente ("Campeão da Era do Caos")
+- Histórico de rankings de temporadas anteriores visível
+- Cria urgência competitiva periódica sem ranking permanente
+
+---
+
+### 6.15 Boss de Mundo Semanal
+
+Boss global disponível sexta a domingo para todos os jogadores.
+
+**Funcionamento:**
+- HP global compartilhado — dano de todos os jogadores acumula
+- Recompensa proporcional ao dano contribuído por personagem
+- Se comunidade não matar no prazo: debuff global de produção 24h
+- Se matar: bônus global de XP por 24h
+- Cria evento social que concentra a comunidade
+
+---
+
+### 6.16 Missões Coletivas de Sociedade
+
+Missões semanais que membros da Sociedade completam em conjunto.
+
+**Funcionamento:**
+- 3 missões coletivas por Sociedade por semana
+- Progresso visível para todos os membros
+- Exemplos: "membros completam 30 expedições", "Sociedade recruta 50 tropas", "membros vencem 20 duelos"
+- Recompensa vai para o cofre da Sociedade + XP para participantes
+- Incentiva membros a jogar ativamente pela Sociedade
+
+---
+
+## 7. Campanha Inicial — Expedição Régia
+
+### Filosofia
+
+A Campanha Inicial é o modo história que guia o jogador pelos níveis 1 a 10. Não é tutorial de mecânicas — é narrativa de entrada no mundo. As mecânicas são apresentadas organicamente conforme a história avança. Duração esperada: 1 a 2 semanas para um jogador casual.
+
+---
+
+### 7.1 Estrutura
+
+10 capítulos cobrindo os níveis 1 a 10:
+
+```
+Nível 1–2   → Cap. 1–2: Chegada a Vallaeon. Primeiro contato
+               com a Expedição Régia. Combate tutorial.
+Nível 3–4   → Cap. 3–4: Primeiras missões. Introdução ao lore
+               das facções. Escolhas com impacto em reputação.
+Nível 5     → Cap. 5: Evento de Ressonância (integra com
+               sistema existente — modal narrativo).
+Nível 6–8   → Cap. 6–8: Revelações sobre os Arquétipos.
+               Combates mais complexos. Skills novas disponíveis.
+Nível 9     → Cap. 9: Clímax da campanha inicial.
+Nível 10    → Cap. 10: Conclusão. Jogo completo desbloqueado.
+               Sociedades, PvP, Maestrias e territórios liberados.
+```
+
+---
+
+### 7.2 Mecânicas de capítulo
+
+Cada capítulo tem:
+- **Texto narrativo** — pré-escrito, não gerado por IA
+- **Choices** — 2 a 3 opções de resposta com impacto em reputação de facções e na narrativa do personagem
+- **Combate** (quando aplicável) — usa engine de PvP contra NPCs
+- **Recompensas** — XP, Libras, fragmentos de lore, itens
+
+---
+
+### 7.3 Choices e consequências
+
+As choices da campanha impactam:
+- Reputação com facções (delta definido por choice)
+- Fragmentos de lore desbloqueados no Bestiário
+- Diálogos futuros com NPCs das facções envolvidas
+- Títulos exclusivos da campanha
+
+As escolhas **não bloqueiam progressão** — apenas colorem a narrativa e a relação com o mundo.
+
+---
+
+### 7.4 Integração com sistemas existentes
+
+- Capítulo 5 dispara o evento de Ressonância já implementado
+- Capítulo 10 marca level >= 10 como condição de desbloqueio total (já verificado em `xp.ts`)
+- Choices registram eventos na tabela `events` com type: `campaign_choice`
+- Progresso salvo em `campaign_progress` por personagem
+
+---
+
+## 8. Diretrizes de Implementação
 
 ### Arquitetura de lógica de jogo
 
@@ -889,5 +1066,5 @@ rankings                 -- snapshot de rankings (atualizado periodicamente)
 
 ---
 
-*Fim do GDD_Sistemas v1.0*
+*Fim do GDD_Sistemas v1.1*
 *Documentos relacionados: GDD_Mundo.md | GDD_Personagem.md | GDD_Narrativa.md*

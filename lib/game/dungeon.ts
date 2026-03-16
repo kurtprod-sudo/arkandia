@@ -613,4 +613,35 @@ async function finishDungeon(
       'derrota'
     }.`,
   })
+
+  // Drop de Fragmentos de Maestria (difícil: 10% x1, lendária: 25% x2)
+  const difficulty = session.difficulty as string
+  const fragmentChance = difficulty === 'lendario' ? 0.25 : difficulty === 'dificil' ? 0.1 : 0
+  const fragmentAmount = difficulty === 'lendario' ? 2 : 1
+
+  if (fragmentChance > 0 && result !== 'failure' && Math.random() < fragmentChance) {
+    for (const participant of survivors) {
+      const { data: existingFrag } = await supabase
+        .from('maestria_fragments')
+        .select('id, quantity')
+        .eq('character_id', participant.character_id)
+        .eq('fragment_type', 'prestígio')
+        .maybeSingle()
+
+      if (existingFrag) {
+        await supabase
+          .from('maestria_fragments')
+          .update({ quantity: existingFrag.quantity + fragmentAmount })
+          .eq('id', existingFrag.id)
+      } else {
+        await supabase
+          .from('maestria_fragments')
+          .insert({
+            character_id: participant.character_id,
+            fragment_type: 'prestígio',
+            quantity: fragmentAmount,
+          })
+      }
+    }
+  }
 }

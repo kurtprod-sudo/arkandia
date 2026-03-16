@@ -182,7 +182,7 @@ export async function createCharacter(formData: FormData) {
   }).catch((err) => console.error('[creation] avatar generation failed:', err))
 
   revalidatePath('/character')
-  redirect('/character')
+  redirect('/onboarding')
 }
 
 /** @deprecated Versão antiga baseada em Profissões. Mantida para referência. */
