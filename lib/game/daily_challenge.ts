@@ -111,7 +111,7 @@ export async function generateDailyChallenge(
     .eq('challenge_date', yesterday)
     .maybeSingle()
 
-  const prevStreak = (yesterdayChallenge?.won && yesterdayChallenge?.current_streak) ?? 0
+  const prevStreak = yesterdayChallenge?.won ? (yesterdayChallenge.current_streak ?? 0) : 0
 
   const npcSnapshot: NpcSnapshot = {
     name: pick(NPC_NAMES),
