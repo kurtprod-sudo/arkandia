@@ -4,7 +4,50 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ArkButton from '@/components/ui/ArkButton'
 import { startTroopExpeditionAction } from '@/app/actions/troops'
-import { calcTroopSuccessModifier, type TroopType, type TroopStock } from '@/lib/game/troops'
+
+type TroopType = 'infantaria' | 'arquearia' | 'cavalaria' | 'cerco'
+
+interface TroopStock {
+  infantaria: number
+  arquearia: number
+  cavalaria: number
+  cerco: number
+}
+
+// Client-side copy of troop constants (mirrors lib/game/troops.ts)
+const TROOP_ADVANTAGE: Partial<Record<TroopType, TroopType>> = {
+  arquearia: 'cavalaria',
+  cavalaria: 'infantaria',
+  infantaria: 'arquearia',
+}
+
+const CERCO_PER_LOT = 2
+
+function calcModifier(deployment: Record<string, number>, resistanceType: string): number {
+  let modifier = 0
+  const rt = resistanceType as TroopType
+
+  const advantageousType = (Object.entries(TROOP_ADVANTAGE) as Array<[TroopType, TroopType]>)
+    .find(([, weak]) => weak === rt)?.[0]
+
+  const disadvantagedType = TROOP_ADVANTAGE[rt]
+
+  if (advantageousType && (deployment[advantageousType] ?? 0) > 0) modifier += 0.15
+
+  const cercoCount = deployment.cerco ?? 0
+  if (cercoCount > 0) {
+    const cercoLots = Math.floor(cercoCount / CERCO_PER_LOT)
+    modifier += Math.min(0.20, cercoLots * 0.05)
+  }
+
+  if (disadvantagedType) {
+    const totalTroops = Object.values(deployment).reduce((s, v) => s + (v ?? 0), 0)
+    const disadCount = deployment[disadvantagedType] ?? 0
+    if (totalTroops > 0 && disadCount / totalTroops > 0.5) modifier -= 0.10
+  }
+
+  return Math.max(-0.20, Math.min(0.35, modifier))
+}
 
 interface Props {
   expeditionTypeId: string
@@ -22,7 +65,7 @@ export default function TroopExpeditionForm({ expeditionTypeId, resistanceType, 
   })
 
   const total = Object.values(deployment).reduce((s, v) => s + v, 0)
-  const modifier = calcTroopSuccessModifier(deployment, resistanceType as TroopType)
+  const modifier = calcModifier(deployment, resistanceType)
   const modifierStr = modifier >= 0 ? `+${(modifier * 100).toFixed(0)}%` : `${(modifier * 100).toFixed(0)}%`
 
   const handleSend = async () => {
