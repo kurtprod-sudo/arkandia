@@ -61,14 +61,14 @@ export async function closeSeason(
       const titleName = `Campeão da ${season.theme ?? 'Temporada'} — ${label}`
 
       // Create title definition (idempotent)
-      await supabase.from('title_definitions').insert({
+      await supabase.from('title_definitions').upsert({
         name: titleName,
         description: `Top ${entry.rank_position} em ${label} na temporada ${season.theme ?? ''}.`,
         category: 'especial',
         trigger_type: 'automatico',
         trigger_condition: {},
         is_unique: false,
-      } as never)
+      } as never, { onConflict: 'name', ignoreDuplicates: true })
 
       const { data: titleDef } = await supabase.from('title_definitions')
         .select('id').eq('name', titleName).maybeSingle()

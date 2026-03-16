@@ -7,6 +7,14 @@
     {
       "path": "/api/cron/rankings",
       "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/cron/boss-open",
+      "schedule": "0 0 * * 5"
+    },
+    {
+      "path": "/api/cron/boss-close",
+      "schedule": "0 0 * * 1"
     }
   ]
 }

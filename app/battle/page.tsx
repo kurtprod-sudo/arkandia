@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import ArkDivider from '@/components/ui/ArkDivider'
-import { Target, Compass, Users, Swords, BookOpen, Trophy, Shield, BookMarked } from 'lucide-react'
+import { Target, Compass, Users, Swords, BookOpen, Trophy, Shield, BookMarked, Skull } from 'lucide-react'
 
 export default async function BattlePage() {
   const supabase = await createClient()
@@ -10,6 +10,7 @@ export default async function BattlePage() {
   if (!user) redirect('/auth/login')
 
   const sections = [
+    { label: 'Boss', href: '/boss', icon: Skull, description: 'Boss de Mundo semanal. HP compartilhado, recompensa proporcional.' },
     { label: 'Bestiário', href: '/bestiary', icon: BookMarked, description: 'Registro de criaturas derrotadas com lore e drops.' },
     { label: 'Hunting', href: '/hunting', icon: Target, description: 'Entre em zonas de caça e enfrente NPCs em combate sequencial.' },
     { label: 'Expedições', href: '/expeditions', icon: Compass, description: 'Envie seu personagem em expedições idle e colete recompensas.' },

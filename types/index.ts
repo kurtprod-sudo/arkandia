@@ -1566,5 +1566,24 @@ export interface SeasonRankingSnapshot {
   rankPosition: number; snapshottedAt: string
 }
 
+// ---------------------------------------------------------------------------
+// Boss de Mundo
+// ---------------------------------------------------------------------------
+
+export type WorldBossStatus = 'upcoming' | 'active' | 'defeated' | 'expired'
+
+export interface WorldBossInstance {
+  id: string; name: string; loreText: string | null; hpMax: number; hpCurrent: number
+  status: WorldBossStatus; skills: unknown[]; behavior: string
+  windowStart: string; windowEnd: string
+  rewardPool: { libras: number; essencia: number; xp: number }
+  totalDamageDealt: number; createdAt: string
+}
+
+export interface BossContribution {
+  bossId: string; characterId: string; damageDealt: number
+  attacksToday: number; lastAttackDate: string | null; rewardClaimed: boolean
+}
+
 // Database type is in types/database.types.ts (follows Supabase generated format)
 // export type { Database } from './database.types'
