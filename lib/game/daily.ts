@@ -256,6 +256,9 @@ export async function completeTask(
       isPublic: false,
       narrativeText: 'Todas as tarefas do dia completas. Ticket de Summon obtido.',
     })
+
+    const { checkAchievements } = await import('./achievements')
+    await checkAchievements(characterId, 'daily_tasks_complete', {}).catch(() => {})
   }
 
   await supabase
@@ -386,6 +389,9 @@ export async function updateLoginStreak(characterId: string): Promise<{
       narrativeText: `${milestone.label} de login consecutivo.`,
     })
   }
+
+  const { checkAchievements } = await import('./achievements')
+  await checkAchievements(characterId, 'login_streak', { streakDays: newStreak }).catch(() => {})
 
   return { currentStreak: newStreak, isNewDay: true, streakBroken }
 }

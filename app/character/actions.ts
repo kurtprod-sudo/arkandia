@@ -181,6 +181,9 @@ export async function createCharacter(formData: FormData) {
     gemasSpent: 0,
   }).catch((err) => console.error('[creation] avatar generation failed:', err))
 
+  const { checkAchievements } = await import('@/lib/game/achievements')
+  await checkAchievements(character.id, 'first_login', {}).catch(() => {})
+
   revalidatePath('/character')
   redirect('/onboarding')
 }

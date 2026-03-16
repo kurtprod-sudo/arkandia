@@ -79,6 +79,9 @@ export async function grantXp(
         : `Você subiu para o nível ${result.newLevel}. Distribua seus pontos de atributo.`,
       actionUrl: '/character',
     })
+
+    const { checkAchievements } = await import('./achievements')
+    await checkAchievements(characterId, 'level_up', { newLevel: result.newLevel }, supabase).catch(() => {})
   }
 
   // Concede Essências por nível (40/nível) — Referência: GDD_Balanceamento §10

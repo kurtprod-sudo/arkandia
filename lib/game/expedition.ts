@@ -509,6 +509,12 @@ export async function resolveExpedition(
     }
   }
 
+  const { checkAchievements } = await import('./achievements')
+  if (expeditionSuccess) {
+    await checkAchievements(expedition.character_id, 'expedition_complete', {}).catch(() => {})
+    if (troopsDeployed) await checkAchievements(expedition.character_id, 'troop_expedition_complete', {}).catch(() => {})
+  }
+
   return {
     success: true,
     result: {

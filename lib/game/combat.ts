@@ -316,7 +316,7 @@ export async function processTurn(
         await recordTurn(supabase, sessionId, session.current_turn,
           actor.id, 'ataque_basico', 0, effect.effect_type,
           `${actor.name} está imobilizado por ${effect.effect_type}.`)
-        await advanceTurn(supabase, sessionId, session.current_turn, opponentId)
+        await advanceTurn(supabase, sessionId, session.current_turn, opponentId, actor.id)
         return {
           success: true,
           turnResult: {
@@ -450,7 +450,7 @@ export async function processTurn(
       // Fuga fracassada — turno consumido
       narrativeText = 'Tentativa de fuga fracassou.'
       await recordTurn(supabase, sessionId, session.current_turn, actor.id, 'fuga', 0, null, narrativeText)
-      await advanceTurn(supabase, sessionId, session.current_turn, opponentId)
+      await advanceTurn(supabase, sessionId, session.current_turn, opponentId, actor.id)
       return {
         success: true,
         turnResult: {
@@ -467,7 +467,7 @@ export async function processTurn(
   if (action.type === 'mudar_range') {
     narrativeText = `Mudou para Range State ${action.rangeState}.`
     await recordTurn(supabase, sessionId, session.current_turn, actor.id, 'mudar_range', 0, null, narrativeText, action.rangeState)
-    await advanceTurn(supabase, sessionId, session.current_turn, opponentId)
+    await advanceTurn(supabase, sessionId, session.current_turn, opponentId, actor.id)
     return {
       success: true,
       turnResult: {
@@ -601,6 +601,30 @@ export async function processTurn(
     }
   }
 
+  // Resistência racial a elementos (ex: Draconiano -15% dano de fogo)
+  if (damageDealt > 0 && action.type === 'skill' && skillFormula) {
+    const skillElement = ((skillFormula as unknown as Record<string, unknown>).element as string) ?? null
+    const skillTags = ((skillFormula as unknown as Record<string, unknown>).tags as string[]) ?? []
+    const hasFire = skillElement === 'fogo' || skillTags.includes('fogo')
+
+    if (hasFire) {
+      const { data: opponentChar } = await supabase
+        .from('characters')
+        .select('races(passives)')
+        .eq('id', opponentId)
+        .single()
+      const opPassives = (
+        (opponentChar?.races as Record<string, unknown> | null)?.passives as Record<string, unknown>
+      ) ?? {}
+      const fireRes = (opPassives.fire_damage_resistance_percent as number) ?? 0
+      if (fireRes > 0) {
+        const reduction = Math.floor(damageDealt * (fireRes / 100))
+        damageDealt = Math.max(1, damageDealt - reduction)
+        narrativeText += ` (resistência racial: -${reduction})`
+      }
+    }
+  }
+
   // Aplica dano ao oponente
   if (damageDealt > 0) {
     const newHp = Math.max(0, opponentAttrs.hp_atual - damageDealt)
@@ -638,7 +662,7 @@ export async function processTurn(
   await recordTurn(supabase, sessionId, session.current_turn, actor.id,
     actionType, damageDealt, effectApplied, narrativeText, undefined, skillId)
 
-  await advanceTurn(supabase, sessionId, session.current_turn, opponentId)
+  await advanceTurn(supabase, sessionId, session.current_turn, opponentId, actor.id)
 
   return {
     success: true,
@@ -814,6 +838,20 @@ async function finishCombat(
   const { completeTask } = await import('./daily')
   await completeTask(winnerId, 'win_pvp').catch(() => {})
 
+  // Se a sessão tem desafio diário vinculado, resolve
+  // resolveDailyChallenge determina won baseado em challenge.character_id == winnerId
+  const { resolveDailyChallenge } = await import('./daily_challenge')
+  await resolveDailyChallenge(sessionId, winnerId).catch(() => {})
+
+  const { checkAchievements } = await import('./achievements')
+  if (modality === 'duelo_ranqueado' || modality === 'duelo_livre') {
+    await checkAchievements(winnerId, 'pvp_win', { modality }, supabase).catch(() => {})
+  }
+  if (modality === 'emboscada') {
+    await checkAchievements(winnerId, 'ambush_performed', {}, supabase).catch(() => {})
+    await checkAchievements(winnerId, 'pvp_win', { modality }, supabase).catch(() => {})
+  }
+
   // Se a sessão é de torneio, propaga resultado para o bracket
   if (modality === 'torneio') {
     const { resolveTournamentMatch } = await import('./tournament')
@@ -865,8 +903,41 @@ async function advanceTurn(
   supabase: SupabaseClient<Database>,
   sessionId: string,
   currentTurn: number,
-  nextPlayerId: string
+  nextPlayerId: string,
+  actorId?: string
 ) {
+  // Regeneração racial de Éter por turno (ex: Melfork +3/turno)
+  if (actorId) {
+    const { data: actorChar } = await supabase
+      .from('characters')
+      .select('races(passives)')
+      .eq('id', actorId)
+      .single()
+
+    const actorPassives = (
+      (actorChar?.races as Record<string, unknown> | null)?.passives as Record<string, unknown>
+    ) ?? {}
+    const eterRegenPerTurn = (actorPassives.eter_regen_per_turn as number) ?? 0
+
+    if (eterRegenPerTurn > 0) {
+      const { data: actorAttrs } = await supabase
+        .from('character_attributes')
+        .select('eter_atual, eter_max')
+        .eq('character_id', actorId)
+        .single()
+
+      if (actorAttrs) {
+        const newEter = Math.min(actorAttrs.eter_max, actorAttrs.eter_atual + eterRegenPerTurn)
+        if (newEter !== actorAttrs.eter_atual) {
+          await supabase
+            .from('character_attributes')
+            .update({ eter_atual: newEter })
+            .eq('character_id', actorId)
+        }
+      }
+    }
+  }
+
   const turnExpiresAt = new Date()
   turnExpiresAt.setSeconds(turnExpiresAt.getSeconds() + TURN_TIMER_SECONDS)
 

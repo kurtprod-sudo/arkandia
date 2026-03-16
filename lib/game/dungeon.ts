@@ -648,4 +648,9 @@ async function finishDungeon(
       }
     }
   }
+
+  const { checkAchievements: checkAch } = await import('./achievements')
+  for (const p of survivors) {
+    await checkAch(p.character_id, 'dungeon_complete', {}).catch(() => {})
+  }
 }

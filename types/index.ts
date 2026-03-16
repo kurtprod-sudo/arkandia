@@ -270,6 +270,8 @@ export interface SkillFormula {
   defense_penetration_percent?: number
   effect_type?: string
   effect_duration?: number
+  element?: string
+  tags?: string[]
 }
 
 /** @deprecated Usava o schema antigo de skills. Mantido para compatibilidade. */
@@ -1424,6 +1426,31 @@ export interface DailyChallenge {
   won: boolean | null
   rewardClaimed: boolean
   currentStreak: number
+}
+
+// ---------------------------------------------------------------------------
+// Conquistas
+// ---------------------------------------------------------------------------
+
+export type AchievementRarity = 'comum' | 'raro' | 'epico' | 'lendario'
+export type AchievementCategory =
+  'progressao' | 'combate' | 'exploracao' | 'social' | 'economia' | 'marco'
+
+export interface Achievement {
+  id: string
+  key: string
+  title: string
+  description: string
+  category: AchievementCategory
+  rarity: AchievementRarity
+  icon: string
+  target: number | null
+  titleRewardName: string | null
+}
+
+export interface AchievementWithProgress extends Achievement {
+  progress: number
+  unlockedAt: string | null
 }
 
 // Database type is in types/database.types.ts (follows Supabase generated format)

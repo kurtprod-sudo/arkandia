@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import AppShell from './AppShell'
+import AchievementToast from '@/components/ui/AchievementToast'
 
 const NO_SHELL_ROUTES = ['/', '/auth', '/character/create', '/banned', '/onboarding', '/terms', '/privacy']
 
@@ -34,6 +35,7 @@ export default async function AppShellWrapper({ children, pathname }: AppShellWr
       isGm={profile?.role === 'gm'}
     >
       {children}
+      <AchievementToast characterId={character?.id ?? null} />
     </AppShell>
   )
 }

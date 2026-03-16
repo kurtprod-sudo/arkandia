@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { label: 'Home',       href: '/home',      icon: Home          },
   { label: 'Personagem', href: '/character',  icon: User          },
   { label: 'Building',   href: '/building',   icon: Sword         },
+  { label: 'Conquistas', href: '/achievements', icon: Trophy      },
   { label: 'Mundo',      href: '/world',      icon: Globe         },
   { label: 'Batalha',    href: '/battle',     icon: Swords        },
   { label: 'Lobby',      href: '/lobby',      icon: MessageCircle },

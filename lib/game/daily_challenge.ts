@@ -5,7 +5,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createNotification } from './notifications'
-import { calcSkillDamage, calcDodgeChance } from './attributes'
+import { startCombat } from './combat'
 
 const NPC_NAMES = [
   'Malachar, o Errante', 'Syvara, Lâmina da Névoa', 'Drothek, o Inclemente',
@@ -73,27 +73,18 @@ export async function generateDailyChallenge(
     .from('characters').select('id').eq('id', characterId).eq('user_id', userId).single()
   if (!character) return { success: false, error: 'Personagem não encontrado.' }
 
-  // Check if already exists today
   const { data: existing } = await supabase
-    .from('daily_challenges')
-    .select('*')
-    .eq('character_id', characterId)
-    .eq('challenge_date', today)
-    .maybeSingle()
+    .from('daily_challenges').select('*')
+    .eq('character_id', characterId).eq('challenge_date', today).maybeSingle()
+  if (existing) return { success: true, challenge: mapRecord(existing) }
 
-  if (existing) {
-    return { success: true, challenge: mapRecord(existing) }
-  }
-
-  // Get player attributes
   const { data: attrs } = await supabase
     .from('character_attributes')
     .select('ataque, magia, defesa, vitalidade, velocidade, precisao, tenacidade, capitania, eter_max')
-    .eq('character_id', characterId)
-    .single()
+    .eq('character_id', characterId).single()
   if (!attrs) return { success: false, error: 'Atributos não encontrados.' }
 
-  // Generate NPC at 80% of player stats
+  // NPC at 80% of player stats
   const npcAttrs: Record<string, number> = {}
   for (const [key, val] of Object.entries(attrs)) {
     npcAttrs[key] = Math.max(1, Math.floor((val as number) * 0.8))
@@ -102,14 +93,10 @@ export async function generateDailyChallenge(
   npcAttrs.hp_atual = npcAttrs.hp_max
   npcAttrs.eter_atual = npcAttrs.eter_max
 
-  // Get yesterday's streak
   const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
   const { data: yesterdayChallenge } = await supabase
-    .from('daily_challenges')
-    .select('current_streak, won')
-    .eq('character_id', characterId)
-    .eq('challenge_date', yesterday)
-    .maybeSingle()
+    .from('daily_challenges').select('current_streak, won')
+    .eq('character_id', characterId).eq('challenge_date', yesterday).maybeSingle()
 
   const prevStreak = yesterdayChallenge?.won ? (yesterdayChallenge.current_streak ?? 0) : 0
 
@@ -128,100 +115,116 @@ export async function generateDailyChallenge(
       completed: false,
       current_streak: prevStreak,
     })
-    .select()
-    .single()
+    .select().single()
 
   if (!created) return { success: false, error: 'Erro ao criar desafio.' }
-
   return { success: true, challenge: mapRecord(created) }
 }
 
 /**
- * Simulates a simplified combat vs the NPC snapshot.
- * Returns win/loss based on attribute comparison + randomness.
- * Uses the same calcSkillDamage engine as hunting.
+ * Inicia o combate do desafio diário via engine PvP completo.
+ * Cria um personagem fantasma para o NPC, inicia combate duelo_livre,
+ * retorna sessionId para redirecionar à CombatArena.
  */
 export async function acceptDailyChallenge(
   challengeId: string,
   userId: string
-): Promise<{ success: boolean; error?: string; won?: boolean }> {
+): Promise<{ success: boolean; error?: string; sessionId?: string }> {
   const supabase = await createClient()
 
   const { data: challenge } = await supabase
-    .from('daily_challenges')
-    .select('*')
-    .eq('id', challengeId)
-    .single()
+    .from('daily_challenges').select('*').eq('id', challengeId).single()
   if (!challenge) return { success: false, error: 'Desafio não encontrado.' }
   if (challenge.completed) return { success: false, error: 'Desafio já completado.' }
 
-  const { data: character } = await supabase
-    .from('characters').select('id').eq('id', challenge.character_id).eq('user_id', userId).single()
-  if (!character) return { success: false, error: 'Acesso negado.' }
-
-  const { data: playerAttrs } = await supabase
-    .from('character_attributes')
-    .select('ataque, magia, defesa, vitalidade, velocidade, precisao, eter_max')
-    .eq('character_id', character.id)
-    .single()
-  if (!playerAttrs) return { success: false, error: 'Atributos não encontrados.' }
-
-  const npc = (challenge.npc_snapshot as unknown as NpcSnapshot).attributes
-  const playerHp = 80 + playerAttrs.vitalidade * 5
-  const npcHp = npc.hp_max ?? 100
-
-  // Simulate 15 rounds of basic attack exchange
-  let pHp = playerHp
-  let nHp = npcHp
-
-  for (let turn = 0; turn < 15 && pHp > 0 && nHp > 0; turn++) {
-    // Player attacks NPC
-    const pDodge = calcDodgeChance(npc.velocidade ?? 10)
-    if (Math.random() * 100 > pDodge) {
-      const pDmg = calcSkillDamage({
-        baseDamage: 8, ataqueFactor: 0.6,
-        attackerAtaque: playerAttrs.ataque, attackerMagia: playerAttrs.magia,
-        targetDefesa: npc.defesa ?? 5,
-      })
-      nHp -= Math.max(1, Math.floor(pDmg.afterDefense))
-    }
-
-    if (nHp <= 0) break
-
-    // NPC attacks player
-    const nDodge = calcDodgeChance(playerAttrs.velocidade)
-    if (Math.random() * 100 > nDodge) {
-      const nDmg = calcSkillDamage({
-        baseDamage: 8, ataqueFactor: 0.6,
-        attackerAtaque: npc.ataque ?? 10, attackerMagia: npc.magia ?? 10,
-        targetDefesa: playerAttrs.defesa,
-      })
-      pHp -= Math.max(1, Math.floor(nDmg.afterDefense))
-    }
+  // If already has a session, return it (idempotent)
+  if (challenge.combat_session_id) {
+    return { success: true, sessionId: challenge.combat_session_id as string }
   }
 
-  const won = nHp <= 0 || pHp > nHp
+  const { data: character } = await supabase
+    .from('characters').select('id')
+    .eq('id', challenge.character_id).eq('user_id', userId).single()
+  if (!character) return { success: false, error: 'Acesso negado.' }
 
-  // Resolve
-  await resolveDailyChallenge(challenge.id, challenge.character_id, won, supabase)
+  const npcSnapshot = challenge.npc_snapshot as unknown as NpcSnapshot
+  const npcAttrs = npcSnapshot.attributes
 
-  return { success: true, won }
+  // Create phantom NPC character for the combat engine
+  const { data: npcChar } = await supabase
+    .from('characters')
+    .insert({
+      user_id: userId,
+      name: npcSnapshot.name,
+      level: 1,
+      status: 'active',
+      xp: 0,
+      xp_to_next_level: 9999,
+    } as never)
+    .select('id').single()
+
+  if (!npcChar) return { success: false, error: 'Erro ao criar NPC.' }
+
+  // Set NPC attributes from snapshot
+  await supabase.from('character_attributes').upsert({
+    character_id: npcChar.id,
+    ataque: npcAttrs.ataque ?? 10,
+    magia: npcAttrs.magia ?? 10,
+    defesa: npcAttrs.defesa ?? 5,
+    vitalidade: npcAttrs.vitalidade ?? 10,
+    velocidade: npcAttrs.velocidade ?? 10,
+    precisao: npcAttrs.precisao ?? 10,
+    tenacidade: npcAttrs.tenacidade ?? 10,
+    capitania: npcAttrs.capitania ?? 0,
+    eter_max: npcAttrs.eter_max ?? 50,
+    eter_atual: npcAttrs.eter_atual ?? 50,
+    hp_max: npcAttrs.hp_max ?? 130,
+    hp_atual: npcAttrs.hp_atual ?? 130,
+    moral: 100,
+    attribute_points: 0,
+  } as never, { onConflict: 'character_id' })
+
+  // Start combat via the full PvP engine (duelo_livre — no consequences)
+  const combatResult = await startCombat(character.id, npcChar.id, 'duelo_livre', userId)
+
+  if (!combatResult.success || !combatResult.sessionId) {
+    await supabase.from('character_attributes').delete().eq('character_id', npcChar.id)
+    await supabase.from('characters').delete().eq('id', npcChar.id)
+    return { success: false, error: combatResult.error ?? 'Erro ao iniciar combate.' }
+  }
+
+  // Link session to challenge
+  await supabase
+    .from('daily_challenges')
+    .update({ combat_session_id: combatResult.sessionId })
+    .eq('id', challengeId)
+
+  return { success: true, sessionId: combatResult.sessionId }
 }
 
-async function resolveDailyChallenge(
-  challengeId: string,
-  characterId: string,
-  won: boolean,
-  supabase: Awaited<ReturnType<typeof createClient>>
+/**
+ * Resolve o desafio diário após o combate terminar.
+ * Chamada por combat.ts quando uma sessão com daily_challenge associado é finalizada.
+ */
+export async function resolveDailyChallenge(
+  sessionId: string,
+  winnerId: string
 ): Promise<void> {
-  // Get yesterday's streak
+  const supabase = await createClient()
+
+  const { data: challenge } = await supabase
+    .from('daily_challenges').select('id, character_id, current_streak')
+    .eq('combat_session_id', sessionId).maybeSingle()
+
+  if (!challenge) return
+
+  const characterId = challenge.character_id as string
+  const won = winnerId === characterId
+
   const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
   const { data: yesterdayChallenge } = await supabase
-    .from('daily_challenges')
-    .select('current_streak, won')
-    .eq('character_id', characterId)
-    .eq('challenge_date', yesterday)
-    .maybeSingle()
+    .from('daily_challenges').select('current_streak, won')
+    .eq('character_id', characterId).eq('challenge_date', yesterday).maybeSingle()
 
   let newStreak = 0
   if (won) {
@@ -231,31 +234,24 @@ async function resolveDailyChallenge(
   await supabase
     .from('daily_challenges')
     .update({ completed: true, won, current_streak: newStreak, reward_claimed: won })
-    .eq('id', challengeId)
+    .eq('id', challenge.id)
 
   if (won) {
-    // 150 Libras reward
     const { data: wallet } = await supabase
-      .from('character_wallet').select('libras, summon_tickets').eq('character_id', characterId).single()
+      .from('character_wallet').select('libras, summon_tickets')
+      .eq('character_id', characterId).single()
     if (wallet) {
       const updates: Record<string, number> = { libras: wallet.libras + 150 }
-
-      // Streak bonus: every 7 wins → +1 Ticket
       if (newStreak > 0 && newStreak % 7 === 0) {
         updates.summon_tickets = wallet.summon_tickets + 1
       }
-
       await supabase.from('character_wallet').update(updates as never).eq('character_id', characterId)
     }
 
     // 30% material drop
     if (Math.random() < 0.3) {
       const { data: material } = await supabase
-        .from('items')
-        .select('id')
-        .eq('item_type', 'material')
-        .eq('rarity', 'comum')
-        .limit(5)
+        .from('items').select('id').eq('item_type', 'material').eq('rarity', 'comum').limit(5)
       if (material && material.length > 0) {
         const item = material[Math.floor(Math.random() * material.length)]
         const { data: inv } = await supabase
@@ -269,9 +265,11 @@ async function resolveDailyChallenge(
       }
     }
 
-    // Complete daily task
     const { completeTask } = await import('./daily')
     await completeTask(characterId, 'win_pvp').catch(() => {})
+
+    const { checkAchievements } = await import('./achievements')
+    await checkAchievements(characterId, 'daily_challenge_streak', { streakDays: newStreak }).catch(() => {})
 
     const streakMsg = newStreak % 7 === 0 ? ` Streak ${newStreak}! +1 Ticket de Summon.` : ''
     await createNotification({
@@ -296,11 +294,8 @@ export async function getDailyChallenge(characterId: string): Promise<DailyChall
   const supabase = await createClient()
   const today = new Date().toISOString().split('T')[0]
   const { data } = await supabase
-    .from('daily_challenges')
-    .select('*')
-    .eq('character_id', characterId)
-    .eq('challenge_date', today)
-    .maybeSingle()
+    .from('daily_challenges').select('*')
+    .eq('character_id', characterId).eq('challenge_date', today).maybeSingle()
   return data ? mapRecord(data) : null
 }
 
