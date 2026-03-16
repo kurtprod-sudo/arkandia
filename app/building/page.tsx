@@ -22,7 +22,6 @@ export default async function BuildingPage() {
     { data: inventoryRaw },
     { data: characterSkillsRaw },
     { data: characterMaestriasRaw },
-    { data: wallet },
   ] = await Promise.all([
     supabase
       .from('character_building')
@@ -50,11 +49,6 @@ export default async function BuildingPage() {
       .from('character_maestrias')
       .select('maestria_id, maestrias(id, name, description, category)')
       .eq('character_id', characterId),
-    supabase
-      .from('character_wallet')
-      .select('libras')
-      .eq('character_id', characterId)
-      .single(),
   ])
 
   // Transform building slots
