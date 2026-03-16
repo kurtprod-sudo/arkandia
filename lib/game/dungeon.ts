@@ -615,9 +615,9 @@ async function finishDungeon(
   })
 
   // Drop de Fragmentos de Maestria (difícil: 10% x1, lendária: 25% x2)
-  const difficulty = session.difficulty as string
-  const fragmentChance = difficulty === 'lendario' ? 0.25 : difficulty === 'dificil' ? 0.1 : 0
-  const fragmentAmount = difficulty === 'lendario' ? 2 : 1
+  const difficultyStr = session.difficulty as string
+  const fragmentChance = difficultyStr === 'lendario' ? 0.25 : difficultyStr === 'dificil' ? 0.1 : 0
+  const fragmentAmount = difficultyStr === 'lendario' ? 2 : 1
 
   if (fragmentChance > 0 && result !== 'failure' && Math.random() < fragmentChance) {
     for (const participant of survivors) {
