@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ArkButton from '@/components/ui/ArkButton'
 import { enqueueRecruitmentAction } from '@/app/actions/troops'
-import type { TroopType } from '@/lib/game/troops'
+import type { TroopType } from '@/lib/utils/game-types'
 
 export default function TroopRecruitButton({ troopType }: { troopType: TroopType }) {
   const router = useRouter()

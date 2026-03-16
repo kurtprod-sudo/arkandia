@@ -454,6 +454,17 @@ export async function resolveBattle(
       isPublic: true,
       narrativeText: `A guerra pelo território terminou. ${finalWinner === 'attacker' ? 'Atacantes' : 'Defensores'} vencem.`,
     })
+
+    // Weekly mission: war battle won for winning side participants
+    const winningSocietyId = finalWinner === 'attacker' ? war.attacker_id : war.defender_id
+    if (winningSocietyId) {
+      const { data: winMembers } = await supabase
+        .from('war_participants').select('character_id').eq('war_id', warId).eq('side', finalWinner)
+      const { updateWeeklyProgress } = await import('./weekly')
+      for (const wm of winMembers ?? []) {
+        await updateWeeklyProgress(wm.character_id, 'win_war_battle').catch(() => {})
+      }
+    }
   } else {
     // Avança para próxima fase
     await supabase

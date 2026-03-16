@@ -763,6 +763,10 @@ async function handleNpcDefeated(
   const zoneId = session.zone_id as string
   const sessionId = session.id as string
 
+  // Weekly mission: hunting kill
+  const { updateWeeklyProgress } = await import('./weekly')
+  await updateWeeklyProgress(characterId, 'hunting_kills').catch(() => {})
+
   // Calcula loot do NPC
   const lootTable = (npcType.loot_table as Array<{
     type: string; min?: number; max?: number; amount?: number;

@@ -650,7 +650,9 @@ async function finishDungeon(
   }
 
   const { checkAchievements: checkAch } = await import('./achievements')
+  const { updateWeeklyProgress } = await import('./weekly')
   for (const p of survivors) {
     await checkAch(p.character_id, 'dungeon_complete', {}).catch(() => {})
+    await updateWeeklyProgress(p.character_id, 'complete_dungeons').catch(() => {})
   }
 }

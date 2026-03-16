@@ -259,6 +259,8 @@ export async function completeTask(
 
     const { checkAchievements } = await import('./achievements')
     await checkAchievements(characterId, 'daily_tasks_complete', {}).catch(() => {})
+    const { updateWeeklyProgress } = await import('./weekly')
+    await updateWeeklyProgress(characterId, 'complete_daily_tasks').catch(() => {})
   }
 
   await supabase

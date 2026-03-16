@@ -85,6 +85,8 @@ export async function sendLetter(
 
   const { checkAchievements } = await import('@/lib/game/achievements')
   await checkAchievements(senderId, 'letter_sent', {}).catch(() => {})
+  const { updateWeeklyProgress } = await import('@/lib/game/weekly')
+  await updateWeeklyProgress(senderId, 'send_letters').catch(() => {})
 
   return { success: true, letterId: letter.id }
 }

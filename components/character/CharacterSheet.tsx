@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { xpToNextLevel } from '@/lib/game/xp'
+import { xpToNextLevel } from '@/lib/utils/formulas'
 import AttributeDistributor from './AttributeDistributor'
 import AvatarReworkModal from './AvatarReworkModal'
 import { ArkPortraitParticles } from '@/components/ui/ArkPortraitParticles'

@@ -229,6 +229,9 @@ export async function buyListing(
     narrativeText: `Transação no Bazaar: ${listing.quantity}x item por ${listing.price_libras} Libras.`,
   })
 
+  const { updateWeeklyProgress } = await import('./weekly')
+  await updateWeeklyProgress(buyerId, 'bazaar_trades').catch(() => {})
+
   return { success: true }
 }
 

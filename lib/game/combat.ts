@@ -847,6 +847,10 @@ async function finishCombat(
   if (modality === 'duelo_ranqueado' || modality === 'duelo_livre') {
     await checkAchievements(winnerId, 'pvp_win', { modality }, supabase).catch(() => {})
   }
+  if (modality === 'duelo_ranqueado') {
+    const { updateWeeklyProgress } = await import('./weekly')
+    await updateWeeklyProgress(winnerId, 'win_pvp_ranked').catch(() => {})
+  }
   if (modality === 'emboscada') {
     await checkAchievements(winnerId, 'ambush_performed', {}, supabase).catch(() => {})
     await checkAchievements(winnerId, 'pvp_win', { modality }, supabase).catch(() => {})

@@ -130,6 +130,9 @@ export async function enqueueRecruitment(
     completed: false,
   })
 
+  const { updateWeeklyProgress } = await import('./weekly')
+  await updateWeeklyProgress(characterId, 'recruit_troops').catch(() => {})
+
   return { success: true, endsAt: endsAt.toISOString() }
 }
 

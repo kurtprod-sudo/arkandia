@@ -8,6 +8,8 @@ import type { JournalSection } from '@/types'
 import { getDailyTasks, updateLoginStreak } from '@/lib/game/daily'
 import DailyTasksWidget from '@/components/dashboard/DailyTasksWidget'
 import DailyChallengeWidget from '@/components/dashboard/DailyChallengeWidget'
+import WeeklyMissionsWidget from '@/components/home/WeeklyMissionsWidget'
+import { getWeeklyMissions } from '@/lib/game/weekly'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -74,10 +76,11 @@ export default async function HomePage() {
       .eq('is_read', false),
   ])
 
-  // Daily tasks + streak
-  const [dailyData, streakData] = await Promise.all([
+  // Daily tasks + streak + weekly
+  const [dailyData, streakData, weeklyMissions] = await Promise.all([
     getDailyTasks(character.id),
     updateLoginStreak(character.id),
+    getWeeklyMissions(character.id),
   ])
 
   // Check active hunting
@@ -270,6 +273,9 @@ export default async function HomePage() {
 
           {/* Daily Challenge */}
           <DailyChallengeWidget challenge={null} />
+
+          {/* Weekly Missions */}
+          <WeeklyMissionsWidget weeklyMissions={weeklyMissions} />
         </div>
 
         {/* ── RIGHT COLUMN: Journal & Notifications ── */}

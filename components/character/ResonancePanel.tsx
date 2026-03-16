@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ArkButton from '@/components/ui/ArkButton'
-import { calcResonanceEter, calcResonanceCost } from '@/lib/game/attributes'
+import { calcResonanceEter, calcResonanceCost } from '@/lib/utils/formulas'
 
 const ARCHETYPE_COLORS: Record<string, string> = {
   ordem: '#C8B560', caos: '#9B4DCA', tempo: '#4DA6CA', espaco: '#1A1A8E',

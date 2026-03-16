@@ -1453,5 +1453,41 @@ export interface AchievementWithProgress extends Achievement {
   unlockedAt: string | null
 }
 
+// ---------------------------------------------------------------------------
+// Missões Semanais
+// ---------------------------------------------------------------------------
+
+export type WeeklyMissionType =
+  | 'complete_dungeons' | 'win_pvp_ranked' | 'complete_expeditions'
+  | 'hunting_kills' | 'send_letters' | 'complete_daily_tasks'
+  | 'bazaar_trades' | 'win_war_battle' | 'recruit_troops'
+  | 'complete_troop_expedition'
+
+export type WeeklyMissionDifficulty = 'facil' | 'medio' | 'dificil'
+
+export interface WeeklyMissionEntry {
+  type: WeeklyMissionType
+  label: string
+  description: string
+  difficulty: WeeklyMissionDifficulty
+  target: number
+  progress: number
+  completed: boolean
+  reward_claimed: boolean
+  xp_reward: number
+  essencias_reward: number
+  libras_reward: number
+}
+
+export interface WeeklyMissionsRecord {
+  id: string
+  characterId: string
+  weekStart: string
+  missions: WeeklyMissionEntry[]
+  completedCount: number
+  ticketGranted: boolean
+  earlyBonusClaimed: boolean
+}
+
 // Database type is in types/database.types.ts (follows Supabase generated format)
 // export type { Database } from './database.types'
