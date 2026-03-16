@@ -1,7 +1,5 @@
 'use client'
 
-import ArkBadge from '@/components/ui/ArkBadge'
-
 type ReputationStage = 'hostil' | 'neutro' | 'reconhecido' | 'aliado' | 'venerado'
 
 interface FactionRep {

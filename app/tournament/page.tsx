@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import ArkButton from '@/components/ui/ArkButton'
 import ArkBadge from '@/components/ui/ArkBadge'
 import ArkDivider from '@/components/ui/ArkDivider'
 

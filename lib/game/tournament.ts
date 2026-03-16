@@ -166,7 +166,6 @@ export async function gmGenerateBracket(
 
   // Create round 1 matches
   const matchesR1 = maxP / 2
-  const byeCount = maxP - shuffled.length
 
   for (let m = 0; m < matchesR1; m++) {
     const seedA = m * 2 + 1

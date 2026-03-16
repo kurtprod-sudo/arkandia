@@ -600,7 +600,7 @@ export async function collectAndExit(
 /**
  * Usa Poção de Cura para resetar o cooldown da zona.
  */
-export async function useHealingPotion(
+export async function applyHealingPotion(
   characterId: string,
   userId: string
 ): Promise<{ success: boolean; error?: string }> {

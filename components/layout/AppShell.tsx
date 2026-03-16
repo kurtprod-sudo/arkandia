@@ -30,7 +30,6 @@ const MOBILE_ITEMS = NAV_ITEMS.slice(0, 4) // Home, Personagem, Mundo, Batalha
 interface AppShellProps {
   children: React.ReactNode
   characterId: string | null
-  characterName: string | null
   characterInitial: string
   isGm: boolean
 }
@@ -38,7 +37,6 @@ interface AppShellProps {
 export default function AppShell({
   children,
   characterId,
-  characterName,
   characterInitial,
   isGm,
 }: AppShellProps) {

@@ -4,10 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import ArkButton from '@/components/ui/ArkButton'
 
-interface ResonanceEventModalProps {
-  characterName: string
-}
-
 const LINES = [
   'Durante anos, um Arquétipo dormiu dentro de você —',
   'silencioso, paciente, aguardando o momento certo.',
@@ -15,7 +11,7 @@ const LINES = [
   'O que sempre foi parte de você agora tem nome.',
 ]
 
-export default function ResonanceEventModal({ characterName }: ResonanceEventModalProps) {
+export default function ResonanceEventModal() {
   const router = useRouter()
   const [closing, setClosing] = useState(false)
   const [entered, setEntered] = useState(false)

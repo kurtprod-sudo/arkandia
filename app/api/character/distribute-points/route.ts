@@ -45,13 +45,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Pontos insuficientes.' }, { status: 400 })
   }
 
-  // Build update object
-  const update: Record<string, number> = {
-    attribute_points: attrs.attribute_points - amount,
-    [attribute]: amount, // Will be added via SQL increment
-  }
-
-  // Use RPC or manual increment
   // First get current value
   const { data: currentAttrs } = await supabase
     .from('character_attributes')

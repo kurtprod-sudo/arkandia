@@ -30,7 +30,6 @@ export default async function AppShellWrapper({ children, pathname }: AppShellWr
   return (
     <AppShell
       characterId={character?.id ?? null}
-      characterName={character?.name ?? null}
       characterInitial={character?.name?.charAt(0) ?? '?'}
       isGm={profile?.role === 'gm'}
     >

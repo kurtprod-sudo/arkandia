@@ -221,16 +221,6 @@ export default async function CharacterSheetPage() {
                   required_level: (inv.items as Record<string, unknown>).required_level as number,
                 },
               }))}
-              currentAttrs={{
-                ataque: attrs.ataque,
-                magia: attrs.magia,
-                defesa: attrs.defesa,
-                vitalidade: attrs.vitalidade,
-                velocidade: attrs.velocidade,
-                precisao: attrs.precisao,
-                tenacidade: attrs.tenacidade,
-                capitania: attrs.capitania,
-              }}
               librasBalance={wallet.libras}
             />
           </div>
@@ -273,7 +263,7 @@ export default async function CharacterSheetPage() {
 
         {/* Resonance event modal */}
         {character.resonance_event_pending && (
-          <ResonanceEventModal characterName={character.name} />
+          <ResonanceEventModal />
         )}
       </div>
     </main>

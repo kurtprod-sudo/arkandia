@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import ArkButton from '@/components/ui/ArkButton'
 import ArkDivider from '@/components/ui/ArkDivider'
 import { Globe, Map, Landmark } from 'lucide-react'
 

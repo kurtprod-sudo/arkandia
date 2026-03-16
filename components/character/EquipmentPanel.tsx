@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import ArkButton from '@/components/ui/ArkButton'
 import ArkBadge from '@/components/ui/ArkBadge'
 import {
-  Sword, Shield, HardHat, Shirt, Footprints, Gem, Lock, X, ArrowUp,
+  Sword, HardHat, Shirt, Footprints, Gem, Lock, X, ArrowUp,
 } from 'lucide-react'
 
 const SLOT_ICONS: Record<string, React.ElementType> = {
@@ -66,7 +66,6 @@ interface EquipmentPanelProps {
   slotDefinitions: SlotDef[]
   equippedItems: EquippedItem[]
   inventoryItems: InventoryItem[]
-  currentAttrs: Record<string, number>
   librasBalance: number
 }
 
@@ -75,7 +74,6 @@ export default function EquipmentPanel({
   slotDefinitions,
   equippedItems,
   inventoryItems,
-  currentAttrs,
   librasBalance,
 }: EquipmentPanelProps) {
   const router = useRouter()
