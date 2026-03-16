@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Swords, CheckCircle, Lock, Shield, BookOpen, Star } from 'lucide-react'
 import type { CampaignStage, LoreFragment } from '@/types'
-import { startStageCombatAction, completeStageAction } from '@/app/actions/campaign_long'
+import { startStageCombatAction } from '@/app/actions/campaign_long'
 
 interface StageWithStatus extends CampaignStage {
   normalCompleted: boolean
@@ -45,18 +45,6 @@ export default function AventuraChapterTabs({ chapters, loreFragments }: Props) 
         setError(res.error ?? 'Erro ao iniciar combate.')
       } else if (res.sessionId) {
         router.push(`/combat?session=${res.sessionId}`)
-      }
-    })
-  }
-
-  async function _handleComplete(stageNumber: number, difficulty: 'normal' | 'hard', sessionId: string) {
-    setError(null)
-    startTransition(async () => {
-      const res = await completeStageAction('aventura', activeTab, stageNumber, difficulty, sessionId)
-      if (!res.success) {
-        setError(res.error ?? 'Erro ao completar fase.')
-      } else {
-        router.refresh()
       }
     })
   }

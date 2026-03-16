@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -136,7 +137,7 @@ export default async function HomePage() {
             <div className="flex items-center gap-3 mb-4">
               <div className="w-14 h-14 rounded-full bg-[#6e160f]/30 border-2 border-[var(--ark-border-bright)] flex items-center justify-center text-2xl font-display font-bold text-[var(--text-primary)] overflow-hidden">
                 {character.avatar_url ? (
-                  <img src={character.avatar_url} alt="" className="w-full h-full object-cover" />
+                  <Image src={character.avatar_url} alt="" width={56} height={56} className="w-full h-full object-cover" />
                 ) : (
                   character.name.charAt(0)
                 )}

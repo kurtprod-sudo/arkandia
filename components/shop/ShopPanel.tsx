@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import ArkButton from '@/components/ui/ArkButton'
 
 interface PendingPaymentData {
@@ -234,10 +235,12 @@ export default function ShopPanel({ characterId, pendingPayment }: Props) {
           {/* QR Code Image */}
           {paymentData.qrCodeBase64 && (
             <div className="flex justify-center">
-              <img
+              <Image
                 src={`data:image/png;base64,${paymentData.qrCodeBase64}`}
                 alt="QR Code PIX"
-                className="w-48 h-48 rounded bg-white p-2"
+                width={192}
+                height={192}
+                className="rounded bg-white p-2"
               />
             </div>
           )}

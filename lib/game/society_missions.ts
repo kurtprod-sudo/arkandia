@@ -55,7 +55,8 @@ const BONUS_TEMPLATES: Record<SocietyMissionType, { label: string; description: 
   collective_treasury: { label: 'Tesouro da Era', description: 'Cofre recebe 8.000 Libras.', target: 8000, treasury_reward: 3000, xp_reward: 400 },
 }
 
-type SBU = { from: (t: string) => Record<string, unknown> }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SBU = { from: (t: string) => any }
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]

@@ -6,6 +6,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createNotification } from './notifications'
 import { grantXp } from './levelup'
+import { getWeekStart, isBeforeThursday } from '@/lib/utils/formulas'
 
 export type WeeklyMissionType =
   | 'complete_dungeons' | 'win_pvp_ranked' | 'complete_expeditions'

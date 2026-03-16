@@ -372,9 +372,7 @@ export async function challengeMirror(
 
 // ─── Season Rewards ───────────────────────────────────────────────────────
 
-export async function distributeSeasonRewards(
-  _gmCharacterId: string
-): Promise<{ success: boolean; error?: string; rewarded?: number }> {
+export async function distributeSeasonRewards(): Promise<{ success: boolean; error?: string; rewarded?: number }> {
   const supabase = await createClient()
 
   const { data: season } = await (supabase as unknown as { from: (t: string) => { select: (s: string) => { eq: (k: string, v: string) => { single: () => Promise<{ data: Record<string, unknown> | null }> } } } })
@@ -421,7 +419,7 @@ export async function distributeSeasonRewards(
   }
 
   // Participation reward
-  for (const charId of participantIds) {
+  for (const charId of Array.from(participantIds)) {
     const { data: wallet } = await supabase
       .from('character_wallet').select('essencia').eq('character_id', charId).single()
     if (wallet) {

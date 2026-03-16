@@ -38,7 +38,8 @@ export function getPremiumReward(tier: number): TierReward {
 }
 
 type SB = SupabaseClient<Database>
-type SBANY = { from: (t: string) => Record<string, unknown> }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SBANY = { from: (t: string) => any }
 
 export async function getOrCreateBattlePass(characterId: string): Promise<CharacterBattlePass | null> {
   const supabase = await createClient()

@@ -28,7 +28,8 @@ export interface BossTurnResult {
   bossDefeated: boolean; playerDefeated: boolean
 }
 
-type SBU = { from: (t: string) => Record<string, unknown> }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SBU = { from: (t: string) => any }
 
 function mapBoss(r: Record<string, unknown>): WorldBossInstance {
   const pool = (r.reward_pool ?? {}) as Record<string, unknown>

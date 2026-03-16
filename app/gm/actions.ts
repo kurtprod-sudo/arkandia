@@ -803,7 +803,7 @@ export async function gmDistributeColiseuRewardsAction() {
     .from('characters').select('id').eq('user_id', (await supabase.auth.getUser()).data.user?.id ?? '').single()
   if (!character) return { success: false, error: 'Personagem GM não encontrado.' }
   const { distributeSeasonRewards } = await import('@/lib/game/coliseu')
-  const result = await distributeSeasonRewards(character.id)
+  const result = await distributeSeasonRewards()
   revalidatePath('/gm')
   revalidatePath('/coliseu')
   return result
@@ -812,8 +812,9 @@ export async function gmDistributeColiseuRewardsAction() {
 export async function gmCloseSeasonAction(
   newSeasonName: string, newSeasonTheme: string, newSeasonLoreText?: string
 ) {
-  const { user } = await assertGM()
-  const supabase = await createClient()
+  const supabase = await assertGM()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Não autenticado.' }
   const { data: character } = await supabase
     .from('characters').select('id').eq('user_id', user.id).single()
   if (!character) return { success: false, error: 'Personagem GM não encontrado.' }
