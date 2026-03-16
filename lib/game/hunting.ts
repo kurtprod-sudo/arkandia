@@ -767,6 +767,10 @@ async function handleNpcDefeated(
   const { updateWeeklyProgress } = await import('./weekly')
   await updateWeeklyProgress(characterId, 'hunting_kills').catch(() => {})
 
+  // Bestiário: registra derrota do NPC
+  const { recordNpcDefeat } = await import('./bestiary')
+  await recordNpcDefeat(characterId, npcType.id as string).catch(() => {})
+
   // Calcula loot do NPC
   const lootTable = (npcType.loot_table as Array<{
     type: string; min?: number; max?: number; amount?: number;

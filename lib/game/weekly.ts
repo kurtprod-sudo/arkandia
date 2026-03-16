@@ -62,19 +62,7 @@ function shuffle<T>(arr: T[]): T[] {
   return a
 }
 
-export function getWeekStart(date?: Date): string {
-  const d = date ?? new Date()
-  const day = d.getUTCDay()
-  const diff = (day + 6) % 7
-  const monday = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - diff))
-  return monday.toISOString().split('T')[0]
-}
-
-export function isBeforeThursday(weekStart: string): boolean {
-  const ws = new Date(weekStart + 'T00:00:00Z')
-  const thursday = new Date(ws.getTime() + 3 * 86400000) // +3 days = Thursday
-  return new Date() < thursday
-}
+export { getWeekStart, isBeforeThursday } from '@/lib/utils/formulas'
 
 function isWeeklyMissionEntry(val: unknown): val is WeeklyMissionEntry {
   if (!val || typeof val !== 'object') return false

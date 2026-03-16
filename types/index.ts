@@ -1489,5 +1489,82 @@ export interface WeeklyMissionsRecord {
   earlyBonusClaimed: boolean
 }
 
+// ---------------------------------------------------------------------------
+// Coliseu
+// ---------------------------------------------------------------------------
+
+export type ColiseuResult = 'win' | 'loss' | 'draw'
+export type ColiseuTier = 'Iniciante' | 'Guerreiro' | 'Veterano' | 'Elite' | 'Lendário'
+
+export interface MirrorAttrsSnapshot {
+  ataque: number; magia: number; defesa: number; vitalidade: number
+  velocidade: number; precisao: number; tenacidade: number
+  hp_max: number; eter_max: number
+}
+
+export interface MirrorSkillSnapshot {
+  slot: number; skill_id: string; skill_name: string
+  formula: Record<string, number>; eter_cost: number; skill_type: string
+}
+
+export interface CharacterMirror {
+  characterId: string; attrsSnapshot: MirrorAttrsSnapshot
+  buildingSnapshot: MirrorSkillSnapshot[]; coliseuPoints: number
+  wins: number; losses: number; dailyChallengesUsed: number
+  lastChallengeDate: string | null; updatedAt: string
+}
+
+export interface CombatLogEntry {
+  turn: number; actor: 'challenger' | 'defender'
+  action: string; damage: number; hpAfter: number
+}
+
+export interface ColiseuSeason {
+  id: string; startsAt: string; endsAt: string
+  status: 'active' | 'finished'; rewardsDistributed: boolean
+}
+
+// ---------------------------------------------------------------------------
+// Bestiário
+// ---------------------------------------------------------------------------
+
+export interface BestiaryEntry {
+  npcTypeId: string; npcName: string; npcTier: string
+  zoneName: string; zoneId: string; totalDefeated: number
+  firstDefeatedAt: string; loreText: string | null
+  firstDiscovererName: string | null; knownDrops: string[]
+}
+
+export interface ZoneBestiaryProgress {
+  zoneId: string; zoneName: string
+  discovered: number; total: number; completed: boolean
+}
+
+// ---------------------------------------------------------------------------
+// Battle Pass + Ranking Sazonal
+// ---------------------------------------------------------------------------
+
+export interface TierReward {
+  libras: number; essencias: number; gemas: number; tickets: number
+}
+
+export interface CharacterBattlePass {
+  id: string; characterId: string; seasonId: string
+  seasonXp: number; currentTier: number; isPremium: boolean
+  purchasedAt: string | null
+}
+
+export interface BattlePassStatus extends CharacterBattlePass {
+  seasonName: string; seasonTheme: string; seasonEndsAt: string
+  xpToNextTier: number
+  claimedTiers: Array<{ tier: number; track: 'free' | 'premium' }>
+}
+
+export interface SeasonRankingSnapshot {
+  seasonId: string; category: string; entityId: string
+  entityType: string; entityName: string; score: number
+  rankPosition: number; snapshottedAt: string
+}
+
 // Database type is in types/database.types.ts (follows Supabase generated format)
 // export type { Database } from './database.types'

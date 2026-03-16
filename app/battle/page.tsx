@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import ArkDivider from '@/components/ui/ArkDivider'
-import { Target, Compass, Users, Swords, BookOpen, Trophy, Shield } from 'lucide-react'
+import { Target, Compass, Users, Swords, BookOpen, Trophy, Shield, BookMarked } from 'lucide-react'
 
 export default async function BattlePage() {
   const supabase = await createClient()
@@ -10,12 +10,15 @@ export default async function BattlePage() {
   if (!user) redirect('/auth/login')
 
   const sections = [
+    { label: 'Bestiário', href: '/bestiary', icon: BookMarked, description: 'Registro de criaturas derrotadas com lore e drops.' },
     { label: 'Hunting', href: '/hunting', icon: Target, description: 'Entre em zonas de caça e enfrente NPCs em combate sequencial.' },
     { label: 'Expedições', href: '/expeditions', icon: Compass, description: 'Envie seu personagem em expedições idle e colete recompensas.' },
     { label: 'Dungeons', href: '/dungeon', icon: Users, description: 'Monte um grupo e enfrente dungeons em combate por turnos.' },
     { label: 'Combate PvP', href: '/combat', icon: Swords, description: 'Desafie outros jogadores para duelos em tempo real.' },
     { label: 'Tropas', href: '/battle/troops', icon: Shield, description: 'Recrute tropas e envie expedições com exército.' },
+    { label: 'Coliseu', href: '/coliseu', icon: Trophy, description: 'PvP assíncrono ranqueado por elos. Desafie Espelhos de outros jogadores.' },
     { label: 'Torneios', href: '/tournament', icon: Trophy, description: 'Torneios eliminatórios organizados pelo GM com premiação.' },
+    { label: 'Passe', href: '/battle-pass', icon: BookOpen, description: 'Trilha de recompensas sazonal com 40 tiers.' },
     { label: 'Campanha', href: '/battle', icon: BookOpen, description: 'Missões narrativas da Campanha Inicial. Em breve.' },
   ]
 

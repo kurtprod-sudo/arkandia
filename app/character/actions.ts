@@ -183,6 +183,8 @@ export async function createCharacter(formData: FormData) {
 
   const { checkAchievements } = await import('@/lib/game/achievements')
   await checkAchievements(character.id, 'first_login', {}).catch(() => {})
+  const { updateMirror } = await import('@/lib/game/coliseu')
+  await updateMirror(character.id).catch(() => {})
 
   revalidatePath('/character')
   redirect('/onboarding')

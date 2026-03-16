@@ -1,5 +1,5 @@
 import { claimWeeklyRewardAction } from '@/app/actions/weekly'
-import { isBeforeThursday } from '@/lib/game/weekly'
+import { isBeforeThursday } from '@/lib/utils/formulas'
 import ArkButton from '@/components/ui/ArkButton'
 import ArkBadge from '@/components/ui/ArkBadge'
 import WeeklyCountdown from './WeeklyCountdown'

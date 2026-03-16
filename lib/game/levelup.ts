@@ -129,6 +129,10 @@ export async function grantXp(
     }
   }
 
+  // Propaga XP para o battle pass da temporada ativa
+  const { addSeasonXp } = await import('./battle_pass')
+  await addSeasonXp(characterId, amount, supabase).catch(() => {})
+
   return {
     levelsGained: result.levelsGained,
     newLevel: result.newLevel,

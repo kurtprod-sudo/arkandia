@@ -26,3 +26,19 @@ export function calcResonanceEter(resonanceLevel: number): number {
 export function calcResonanceCost(targetLevel: number): number {
   return 50 * targetLevel + 10 * targetLevel ** 2
 }
+
+/** Segunda-feira da semana atual em UTC (formato YYYY-MM-DD). */
+export function getWeekStart(date?: Date): string {
+  const d = date ?? new Date()
+  const day = d.getUTCDay()
+  const diff = (day + 6) % 7
+  const monday = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() - diff))
+  return monday.toISOString().split('T')[0]
+}
+
+/** True se agora (UTC) é antes de quinta-feira 00:00 da semana informada. */
+export function isBeforeThursday(weekStart: string): boolean {
+  const ws = new Date(weekStart + 'T00:00:00Z')
+  const thursday = new Date(ws.getTime() + 3 * 86400000)
+  return new Date() < thursday
+}
