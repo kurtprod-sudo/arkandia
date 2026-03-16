@@ -654,5 +654,7 @@ async function finishDungeon(
   for (const p of survivors) {
     await checkAch(p.character_id, 'dungeon_complete', {}).catch(() => {})
     await updateWeeklyProgress(p.character_id, 'complete_dungeons').catch(() => {})
+    const { updateSocietyMissionProgress } = await import('./society_missions')
+    await updateSocietyMissionProgress(p.character_id, 'collective_dungeons').catch(() => {})
   }
 }

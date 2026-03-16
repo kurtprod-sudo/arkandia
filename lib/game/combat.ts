@@ -850,6 +850,8 @@ async function finishCombat(
   if (modality === 'duelo_ranqueado') {
     const { updateWeeklyProgress } = await import('./weekly')
     await updateWeeklyProgress(winnerId, 'win_pvp_ranked').catch(() => {})
+    const { updateSocietyMissionProgress } = await import('./society_missions')
+    await updateSocietyMissionProgress(winnerId, 'collective_pvp_wins').catch(() => {})
   }
   if (modality === 'emboscada') {
     await checkAchievements(winnerId, 'ambush_performed', {}, supabase).catch(() => {})

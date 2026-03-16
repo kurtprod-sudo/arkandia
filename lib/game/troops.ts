@@ -132,6 +132,8 @@ export async function enqueueRecruitment(
 
   const { updateWeeklyProgress } = await import('./weekly')
   await updateWeeklyProgress(characterId, 'recruit_troops').catch(() => {})
+  const { updateSocietyMissionProgress } = await import('./society_missions')
+  await updateSocietyMissionProgress(characterId, 'collective_troop_recruit').catch(() => {})
 
   return { success: true, endsAt: endsAt.toISOString() }
 }

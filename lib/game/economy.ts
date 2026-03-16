@@ -127,6 +127,8 @@ export async function collectTerritoryProduction(
       .from('societies')
       .update({ treasury_libras: (society.treasury_libras ?? 0) + taxAmount })
       .eq('id', societyId)
+    const { updateSocietyMissionProgress } = await import('./society_missions')
+    await updateSocietyMissionProgress(character.id, 'collective_treasury', taxAmount).catch(() => {})
   }
 
   // Distribui restante para o coletador (simplificado — pode expandir para todos membros)

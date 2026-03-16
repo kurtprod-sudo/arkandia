@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/boss-close",
       "schedule": "0 0 * * 1"
+    },
+    {
+      "path": "/api/cron/society-missions",
+      "schedule": "2 0 * * 1"
     }
   ]
 }

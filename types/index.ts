@@ -1585,5 +1585,117 @@ export interface BossContribution {
   attacksToday: number; lastAttackDate: string | null; rewardClaimed: boolean
 }
 
+// ---------------------------------------------------------------------------
+// Missões Coletivas de Sociedade
+// ---------------------------------------------------------------------------
+
+export type SocietyMissionType =
+  | 'collective_expeditions' | 'collective_pvp_wins' | 'collective_hunting_kills'
+  | 'collective_dungeons' | 'collective_troop_recruit' | 'collective_treasury'
+
+export type SocietyMissionDifficulty = 'facil' | 'medio' | 'dificil'
+
+export interface SocietyMissionEntry {
+  index: number; type: SocietyMissionType; label: string; description: string
+  target: number; progress: number; difficulty: SocietyMissionDifficulty
+  completed: boolean; reward_claimed: boolean; treasury_reward: number
+  xp_reward: number; is_bonus: boolean; notified_50: boolean
+  notified_complete: boolean; contributor_ids: string[]
+}
+
+export interface SocietyMissionsRecord {
+  id: string; societyId: string; weekStart: string
+  missions: SocietyMissionEntry[]; bonusUnlocked: boolean
+}
+
+// ---------------------------------------------------------------------------
+// Campanha
+// ---------------------------------------------------------------------------
+
+export interface CampaignChoiceOption {
+  label: string
+  reputation_faction: string
+  reputation_delta: number
+  narrative_result: string
+}
+
+export interface CampaignChapter {
+  id: string
+  campaignId: string
+  chapterNumber: number
+  title: string
+  narrativeText: string
+  hasCombat: boolean
+  npcName: string | null
+  npcStatPct: number
+  choices: CampaignChoiceOption[] | null
+  xpReward: number
+  librasReward: number
+  titleRewardId: string | null
+  unlocksResonance: boolean
+}
+
+export interface CampaignProgress {
+  id: string
+  characterId: string
+  campaignId: string
+  currentChapter: number
+  chapterChoices: Record<string, number>
+  combatSessionId: string | null
+  completed: boolean
+}
+
+// ---------------------------------------------------------------------------
+// Campanha Longa
+// ---------------------------------------------------------------------------
+
+export interface NpcStageAttrs {
+  ataque: number; magia: number; defesa: number
+  vitalidade: number; velocidade: number; precisao: number
+  tenacidade: number; hp_max: number; hp_atual: number
+  eter_max: number; eter_atual: number
+}
+
+export interface CampaignStage {
+  id: string
+  campaignId: string
+  chapterNumber: number
+  stageNumber: number
+  difficulty: 'normal' | 'hard'
+  title: string
+  narrativeText: string
+  npcKey: string | null
+  npcName: string
+  npcChallengePhrase: string
+  npcSnapshotOverride: NpcStageAttrs | null
+  rewards: { xp: number; libras: number; lore_fragment_key?: string | null }
+}
+
+export interface StageProgress {
+  chapterNumber: number
+  stageNumber: number
+  difficulty: 'normal' | 'hard'
+  completedAt: string
+}
+
+export interface LoreFragment {
+  fragmentKey: string
+  title: string
+  content: string
+  nation: string
+  unlockedAt: string
+}
+
+export interface NpcKeyHistory {
+  npcKey: string
+  npcName: string
+  encounters: Array<{
+    chapterNumber: number
+    stageNumber: number
+    difficulty: 'normal' | 'hard'
+    completedAt: string
+  }>
+}
+
 // Database type is in types/database.types.ts (follows Supabase generated format)
 // export type { Database } from './database.types'

@@ -346,5 +346,8 @@ export async function depositToTreasury(
       .eq('id', character.society_id)
   }
 
+  const { updateSocietyMissionProgress } = await import('./society_missions')
+  await updateSocietyMissionProgress(characterId, 'collective_treasury', amount).catch(() => {})
+
   return { success: true }
 }

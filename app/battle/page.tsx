@@ -20,7 +20,7 @@ export default async function BattlePage() {
     { label: 'Coliseu', href: '/coliseu', icon: Trophy, description: 'PvP assíncrono ranqueado por elos. Desafie Espelhos de outros jogadores.' },
     { label: 'Torneios', href: '/tournament', icon: Trophy, description: 'Torneios eliminatórios organizados pelo GM com premiação.' },
     { label: 'Passe', href: '/battle-pass', icon: BookOpen, description: 'Trilha de recompensas sazonal com 40 tiers.' },
-    { label: 'Campanha', href: '/battle', icon: BookOpen, description: 'Missões narrativas da Campanha Inicial. Em breve.' },
+    { label: 'Campanha', href: '/campaign', icon: BookOpen, description: 'Missões narrativas com escolhas, combate e Ressonância.' },
   ]
 
   return (

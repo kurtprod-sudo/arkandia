@@ -721,6 +721,8 @@ async function handleNpcDefeated(
   // Weekly mission: hunting kill
   const { updateWeeklyProgress } = await import('./weekly')
   await updateWeeklyProgress(characterId, 'hunting_kills').catch(() => {})
+  const { updateSocietyMissionProgress } = await import('./society_missions')
+  await updateSocietyMissionProgress(characterId, 'collective_hunting_kills').catch(() => {})
 
   // Bestiário: registra derrota do NPC
   const { recordNpcDefeat } = await import('./bestiary')

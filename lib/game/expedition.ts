@@ -514,6 +514,8 @@ export async function resolveExpedition(
     await checkAchievements(expedition.character_id, 'expedition_complete', {}).catch(() => {})
     const { updateWeeklyProgress } = await import('./weekly')
     await updateWeeklyProgress(expedition.character_id, 'complete_expeditions').catch(() => {})
+    const { updateSocietyMissionProgress } = await import('./society_missions')
+    await updateSocietyMissionProgress(expedition.character_id, 'collective_expeditions').catch(() => {})
     if (troopsDeployed) {
       await checkAchievements(expedition.character_id, 'troop_expedition_complete', {}).catch(() => {})
       await updateWeeklyProgress(expedition.character_id, 'complete_troop_expedition').catch(() => {})
