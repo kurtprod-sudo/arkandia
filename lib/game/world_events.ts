@@ -113,7 +113,7 @@ export async function gmEndWorldEvent(
         .eq('type', 'monolito_participated')
         .gte('created_at', we.starts_at)
 
-      const participantIds = [...new Set((participantEvents ?? []).map((e) => e.actor_id).filter(Boolean))]
+      const participantIds = Array.from(new Set((participantEvents ?? []).map((e) => e.actor_id).filter((id): id is string => id !== null)))
       const { data: faction } = await supabase.from('factions').select('id').eq('slug', factionSlug).single()
       if (faction) {
         for (const charId of participantIds) {
