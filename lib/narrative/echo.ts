@@ -45,7 +45,7 @@ export async function getDailyEcho(
     .select('*').eq('character_id', characterId).eq('echo_date', today).maybeSingle()
 
   if (existing) {
-    return { success: true, echo: { id: existing.id, content: existing.content, archetype: existing.archetype, essenciaReward: existing.essencia_reward, claimed: existing.claimed, echoDate: existing.echo_date } }
+    return { success: true, echo: { id: existing.id, content: existing.content, archetype: existing.archetype, essenciaReward: existing.essencia_reward, claimed: !!existing.claimed, echoDate: existing.echo_date } }
   }
 
   const archetype = character.resonance_archetype as string
@@ -96,7 +96,7 @@ Escreva apenas o Eco, sem título, sem prefácio.`
 
     if (!echo) return { success: false, error: 'Erro ao salvar Eco.' }
 
-    return { success: true, echo: { id: echo.id, content: echo.content, archetype: echo.archetype, essenciaReward: echo.essencia_reward, claimed: echo.claimed, echoDate: echo.echo_date } }
+    return { success: true, echo: { id: echo.id, content: echo.content, archetype: echo.archetype, essenciaReward: echo.essencia_reward, claimed: !!echo.claimed, echoDate: echo.echo_date } }
   } catch (err) {
     console.error('[getDailyEcho] API error:', err)
     return { success: false, error: 'Serviço narrativo indisponível.' }

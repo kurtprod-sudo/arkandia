@@ -69,7 +69,7 @@ export default async function NotificationsPage() {
                 </div>
                 <p className="text-[11px] font-body text-[var(--text-secondary)]">{n.body}</p>
                 <span className="text-[10px] font-data text-[var(--text-label)] mt-1 block">
-                  {new Date(n.created_at).toLocaleDateString('pt-BR', {
+                  {new Date(n.created_at as string).toLocaleDateString('pt-BR', {
                     day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
                   })}
                 </span>

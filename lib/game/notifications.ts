@@ -27,11 +27,11 @@ export async function createNotification(
   const supabase = await createClient()
   await supabase.from('notifications').insert({
     character_id: input.characterId,
-    type: input.type,
+    type: input.type as string,
     title: input.title,
     body: input.body,
     action_url: input.actionUrl ?? null,
-    metadata: input.metadata ?? {},
+    metadata: (input.metadata ?? {}) as unknown as Record<string, never>,
   })
 }
 

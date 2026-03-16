@@ -205,7 +205,7 @@ export async function processHuntingAction(
   const { data: npcType } = await supabase
     .from('npc_types')
     .select('*')
-    .eq('id', session.current_npc_id)
+    .eq('id', session.current_npc_id as string)
     .single()
   if (!npcType) return { success: false, error: 'NPC não encontrado.' }
 
@@ -217,7 +217,7 @@ export async function processHuntingAction(
     .single()
   if (!playerAttrs) return { success: false, error: 'Atributos não encontrados.' }
 
-  const npcSkills = (npcType.skills as NpcSkill[]) ?? []
+  const npcSkills = (npcType.skills as unknown as NpcSkill[]) ?? []
 
   // Estado atual do NPC
   const npcCurrentHp = session.current_npc_hp as number
@@ -700,7 +700,7 @@ async function spawnNpc(
     velocidade: npc.base_velocidade,
     eter: npc.base_eter,
     eterMax: npc.base_eter,
-    skills: (npc.skills as NpcSkill[]) ?? [],
+    skills: (npc.skills as unknown as NpcSkill[]) ?? [],
     behavior: npc.behavior,
     killNumber,
   }

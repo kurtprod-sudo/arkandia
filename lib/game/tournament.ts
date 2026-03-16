@@ -53,7 +53,7 @@ export async function gmCreateTournament(input: {
       description: input.description ?? null,
       max_participants: input.maxParticipants,
       registration_ends_at: input.registrationEndsAt,
-      prize_pool: input.prizePool as unknown as Record<string, unknown>,
+      prize_pool: input.prizePool as unknown as Record<string, unknown> as never,
       created_by: input.gmCharacterId,
       status: 'open',
     })
@@ -303,8 +303,8 @@ export async function resolveTournamentMatch(
 
   // Determine winner participant
   const [{ data: pA }, { data: pB }] = await Promise.all([
-    supabase.from('tournament_participants').select('id, character_id').eq('id', match.participant_a_id).single(),
-    supabase.from('tournament_participants').select('id, character_id').eq('id', match.participant_b_id).single(),
+    supabase.from('tournament_participants').select('id, character_id').eq('id', match.participant_a_id as string).single(),
+    supabase.from('tournament_participants').select('id, character_id').eq('id', match.participant_b_id as string).single(),
   ])
 
   const winnerParticipantId = pA?.character_id === winnerId ? pA.id

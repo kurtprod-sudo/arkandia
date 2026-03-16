@@ -87,13 +87,14 @@ export async function updateReputation(
   }
 
   // Registra no log de auditoria
-  await supabase.from('reputation_events').insert({
-    character_id: characterId,
-    faction_id: faction.id,
-    delta,
-    reason: `reputation_update`,
-    source: 'quest',
-  }).catch(() => {}) // silently fail if table doesn't exist yet
+  await (supabase as unknown as { from: (t: string) => { insert: (d: Record<string, unknown>) => Promise<unknown> } })
+    .from('reputation_events').insert({
+      character_id: characterId,
+      faction_id: faction.id,
+      delta,
+      reason: 'reputation_update',
+      source: 'quest',
+    })
 
   // Registra evento e notifica se houve mudança de estágio
   const oldStage = getReputationStage(currentPoints)
@@ -278,13 +279,14 @@ export async function modifyReputation(
     .single()
 
   if (faction) {
-    await supabase.from('reputation_events').insert({
-      character_id: characterId,
-      faction_id: faction.id,
-      delta,
-      reason,
-      source,
-    }).catch(() => {})
+    await (supabase as unknown as { from: (t: string) => { insert: (d: Record<string, unknown>) => Promise<unknown> } })
+      .from('reputation_events').insert({
+        character_id: characterId,
+        faction_id: faction.id,
+        delta,
+        reason,
+        source,
+      })
   }
 
   return updateReputation(characterId, factionSlug, delta)
