@@ -268,7 +268,7 @@ export function calcTroopSuccessModifier(
 
   // Find which troop type has advantage against resistance
   const advantageousType = Object.entries(TROOP_ADVANTAGE)
-    .find(([_, weak]) => weak === resistanceType)?.[0] as TroopType | undefined
+    .find(([, weak]) => weak === resistanceType)?.[0] as TroopType | undefined
 
   // Find which troop type is weak to resistance
   const disadvantagedType = TROOP_ADVANTAGE[resistanceType]

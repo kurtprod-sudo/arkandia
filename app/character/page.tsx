@@ -195,7 +195,6 @@ export default async function CharacterSheetPage() {
               archetype={character.resonance_archetype as string}
               resonanceLevel={character.resonance_level ?? 1}
               essenciaBalance={wallet.essencia}
-              eterMax={attrs.eter_max}
             />
           </div>
         )}

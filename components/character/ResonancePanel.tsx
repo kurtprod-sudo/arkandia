@@ -50,11 +50,10 @@ interface ResonancePanelProps {
   archetype: string
   resonanceLevel: number
   essenciaBalance: number
-  eterMax: number
 }
 
 export default function ResonancePanel({
-  archetype, resonanceLevel, essenciaBalance, eterMax,
+  archetype, resonanceLevel, essenciaBalance,
 }: ResonancePanelProps) {
   const router = useRouter()
   const [upgrading, setUpgrading] = useState(false)

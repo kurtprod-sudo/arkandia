@@ -47,11 +47,10 @@ interface Props {
   slotDefinitions: SlotDef[]
   equippedItems: EquippedItem[]
   inventoryItems: InvItem[]
-  librasBalance: number
 }
 
 export default function EquipmentSilhouette({
-  characterId, slotDefinitions, equippedItems, inventoryItems, librasBalance,
+  characterId, slotDefinitions, equippedItems, inventoryItems,
 }: Props) {
   const router = useRouter()
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)

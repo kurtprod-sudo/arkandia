@@ -5,7 +5,6 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createNotification } from './notifications'
-import { createEvent } from './events'
 import { calcSkillDamage, calcDodgeChance } from './attributes'
 
 const NPC_NAMES = [
@@ -215,8 +214,6 @@ async function resolveDailyChallenge(
   won: boolean,
   supabase: Awaited<ReturnType<typeof createClient>>
 ): Promise<void> {
-  const today = new Date().toISOString().split('T')[0]
-
   // Get yesterday's streak
   const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
   const { data: yesterdayChallenge } = await supabase

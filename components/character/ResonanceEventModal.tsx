@@ -167,9 +167,6 @@ export default function ResonanceEventModal() {
             {/* Archetype nodes */}
             {ARCHETYPES.map((a, i) => {
               const angle = (i * 30 - 90) * Math.PI / 180
-              const r = typeof window !== 'undefined' && window.innerWidth < 768 ? 120 : 150
-              const cx = 50 + r * Math.cos(angle) / (r / 50)
-              const cy = 50 + r * Math.sin(angle) / (r / 50)
               const isSelected = selected === a.key
               const isHovered = hovered === a.key
               const color = ARCHETYPE_COLORS[a.key]

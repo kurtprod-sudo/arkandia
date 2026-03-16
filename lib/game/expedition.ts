@@ -11,7 +11,6 @@ import { modifyReputation, hasMinimumReputation } from './reputation'
 import {
   validateTroopDeployment,
   deductTroopLosses,
-  calcTroopSuccessModifier,
   type TroopDeployment,
   type TroopType,
 } from './troops'

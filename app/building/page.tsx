@@ -182,7 +182,6 @@ export default async function BuildingPage() {
           slotDefinitions={slotDefs}
           equippedItems={equippedItems}
           inventoryItems={inventoryItems}
-          librasBalance={wallet?.libras ?? 0}
         />
       </div>
 
