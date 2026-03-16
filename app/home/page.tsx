@@ -7,6 +7,7 @@ import ArkBadge from '@/components/ui/ArkBadge'
 import type { JournalSection } from '@/types'
 import { getDailyTasks, updateLoginStreak } from '@/lib/game/daily'
 import DailyTasksWidget from '@/components/dashboard/DailyTasksWidget'
+import DailyChallengeWidget from '@/components/dashboard/DailyChallengeWidget'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -266,6 +267,9 @@ export default async function HomePage() {
             characterId={character.id}
             streak={streakData.currentStreak}
           />
+
+          {/* Daily Challenge */}
+          <DailyChallengeWidget challenge={null} />
         </div>
 
         {/* ── RIGHT COLUMN: Journal & Notifications ── */}

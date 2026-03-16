@@ -223,6 +223,10 @@ export async function performSummon(
       : undefined,
   })
 
+  // Completa daily task de summon
+  const { completeTask } = await import('./daily')
+  await completeTask(characterId, 'use_summon').catch(() => {})
+
   return {
     success: true,
     result: {

@@ -545,6 +545,10 @@ async function finishDungeon(
     // XP (com level up automático)
     await grantXp(participant.character_id, xpReward, supabase)
 
+    // Completa daily task de dungeon
+    const { completeTask } = await import('./daily')
+    await completeTask(participant.character_id, 'complete_dungeon').catch(() => {})
+
     // Libras
     const { data: wallet } = await supabase
       .from('character_wallet')

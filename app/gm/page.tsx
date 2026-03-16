@@ -165,6 +165,17 @@ export default async function GMPanelPage() {
     })
   }
 
+  // World events
+  const { data: worldEventsRaw } = await supabase
+    .from('world_events')
+    .select('id, type, title, status, created_at')
+    .order('created_at', { ascending: false })
+    .limit(20)
+  const worldEventsData = (worldEventsRaw ?? []).map((e) => ({
+    id: e.id as string, type: e.type as string, title: e.title as string,
+    status: e.status as string, created_at: e.created_at as string,
+  }))
+
   return (
     <main className="min-h-screen relative">
       {/* Background glow — crimson for GM authority */}
@@ -200,6 +211,7 @@ export default async function GMPanelPage() {
           allItems={(allItems ?? []) as GmPanelProps['allItems']}
           factions={(factions ?? []) as GmPanelProps['factions']}
           tournaments={tournamentData}
+          worldEvents={worldEventsData}
         />
       </div>
     </main>

@@ -542,6 +542,8 @@ export type TaskType =
   | 'craft_item'
   | 'login_streak'
   | 'use_summon'
+  | 'mercado_volatil'
+  | 'eco_arquetipo'
 
 export interface DailyTask {
   type: TaskType
@@ -1357,6 +1359,71 @@ export interface TournamentMatch {
   combatSessionId: string | null
   isBye: boolean
   status: TournamentMatchStatus
+}
+
+// ---------------------------------------------------------------------------
+// Tropas (estoque, deployment, recrutamento)
+// ---------------------------------------------------------------------------
+
+export interface TroopStock {
+  infantaria: number
+  arquearia: number
+  cavalaria: number
+  cerco: number
+}
+
+export interface TroopDeployment {
+  infantaria?: number
+  arquearia?: number
+  cavalaria?: number
+  cerco?: number
+}
+
+export interface RecruitmentQueueItem {
+  id: string
+  troopType: TroopType
+  quantity: number
+  startsAt: string
+  endsAt: string
+}
+
+// ---------------------------------------------------------------------------
+// Eventos de Mundo e Desafio Diário
+// ---------------------------------------------------------------------------
+
+export type WorldEventType =
+  | 'monolito' | 'invasao_faccao' | 'passagem_imperador'
+  | 'torneio' | 'crise_politica' | 'catalogo_lendario'
+
+export type WorldEventStatus = 'active' | 'ended'
+
+export interface WorldEvent {
+  id: string
+  type: WorldEventType
+  title: string
+  description: string
+  status: WorldEventStatus
+  startsAt: string
+  endsAt: string | null
+  metadata: Record<string, unknown>
+  createdBy: string
+  createdAt: string
+}
+
+export interface DailyChallenge {
+  id: string
+  characterId: string
+  challengeDate: string
+  npcSnapshot: {
+    name: string
+    challengePhrase: string
+    attributes: Record<string, number>
+  }
+  combatSessionId: string | null
+  completed: boolean
+  won: boolean | null
+  rewardClaimed: boolean
+  currentStreak: number
 }
 
 // Database type is in types/database.types.ts (follows Supabase generated format)

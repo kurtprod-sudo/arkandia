@@ -64,6 +64,10 @@ export async function joinScenario(
     narrativeText: `${character.name} entrou em ${scenario.name}.`,
   })
 
+  // Completa daily task de cenário social
+  const { completeTask } = await import('./daily')
+  await completeTask(characterId, 'join_scenario').catch(() => {})
+
   return { success: true }
 }
 

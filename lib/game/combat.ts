@@ -782,6 +782,38 @@ async function finishCombat(
     await grantXp(loserId, xpRewards.loser, supabase)
   }
 
+  // Recompensas de Libras e Essências por PvP — Referência: GDD_Balanceamento §10, §11
+  const PVP_REWARDS: Record<string, { winner: { libras: number; essencia: number }; loser: { essencia: number } }> = {
+    duelo_livre:     { winner: { libras: 0,  essencia: 0  }, loser: { essencia: 0  } },
+    duelo_ranqueado: { winner: { libras: 80, essencia: 20 }, loser: { essencia: 5  } },
+    emboscada:       { winner: { libras: 60, essencia: 15 }, loser: { essencia: 0  } },
+    torneio:         { winner: { libras: 0,  essencia: 10 }, loser: { essencia: 0  } },
+  }
+  const pvpRewards = PVP_REWARDS[modality] ?? PVP_REWARDS.duelo_livre
+  if (pvpRewards.winner.libras > 0 || pvpRewards.winner.essencia > 0) {
+    const { data: ww } = await supabase
+      .from('character_wallet').select('libras, essencia').eq('character_id', winnerId).single()
+    if (ww) {
+      await supabase.from('character_wallet').update({
+        libras: ww.libras + pvpRewards.winner.libras,
+        essencia: ww.essencia + pvpRewards.winner.essencia,
+      }).eq('character_id', winnerId)
+    }
+  }
+  if (pvpRewards.loser.essencia > 0) {
+    const { data: lw } = await supabase
+      .from('character_wallet').select('essencia').eq('character_id', loserId).single()
+    if (lw) {
+      await supabase.from('character_wallet').update({
+        essencia: lw.essencia + pvpRewards.loser.essencia,
+      }).eq('character_id', loserId)
+    }
+  }
+
+  // Completa daily task de PvP para o vencedor
+  const { completeTask } = await import('./daily')
+  await completeTask(winnerId, 'win_pvp').catch(() => {})
+
   // Se a sessão é de torneio, propaga resultado para o bracket
   if (modality === 'torneio') {
     const { resolveTournamentMatch } = await import('./tournament')

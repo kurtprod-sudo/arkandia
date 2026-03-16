@@ -4,7 +4,7 @@ import { PROGRESSION_MILESTONES } from '@/lib/game/xp'
 import CharacterSheet from '@/components/character/CharacterSheet'
 import DistributePointsPanel from '@/components/character/DistributePointsPanel'
 import ResonanceEventModal from '@/components/character/ResonanceEventModal'
-import EquipmentPanel from '@/components/character/EquipmentPanel'
+import ResonancePanel from '@/components/character/ResonancePanel'
 
 export default async function CharacterSheetPage() {
   const supabase = await createClient()
@@ -32,9 +32,6 @@ export default async function CharacterSheetPage() {
     { data: buildingRaw },
     { data: reputationsRaw },
     { data: characterTitlesRaw },
-    { data: equippedItemsRaw },
-    { data: slotDefinitionsRaw },
-    { data: inventoryRaw },
   ] = await Promise.all([
     supabase
       .from('characters')
@@ -65,19 +62,6 @@ export default async function CharacterSheetPage() {
       .select('*, title_definitions(name, description, category)')
       .eq('character_id', characterId)
       .order('granted_at', { ascending: false }),
-    supabase
-      .from('character_equipment')
-      .select('*, items(id, name, description, rarity, stats, slot_type, required_level)')
-      .eq('character_id', characterId),
-    supabase
-      .from('equipment_slots_definition')
-      .select('*')
-      .order('slot_order'),
-    supabase
-      .from('inventory')
-      .select('id, item_id, quantity, items!inner(id, name, rarity, stats, slot_type, required_level)')
-      .eq('character_id', characterId)
-      .filter('items.item_type', 'eq', 'equipamento'),
   ])
 
   // Extract joined names before casting to Character type
@@ -185,47 +169,6 @@ export default async function CharacterSheetPage() {
           titles={characterTitles}
         />
 
-        {/* Equipment Panel */}
-        {slotDefinitionsRaw && (
-          <div className="max-w-5xl mx-auto mt-6">
-            <EquipmentPanel
-              characterId={characterId}
-              slotDefinitions={(slotDefinitionsRaw ?? []).map((s) => ({
-                slot_key: s.slot_key as string,
-                label: s.label as string,
-                slot_order: s.slot_order as number,
-                is_locked: s.is_locked as boolean,
-              }))}
-              equippedItems={(equippedItemsRaw ?? []).map((e) => ({
-                slot_key: e.slot_key as string,
-                enhancement: e.enhancement as number,
-                items: e.items ? {
-                  id: (e.items as Record<string, unknown>).id as string,
-                  name: (e.items as Record<string, unknown>).name as string,
-                  description: (e.items as Record<string, unknown>).description as string,
-                  rarity: (e.items as Record<string, unknown>).rarity as string,
-                  stats: ((e.items as Record<string, unknown>).stats ?? {}) as Record<string, number>,
-                  slot_type: (e.items as Record<string, unknown>).slot_type as string,
-                } : null,
-              }))}
-              inventoryItems={(inventoryRaw ?? []).map((inv) => ({
-                id: inv.id as string,
-                item_id: inv.item_id as string,
-                quantity: inv.quantity as number,
-                items: {
-                  id: (inv.items as Record<string, unknown>).id as string,
-                  name: (inv.items as Record<string, unknown>).name as string,
-                  rarity: (inv.items as Record<string, unknown>).rarity as string,
-                  stats: ((inv.items as Record<string, unknown>).stats ?? {}) as Record<string, number>,
-                  slot_type: (inv.items as Record<string, unknown>).slot_type as string,
-                  required_level: (inv.items as Record<string, unknown>).required_level as number,
-                },
-              }))}
-              librasBalance={wallet.libras}
-            />
-          </div>
-        )}
-
         {/* Distribute attribute points */}
         {attrs.attribute_points > 0 && (
           <div className="max-w-5xl mx-auto mt-6">
@@ -241,6 +184,18 @@ export default async function CharacterSheetPage() {
                 tenacidade: attrs.tenacidade,
                 capitania: attrs.capitania,
               }}
+            />
+          </div>
+        )}
+
+        {/* Resonance Panel */}
+        {character.is_resonance_unlocked && character.resonance_archetype && !character.resonance_event_pending && (
+          <div className="max-w-5xl mx-auto mt-6">
+            <ResonancePanel
+              archetype={character.resonance_archetype as string}
+              resonanceLevel={character.resonance_level ?? 1}
+              essenciaBalance={wallet.essencia}
+              eterMax={attrs.eter_max}
             />
           </div>
         )}

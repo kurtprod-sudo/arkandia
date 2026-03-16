@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  Home, User, Globe, Swords, MessageCircle,
+  Home, User, Globe, Swords, MessageCircle, Sword,
   Hammer, Shield, Sparkles, ShoppingBag,
   Trophy, Gem, Calendar, ChevronLeft, ChevronRight, Menu, X,
 } from 'lucide-react'
@@ -13,6 +13,7 @@ import NotificationBell from './NotificationBell'
 const NAV_ITEMS = [
   { label: 'Home',       href: '/home',      icon: Home          },
   { label: 'Personagem', href: '/character',  icon: User          },
+  { label: 'Building',   href: '/building',   icon: Sword         },
   { label: 'Mundo',      href: '/world',      icon: Globe         },
   { label: 'Batalha',    href: '/battle',     icon: Swords        },
   { label: 'Lobby',      href: '/lobby',      icon: MessageCircle },

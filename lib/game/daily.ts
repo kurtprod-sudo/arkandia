@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createEvent } from './events'
+import { createNotification } from './notifications'
 import { grantXp } from './levelup'
 import type { Json } from '@/types/database.types'
 
@@ -14,6 +15,8 @@ export type TaskType =
   | 'craft_item'
   | 'login_streak'
   | 'use_summon'
+  | 'mercado_volatil'
+  | 'eco_arquetipo'
 
 export interface DailyTask {
   type: TaskType
@@ -85,6 +88,16 @@ const TASK_DEFINITIONS: Record<TaskType, TaskDefinition> = {
     label: 'Invocador',
     description: 'Realize 1 invocação no Santuário.',
     xp_reward: 15, essencia_reward: 2, libras_reward: 0,
+  },
+  mercado_volatil: {
+    label: 'Mercado Volátil',
+    description: 'Compre o item da Loja NPC do dia.',
+    xp_reward: 20, essencia_reward: 3, libras_reward: 0,
+  },
+  eco_arquetipo: {
+    label: 'Eco do Arquétipo',
+    description: 'Leia e reivindique o Eco do dia.',
+    xp_reward: 15, essencia_reward: 5, libras_reward: 0,
   },
 }
 
@@ -223,8 +236,18 @@ export async function completeTask(
   // Concede ticket se 5/5 e ainda não concedeu
   if (allCompleted && !ticketGranted) {
     ticketGranted = true
-    const { grantSummonTicket } = await import('./summon')
-    await grantSummonTicket(characterId)
+
+    const { data: ticketWallet } = await supabase
+      .from('character_wallet')
+      .select('summon_tickets')
+      .eq('character_id', characterId)
+      .single()
+    if (ticketWallet) {
+      await supabase
+        .from('character_wallet')
+        .update({ summon_tickets: ticketWallet.summon_tickets + 1 })
+        .eq('character_id', characterId)
+    }
 
     await createEvent(supabase, {
       type: 'daily_ticket_granted',
@@ -317,14 +340,50 @@ export async function updateLoginStreak(characterId: string): Promise<{
     })
     .eq('character_id', characterId)
 
-  // Recompensa de streak a cada 30 dias
-  if (newStreak % 30 === 0) {
+  // Marcos de streak com recompensas — Referência: GDD_Sistemas §5.3
+  const STREAK_MILESTONES: Record<number, { libras?: number; essencia?: number; tickets?: number; label: string }> = {
+    3:  { libras: 100,  label: '3 dias consecutivos'  },
+    7:  { tickets: 1,   label: '7 dias consecutivos'  },
+    15: { essencia: 50, label: '15 dias consecutivos' },
+    30: { essencia: 100, tickets: 1, label: '30 dias consecutivos' },
+  }
+
+  const milestone = STREAK_MILESTONES[newStreak]
+  if (milestone) {
+    const { data: mwallet } = await supabase
+      .from('character_wallet')
+      .select('libras, essencia, summon_tickets')
+      .eq('character_id', characterId)
+      .single()
+
+    if (mwallet) {
+      const updates: Record<string, number> = {}
+      if (milestone.libras)   updates.libras         = mwallet.libras         + milestone.libras
+      if (milestone.essencia) updates.essencia       = mwallet.essencia       + milestone.essencia
+      if (milestone.tickets)  updates.summon_tickets = mwallet.summon_tickets + milestone.tickets
+
+      if (Object.keys(updates).length > 0) {
+        await supabase
+          .from('character_wallet')
+          .update(updates as never)
+          .eq('character_id', characterId)
+      }
+    }
+
+    await createNotification({
+      characterId,
+      type: 'general',
+      title: `Streak: ${milestone.label}!`,
+      body: `Recompensa de presença consecutiva.${milestone.libras ? ` +${milestone.libras} Libras.` : ''}${milestone.essencia ? ` +${milestone.essencia} Essências.` : ''}${milestone.tickets ? ` +${milestone.tickets} Ticket.` : ''}`,
+      actionUrl: '/home',
+    })
+
     await createEvent(supabase, {
       type: 'streak_milestone',
       actorId: characterId,
-      metadata: { streak: newStreak },
-      isPublic: true,
-      narrativeText: `${newStreak} dias consecutivos em Arkandia. O mundo nota sua presença.`,
+      metadata: { streak: newStreak, ...milestone },
+      isPublic: false,
+      narrativeText: `${milestone.label} de login consecutivo.`,
     })
   }
 

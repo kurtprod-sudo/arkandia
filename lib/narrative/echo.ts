@@ -137,5 +137,9 @@ export async function claimEchoReward(
     narrativeText: `Eco do Arquétipo recebido. +${echo.essencia_reward} Essências.`,
   })
 
+  // Completa daily task de eco do arquétipo
+  const { completeTask } = await import('@/lib/game/daily')
+  await completeTask(characterId, 'eco_arquetipo').catch(() => {})
+
   return { success: true, essenciaGranted: echo.essencia_reward }
 }

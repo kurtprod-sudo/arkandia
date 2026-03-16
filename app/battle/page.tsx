@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import ArkDivider from '@/components/ui/ArkDivider'
-import { Target, Compass, Users, Swords, BookOpen, Trophy } from 'lucide-react'
+import { Target, Compass, Users, Swords, BookOpen, Trophy, Shield } from 'lucide-react'
 
 export default async function BattlePage() {
   const supabase = await createClient()
@@ -14,6 +14,7 @@ export default async function BattlePage() {
     { label: 'Expedições', href: '/expeditions', icon: Compass, description: 'Envie seu personagem em expedições idle e colete recompensas.' },
     { label: 'Dungeons', href: '/dungeon', icon: Users, description: 'Monte um grupo e enfrente dungeons em combate por turnos.' },
     { label: 'Combate PvP', href: '/combat', icon: Swords, description: 'Desafie outros jogadores para duelos em tempo real.' },
+    { label: 'Tropas', href: '/battle/troops', icon: Shield, description: 'Recrute tropas e envie expedições com exército.' },
     { label: 'Torneios', href: '/tournament', icon: Trophy, description: 'Torneios eliminatórios organizados pelo GM com premiação.' },
     { label: 'Campanha', href: '/battle', icon: BookOpen, description: 'Missões narrativas da Campanha Inicial. Em breve.' },
   ]

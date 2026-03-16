@@ -36,7 +36,7 @@ export async function updateSession(request: NextRequest) {
   supabaseResponse.headers.set('x-next-pathname', pathname)
 
   // Rotas protegidas que requerem autenticação
-  const protectedPaths = ['/home', '/dashboard', '/character', '/gm', '/world', '/battle', '/lobby', '/crafting', '/society', '/sanctuary', '/market', '/rankings', '/shop', '/events', '/notifications', '/expeditions', '/combat', '/dungeon', '/hunting', '/letters', '/diary', '/scenarios', '/journal', '/map', '/territories', '/summon', '/titles', '/onboarding', '/banned', '/tournament']
+  const protectedPaths = ['/home', '/dashboard', '/character', '/gm', '/world', '/battle', '/lobby', '/crafting', '/society', '/sanctuary', '/market', '/rankings', '/shop', '/events', '/notifications', '/expeditions', '/combat', '/dungeon', '/hunting', '/letters', '/diary', '/scenarios', '/journal', '/map', '/territories', '/summon', '/titles', '/onboarding', '/banned', '/tournament', '/building']
   const isProtected = protectedPaths.some((p) => pathname === p || pathname.startsWith(p + '/'))
 
   if (isProtected && !user) {

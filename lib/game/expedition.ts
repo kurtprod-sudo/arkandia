@@ -8,6 +8,13 @@ import { createEvent } from './events'
 import { createNotification } from './notifications'
 import { grantXp } from './levelup'
 import { modifyReputation, hasMinimumReputation } from './reputation'
+import {
+  validateTroopDeployment,
+  deductTroopLosses,
+  calcTroopSuccessModifier,
+  type TroopDeployment,
+  type TroopType,
+} from './troops'
 
 // Horas de recuperação por nível de risco em caso de falha
 const INJURY_HOURS: Record<string, number> = {
@@ -163,6 +170,84 @@ export async function startExpedition(
 }
 
 /**
+ * Inicia expedição com tropas. Fluxo idle idêntico ao solo.
+ * Valida deployment, deduz tropas do estoque ao iniciar.
+ */
+export async function startTroopExpedition(
+  characterId: string,
+  userId: string,
+  expeditionTypeId: string,
+  deployment: TroopDeployment
+): Promise<{ success: boolean; error?: string; expeditionId?: string }> {
+  const supabase = await createClient()
+
+  const { data: character } = await supabase
+    .from('characters').select('id, injured_until').eq('id', characterId).eq('user_id', userId).single()
+  if (!character) return { success: false, error: 'Personagem não encontrado.' }
+
+  if (character.injured_until && new Date(character.injured_until) > new Date()) {
+    return { success: false, error: 'Personagem ferido.' }
+  }
+
+  const { data: activeExp } = await supabase
+    .from('expeditions').select('id').eq('character_id', characterId).eq('status', 'active').maybeSingle()
+  if (activeExp) return { success: false, error: 'Já em expedição.' }
+
+  const { data: expType } = await supabase
+    .from('expedition_types').select('*').eq('id', expeditionTypeId).eq('is_active', true).single()
+  if (!expType) return { success: false, error: 'Tipo de expedição não encontrado.' }
+
+  // troop_expedition e resistance_type ficam dentro de success_formula JSONB
+  const successFormulaRaw = (expType.success_formula as Record<string, unknown>) ?? {}
+  if (!successFormulaRaw.troop_expedition) {
+    return { success: false, error: 'Este tipo de expedição não requer tropas.' }
+  }
+
+  // Validação de nível mínimo por risk_level (sem coluna min_level)
+  const MIN_LEVEL_BY_RISK: Record<string, number> = { moderado: 5, perigoso: 8, extremo: 12 }
+  const { data: charLevel } = await supabase
+    .from('characters').select('level').eq('id', characterId).single()
+  const minLevel = MIN_LEVEL_BY_RISK[expType.risk_level] ?? 1
+  if ((charLevel?.level ?? 1) < minLevel) {
+    return { success: false, error: `Nível ${minLevel} necessário para esta expedição.` }
+  }
+
+  const validation = await validateTroopDeployment(characterId, deployment)
+  if (!validation.valid) return { success: false, error: validation.error }
+
+  // Deduz tropas do estoque ao enviar
+  await deductTroopLosses(characterId, deployment)
+
+  const endsAt = new Date()
+  endsAt.setHours(endsAt.getHours() + expType.duration_hours)
+
+  const { data: expedition, error } = await supabase
+    .from('expeditions')
+    .insert({
+      character_id: characterId,
+      type_id: expeditionTypeId,
+      status: 'active',
+      risk_level: expType.risk_level,
+      ends_at: endsAt.toISOString(),
+      troops_deployed: deployment as unknown as never,
+    })
+    .select()
+    .single()
+
+  if (error || !expedition) return { success: false, error: 'Erro ao iniciar expedição.' }
+
+  await createEvent(supabase, {
+    type: 'expedition_started',
+    actorId: characterId,
+    metadata: { expedition_id: expedition.id, troop_expedition: true, troops: deployment },
+    isPublic: false,
+    narrativeText: `Expedição com tropas iniciada: ${expType.name}.`,
+  })
+
+  return { success: true, expeditionId: expedition.id }
+}
+
+/**
  * Resolve uma expedição concluída.
  * Calcula resultado, aplica recompensas ou consequências.
  * Chamado quando o jogador coleta (ends_at já passou).
@@ -237,9 +322,14 @@ export async function resolveExpedition(
   let injured = false
   let narrativeText = ''
 
+  // Troop expedition multiplier
+  const troopsDeployed = expedition.troops_deployed as TroopDeployment | null
+  const isTroopExpedition = !!troopsDeployed
+  const rewardMultiplier = isTroopExpedition ? 1.5 : 1.0
+
   if (expeditionSuccess) {
     const xpBase = lootTable.xp as number ?? 50
-    xpGained = Math.floor(xpBase * (0.8 + Math.random() * 0.4))
+    xpGained = Math.floor(xpBase * (0.8 + Math.random() * 0.4) * rewardMultiplier)
 
     const librasConfig = lootTable.libras as { min: number; max: number } | undefined
     if (librasConfig) {
@@ -251,6 +341,9 @@ export async function resolveExpedition(
     loreDrop = Math.random() < ((lootTable.lore_chance as number) ?? 0)
     materialDrop = Math.random() < ((lootTable.material_chance as number) ?? 0)
     rareDrop = Math.random() < ((lootTable.rare_chance as number) ?? 0)
+
+    // Apply multiplier to libras too
+    if (isTroopExpedition) librasGained = Math.floor(librasGained * rewardMultiplier)
 
     narrativeText = `Missão cumprida. +${xpGained} XP, +${librasGained} Libras.`
     if (loreDrop) narrativeText += ' Um fragmento de lore foi descoberto.'
@@ -311,6 +404,44 @@ export async function resolveExpedition(
     }
   }
 
+  // Calculate and apply troop losses for troop expeditions
+  let troopLosses: TroopDeployment | null = null
+  if (isTroopExpedition && troopsDeployed && !expeditionSuccess) {
+    const lossRate = injured ? (0.4 + Math.random() * 0.1) : (0.15 + Math.random() * 0.1)
+    troopLosses = {} as TroopDeployment
+    const troopTypes: TroopType[] = ['infantaria', 'arquearia', 'cavalaria', 'cerco']
+    for (const tt of troopTypes) {
+      const deployed = (troopsDeployed as Record<string, number>)[tt] ?? 0
+      if (deployed > 0) {
+        (troopLosses as Record<string, number>)[tt] = Math.floor(deployed * lossRate)
+      }
+    }
+    await deductTroopLosses(expedition.character_id, troopLosses)
+    const lossStr = Object.entries(troopLosses)
+      .filter(([, v]) => (v as number) > 0)
+      .map(([k, v]) => `-${v} ${k}`)
+      .join(', ')
+    if (lossStr) narrativeText += ` Baixas: ${lossStr}.`
+  }
+
+  // Return surviving troops to stock if success
+  if (isTroopExpedition && troopsDeployed && expeditionSuccess) {
+    // Troops were deducted at start; return them on success
+    const { getTroopStock } = await import('./troops')
+    const stock = await getTroopStock(expedition.character_id)
+    const troopTypes: TroopType[] = ['infantaria', 'arquearia', 'cavalaria', 'cerco']
+    for (const tt of troopTypes) {
+      const deployed = (troopsDeployed as Record<string, number>)[tt] ?? 0
+      if (deployed > 0) {
+        await supabase
+          .from('character_troops')
+          .update({ quantity: stock[tt] + deployed })
+          .eq('character_id', expedition.character_id)
+          .eq('troop_type', tt)
+      }
+    }
+  }
+
   // Resolve a expedição
   const resultData = {
     success: expeditionSuccess,
@@ -324,13 +455,16 @@ export async function resolveExpedition(
     success_chance: Math.round(successChance),
   }
 
+  const updatePayload: Record<string, unknown> = {
+    status: expeditionSuccess ? 'completed' : 'failed',
+    result: resultData,
+    resolved_at: new Date().toISOString(),
+  }
+  if (troopLosses) updatePayload.troop_losses = troopLosses
+
   await supabase
     .from('expeditions')
-    .update({
-      status: expeditionSuccess ? 'completed' : 'failed',
-      result: resultData,
-      resolved_at: new Date().toISOString(),
-    })
+    .update(updatePayload as never)
     .eq('id', expeditionId)
 
   await createEvent(supabase, {
@@ -348,6 +482,12 @@ export async function resolveExpedition(
     body: narrativeText,
     actionUrl: '/expeditions',
   })
+
+  // Completa daily task de expedição
+  if (expeditionSuccess) {
+    const { completeTask } = await import('./daily')
+    await completeTask(expedition.character_id, 'complete_expedition').catch(() => {})
+  }
 
   // Concede/remove reputação para expedições de facção
   if (expType.required_faction_slug) {

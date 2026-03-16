@@ -79,6 +79,10 @@ export async function sendLetter(
     metadata: { letter_id: letter.id },
   })
 
+  // Completa daily task de correspondência para o remetente
+  const { completeTask } = await import('@/lib/game/daily')
+  await completeTask(senderId, 'send_letter').catch(() => {})
+
   return { success: true, letterId: letter.id }
 }
 

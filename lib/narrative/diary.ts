@@ -41,6 +41,10 @@ export async function createDiaryEntry(
     .single()
   if (error || !entry) return { success: false, error: 'Erro ao criar entrada.' }
 
+  // Completa daily task de diário
+  const { completeTask } = await import('@/lib/game/daily')
+  await completeTask(characterId, 'write_diary').catch(() => {})
+
   return { success: true, entryId: entry.id }
 }
 

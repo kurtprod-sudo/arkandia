@@ -81,6 +81,22 @@ export async function grantXp(
     })
   }
 
+  // Concede Essências por nível (40/nível) — Referência: GDD_Balanceamento §10
+  if (result.levelsGained > 0) {
+    const essenciasGanhas = result.levelsGained * 40
+    const { data: essWallet } = await supabase
+      .from('character_wallet')
+      .select('essencia')
+      .eq('character_id', characterId)
+      .single()
+    if (essWallet) {
+      await supabase
+        .from('character_wallet')
+        .update({ essencia: essWallet.essencia + essenciasGanhas })
+        .eq('character_id', characterId)
+    }
+  }
+
   // Aplica bônus de Éter por nível para raças com eter_bonus_per_level (ex: Elfo)
   if (result.levelsGained > 0) {
     const { data: raceData } = await supabase

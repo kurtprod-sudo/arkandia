@@ -1,8 +1,6 @@
 'use client'
 
-import { useState } from 'react'
 import type { DailyTask } from '@/types'
-import ArkButton from '@/components/ui/ArkButton'
 
 interface DailyTasksWidgetProps {
   tasks: DailyTask[]
@@ -12,42 +10,27 @@ interface DailyTasksWidgetProps {
   streak: number
 }
 
-// Tasks completadas automaticamente por outros sistemas
-const AUTO_TASKS = new Set(['desafio', 'faccao'])
+const TASK_HOW_TO: Record<string, string> = {
+  complete_expedition: 'Complete uma expedição',
+  win_pvp:             'Vença um duelo',
+  hunting_kills:       'Abata 5 criaturas em hunting',
+  complete_dungeon:    'Participe de uma dungeon',
+  send_letter:         'Envie uma carta',
+  write_diary:         'Escreva no diário',
+  join_scenario:       'Entre em um cenário social',
+  craft_item:          'Produza um item',
+  login_streak:        'Completada automaticamente',
+  use_summon:          'Realize uma invocação',
+  mercado_volatil:     'Compre o item da Loja NPC',
+  eco_arquetipo:       'Leia o Eco do Arquétipo',
+}
 
 export default function DailyTasksWidget({
-  tasks: initialTasks,
-  completedCount: initialCount,
-  ticketGranted: initialTicket,
-  characterId,
+  tasks,
+  completedCount,
+  ticketGranted,
   streak,
 }: DailyTasksWidgetProps) {
-  const [tasks, setTasks] = useState(initialTasks)
-  const [completedCount, setCompletedCount] = useState(initialCount)
-  const [ticketGranted, setTicketGranted] = useState(initialTicket)
-  const [loading, setLoading] = useState<string | null>(null)
-
-  const handleComplete = async (taskType: string) => {
-    setLoading(taskType)
-    try {
-      const res = await fetch('/api/daily/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ character_id: characterId, task_type: taskType }),
-      })
-      const data = await res.json()
-      if (data.success) {
-        setTasks((prev) =>
-          prev.map((t) => (t.type === taskType ? { ...t, completed: true } : t))
-        )
-        setCompletedCount((c) => c + 1)
-        if (data.ticketGranted) setTicketGranted(true)
-      }
-    } finally {
-      setLoading(null)
-    }
-  }
-
   const progressPercent = (completedCount / 5) * 100
 
   return (
@@ -55,7 +38,7 @@ export default function DailyTasksWidget({
       {/* Header */}
       <div className="flex items-center justify-between mb-1">
         <h2 className="text-xs font-body text-[var(--text-secondary)] uppercase tracking-wider">
-          Tarefas Di&aacute;rias
+          Tarefas Diárias
         </h2>
         {streak > 0 && (
           <span className="font-data text-xs text-[var(--ark-amber)] tracking-[0.1em]">
@@ -94,8 +77,11 @@ export default function DailyTasksWidget({
       {/* Task list */}
       <div className="space-y-2">
         {tasks.map((task) => {
-          const isAuto = AUTO_TASKS.has(task.type)
-          const isLoading = loading === task.type
+          const rewardParts: string[] = []
+          if (task.xp_reward > 0) rewardParts.push(`+${task.xp_reward} XP`)
+          if (task.essencia_reward > 0) rewardParts.push(`+${task.essencia_reward} Ess`)
+          if (task.libras_reward > 0) rewardParts.push(`+${task.libras_reward} £`)
+          const rewardStr = rewardParts.join(' · ')
 
           return (
             <div
@@ -127,27 +113,14 @@ export default function DailyTasksWidget({
                   {task.label}
                 </p>
                 <p className="font-body text-xs text-[var(--text-label)] truncate">
-                  {task.description}
+                  {task.completed ? task.description : (TASK_HOW_TO[task.type] ?? task.description)}
                 </p>
+                {rewardStr && (
+                  <p className={`font-data text-[10px] mt-0.5 ${task.completed ? 'text-status-alive' : 'text-[var(--text-ghost)]'}`}>
+                    {rewardStr}
+                  </p>
+                )}
               </div>
-
-              {/* Action */}
-              {!task.completed && (
-                isAuto ? (
-                  <span className="font-data text-[10px] text-[var(--text-ghost)] tracking-[0.15em] uppercase flex-shrink-0">
-                    Autom&aacute;tica
-                  </span>
-                ) : (
-                  <ArkButton
-                    variant="ghost"
-                    size="sm"
-                    disabled={isLoading}
-                    onClick={() => handleComplete(task.type)}
-                  >
-                    {isLoading ? '...' : 'Completar'}
-                  </ArkButton>
-                )
-              )}
             </div>
           )
         })}

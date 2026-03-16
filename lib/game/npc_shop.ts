@@ -131,5 +131,9 @@ export async function purchaseDailyOffer(
     narrativeText: `Item adquirido da Loja do Viajante: ${si.name as string}.`,
   })
 
+  // Completa daily task de mercado volátil
+  const { completeTask } = await import('./daily')
+  await completeTask(characterId, 'mercado_volatil').catch(() => {})
+
   return { success: true }
 }
