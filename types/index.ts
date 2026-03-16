@@ -1300,5 +1300,64 @@ export interface MaestriaFragment {
   updated_at: string
 }
 
+// ---------------------------------------------------------------------------
+// Torneios
+// ---------------------------------------------------------------------------
+
+export type TournamentStatus =
+  'open' | 'closed' | 'bracket_generated' | 'in_progress' | 'finished'
+
+export type TournamentMatchStatus = 'pending' | 'waiting_combat' | 'finished'
+
+export interface PrizeTier {
+  libras?: number
+  gemas?: number
+  itemId?: string
+}
+
+export interface PrizePool {
+  first: PrizeTier
+  second: PrizeTier
+  third: PrizeTier
+}
+
+export interface Tournament {
+  id: string
+  name: string
+  description: string | null
+  status: TournamentStatus
+  maxParticipants: 8 | 16 | 32
+  registrationEndsAt: string
+  startsAt: string | null
+  finishedAt: string | null
+  prizePool: PrizePool
+  createdBy: string
+  createdAt: string
+}
+
+export interface TournamentParticipant {
+  id: string
+  tournamentId: string
+  characterId: string
+  seed: number | null
+  registeredAt: string
+  eliminatedAt: string | null
+  finalPosition: number | null
+  character?: { name: string; level: number }
+}
+
+export interface TournamentMatch {
+  id: string
+  tournamentId: string
+  round: number
+  matchNumber: number
+  participantAId: string | null
+  participantBId: string | null
+  winnerId: string | null
+  combatSessionId: string | null
+  isBye: boolean
+  status: TournamentMatchStatus
+}
+
 // Database type is in types/database.types.ts (follows Supabase generated format)
 // export type { Database } from './database.types'

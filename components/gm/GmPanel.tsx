@@ -7,9 +7,10 @@ import GmWorld from './tabs/GmWorld'
 import GmNarrative from './tabs/GmNarrative'
 import GmEconomy from './tabs/GmEconomy'
 import GmModeration from './tabs/GmModeration'
+import GmTournaments from './tabs/GmTournaments'
 import type { CharacterWithAttributes, GameEvent } from '@/types'
 
-type GmTab = 'overview' | 'characters' | 'world' | 'narrative' | 'economy' | 'moderation'
+type GmTab = 'overview' | 'characters' | 'world' | 'narrative' | 'economy' | 'moderation' | 'tournaments'
 
 const TAB_LABELS: Record<GmTab, string> = {
   overview: 'Visao Geral',
@@ -18,6 +19,7 @@ const TAB_LABELS: Record<GmTab, string> = {
   narrative: 'Narrativa',
   economy: 'Economia',
   moderation: 'Moderacao',
+  tournaments: 'Torneios',
 }
 
 export interface GmPanelProps {
@@ -34,6 +36,10 @@ export interface GmPanelProps {
   journalEditions: Array<{ id: string; edition_date: string; status: string; published_at: string | null }>
   allItems: Array<{ id: string; name: string; item_type: string; rarity: string }>
   factions: Array<{ id: string; slug: string; name: string }>
+  tournaments: Array<{
+    id: string; name: string; status: string; max_participants: number; participantCount: number
+    matches: Array<{ id: string; round: number; match_number: number; status: string; is_bye: boolean; participant_a_name: string | null; participant_b_name: string | null }>
+  }>
 }
 
 export default function GmPanel(props: GmPanelProps) {
@@ -100,7 +106,10 @@ export default function GmPanel(props: GmPanelProps) {
         />
       )}
       {tab === 'moderation' && (
-        <GmModeration events={props.events} />
+        <GmModeration events={props.events} moderationLogs={[]} />
+      )}
+      {tab === 'tournaments' && (
+        <GmTournaments tournaments={props.tournaments} />
       )}
     </div>
   )

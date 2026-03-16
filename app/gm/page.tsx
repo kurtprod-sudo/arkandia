@@ -122,6 +122,49 @@ export default async function GMPanelPage() {
       .order('name'),
   ])
 
+  // Tournament data (separate query for complex joins)
+  const { data: tournamentsRaw } = await supabase
+    .from('tournaments')
+    .select('id, name, status, max_participants')
+    .neq('status', 'finished')
+    .order('created_at', { ascending: false })
+
+  const tournamentData = []
+  for (const t of tournamentsRaw ?? []) {
+    const { count: participantCount } = await supabase
+      .from('tournament_participants')
+      .select('id', { count: 'exact', head: true })
+      .eq('tournament_id', t.id)
+
+    const { data: matchesRaw } = await supabase
+      .from('tournament_matches')
+      .select('id, round, match_number, status, is_bye, participant_a_id, participant_b_id')
+      .eq('tournament_id', t.id)
+      .order('round')
+      .order('match_number')
+
+    const matchesWithNames = []
+    for (const m of matchesRaw ?? []) {
+      let aName: string | null = null
+      let bName: string | null = null
+      if (m.participant_a_id) {
+        const { data: pa } = await supabase.from('tournament_participants').select('characters(name)').eq('id', m.participant_a_id).single()
+        aName = (pa?.characters as Record<string, unknown> | null)?.name as string ?? null
+      }
+      if (m.participant_b_id) {
+        const { data: pb } = await supabase.from('tournament_participants').select('characters(name)').eq('id', m.participant_b_id).single()
+        bName = (pb?.characters as Record<string, unknown> | null)?.name as string ?? null
+      }
+      matchesWithNames.push({ ...m, participant_a_name: aName, participant_b_name: bName })
+    }
+
+    tournamentData.push({
+      ...t,
+      participantCount: participantCount ?? 0,
+      matches: matchesWithNames,
+    })
+  }
+
   return (
     <main className="min-h-screen relative">
       {/* Background glow — crimson for GM authority */}
@@ -156,6 +199,7 @@ export default async function GMPanelPage() {
           journalEditions={(journalEditions ?? []) as GmPanelProps['journalEditions']}
           allItems={(allItems ?? []) as GmPanelProps['allItems']}
           factions={(factions ?? []) as GmPanelProps['factions']}
+          tournaments={tournamentData}
         />
       </div>
     </main>

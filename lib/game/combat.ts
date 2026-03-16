@@ -782,6 +782,12 @@ async function finishCombat(
     await grantXp(loserId, xpRewards.loser, supabase)
   }
 
+  // Se a sessão é de torneio, propaga resultado para o bracket
+  if (modality === 'torneio') {
+    const { resolveTournamentMatch } = await import('./tournament')
+    await resolveTournamentMatch(sessionId, winnerId)
+  }
+
   return {
     success: true,
     turnResult: {
