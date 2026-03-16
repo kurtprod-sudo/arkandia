@@ -28,6 +28,9 @@ export default async function CreateCharacterPage() {
     .select('*')
     .order('name')
 
+    // DEBUG TEMPORÁRIO — remover depois
+console.log('[CREATE] races:', races?.length, races?.[0]?.name)
+
   const { data: classes } = await supabase
     .from('classes')
     .select('*')
