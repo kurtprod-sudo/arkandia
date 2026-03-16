@@ -49,7 +49,7 @@ export default function AventuraChapterTabs({ chapters, loreFragments }: Props) 
     })
   }
 
-  async function handleComplete(stageNumber: number, difficulty: 'normal' | 'hard', sessionId: string) {
+  async function _handleComplete(stageNumber: number, difficulty: 'normal' | 'hard', sessionId: string) {
     setError(null)
     startTransition(async () => {
       const res = await completeStageAction('aventura', activeTab, stageNumber, difficulty, sessionId)

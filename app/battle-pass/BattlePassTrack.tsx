@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import ArkButton from '@/components/ui/ArkButton'
 
 interface TierReward { libras: number; essencias: number; gemas: number; tickets: number }
 interface TierData {

@@ -1,9 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { getBossWithContribution, startBossAttack } from '@/lib/game/world_boss'
+import { getBossWithContribution } from '@/lib/game/world_boss'
 import ArkDivider from '@/components/ui/ArkDivider'
 import ArkBadge from '@/components/ui/ArkBadge'
-import BossArena from '@/components/boss/BossArena'
 import BossClaimButton from './BossClaimButton'
 
 export default async function BossPage() {
@@ -16,8 +15,7 @@ export default async function BossPage() {
 
   const { boss, contribution, ranking } = await getBossWithContribution(character.id)
 
-  // Check if player wants to start attack (via searchParams in future — for now show state)
-  const searchParams = new URL('http://x').searchParams // placeholder — real impl uses page props
+  // searchParams placeholder removed — will use page props when implemented
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">

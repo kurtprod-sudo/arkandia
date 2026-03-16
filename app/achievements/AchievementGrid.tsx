@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import ArkBadge from '@/components/ui/ArkBadge'
 import { Trophy, Check } from 'lucide-react'
 
 const CATEGORIES = [

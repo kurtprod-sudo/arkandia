@@ -373,7 +373,7 @@ export async function challengeMirror(
 // ─── Season Rewards ───────────────────────────────────────────────────────
 
 export async function distributeSeasonRewards(
-  gmCharacterId: string
+  _gmCharacterId: string
 ): Promise<{ success: boolean; error?: string; rewarded?: number }> {
   const supabase = await createClient()
 

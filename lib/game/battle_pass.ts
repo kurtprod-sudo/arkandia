@@ -6,7 +6,6 @@
 import { type SupabaseClient } from '@supabase/supabase-js'
 import { type Database } from '@/types/database.types'
 import { createClient } from '@/lib/supabase/server'
-import { grantXp } from './levelup'
 
 export interface TierReward {
   libras: number; essencias: number; gemas: number; tickets: number
