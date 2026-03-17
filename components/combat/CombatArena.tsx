@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import ArkButton from '@/components/ui/ArkButton'
+import UseItemButton from './UseItemButton'
 import ArkStatBar from '@/components/ui/ArkStatBar'
 
 const TURN_TIMER_SECONDS = 60
@@ -429,6 +430,11 @@ export default function CombatArena({
                 </div>
               )}
             </div>
+
+            <UseItemButton
+              characterId={myCharacterId}
+              onUse={(itemId) => handleAction({ type: 'usar_item', itemId })}
+            />
 
             <ArkButton
               variant="ghost"

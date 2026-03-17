@@ -41,6 +41,7 @@ interface RecipeView {
   resultItemRarity: string
   resultQuantity: number
   ingredients: Array<{ item_id: string; quantity: number }>
+  craftingCost: number
   requiredLevel: number
 }
 
@@ -412,6 +413,11 @@ export default function MarketTabs({
                         <p className="text-[9px] font-data text-[var(--text-ghost)]">
                           Resultado: {r.resultQuantity}x {r.resultItemName}
                         </p>
+                        {r.craftingCost > 0 && (
+                          <p className="text-[9px] font-data text-[var(--ark-gold)]">
+                            Custo: {r.craftingCost} Libras
+                          </p>
+                        )}
                       </div>
                       <RarityBadge rarity={r.resultItemRarity} />
                     </div>

@@ -10,6 +10,7 @@ import { createEvent } from './events'
 import { calcSkillDamage, calcDodgeChance } from './attributes'
 import { createNotification } from './notifications'
 import { grantXp } from './levelup'
+import { getMaestriaPassives } from './maestria_passives'
 
 // Timer de turno: 60 segundos (decisão canônica)
 export const TURN_TIMER_SECONDS = 60
@@ -308,9 +309,60 @@ export async function processTurn(
     .eq('character_id', opponentId)
     .gte('expires_at_turn', session.current_turn)
 
+  // Carrega passivas de Maestria de ambos os combatentes
+  const [actorMaestriaPassives, opponentMaestriaPassives] = await Promise.all([
+    getMaestriaPassives(actor.id, supabase),
+    getMaestriaPassives(opponentId, supabase),
+  ])
+
   // Verifica efeitos que impedem ação
   for (const effect of actorEffects ?? []) {
     switch (effect.effect_type) {
+      case 'confusao': {
+        // 40% de chance de a ação acertar o próprio ator
+        const confusaoRoll = Math.random()
+        if (confusaoRoll < 0.4 && action.type === 'skill') {
+          let confNarrative = `${actor.name} está confuso — a skill acerta a si mesmo!`
+          const confSkillId = (action as { skillId?: string }).skillId ?? ''
+          const { data: confSkill } = await supabase
+            .from('skills').select('*').eq('id', confSkillId).single()
+          if (confSkill) {
+            const confFormula = (confSkill.formula ?? {}) as Record<string, number>
+            const selfResult = calcSkillDamage({
+              baseDamage: confFormula.base ?? 0,
+              ataqueFactor: confFormula.ataque_factor,
+              magiaFactor: confFormula.magia_factor,
+              attackerAtaque: actorAttrs.ataque,
+              attackerMagia: actorAttrs.magia,
+              targetDefesa: actorAttrs.defesa,
+              isTrueDamage: !!confFormula.is_true_damage,
+            })
+            const selfDamage = Math.floor(selfResult.afterDefense * 0.7)
+            const newSelfHp = Math.max(0, actorAttrs.hp_atual - selfDamage)
+            await supabase.from('character_attributes')
+              .update({ hp_atual: newSelfHp }).eq('character_id', actor.id)
+            await supabase.from('character_attributes')
+              .update({ eter_atual: Math.max(0, actorAttrs.eter_atual - (confSkill.eter_cost ?? 0)) })
+              .eq('character_id', actor.id)
+            confNarrative += ` ${selfDamage} de dano no próprio ${actor.name}.`
+
+            if (newSelfHp <= 0) {
+              await recordTurn(supabase, sessionId, session.current_turn,
+                actor.id, 'skill', selfDamage, 'confusao', confNarrative, undefined, confSkillId)
+              return await finishCombat(supabase, sessionId, opponentId, actor.id, 'hp_zero', session.modality)
+            }
+          }
+          await recordTurn(supabase, sessionId, session.current_turn,
+            actor.id, 'skill', 0, 'confusao', confNarrative, undefined, confSkillId)
+          await advanceTurn(supabase, sessionId, session.current_turn, opponentId, actor.id)
+          return {
+            success: true,
+            turnResult: { damageDealt: 0, effectApplied: 'confusao', combatEnded: false, winnerId: null, narrativeText: confNarrative },
+          }
+        }
+        break
+      }
+
       case 'stun':
       case 'sono':
         await recordTurn(supabase, sessionId, session.current_turn,
@@ -392,14 +444,19 @@ export async function processTurn(
   }
 
   // Processa buffs do ator (HoT e recarga de Éter)
+  const hasAntiCura = (actorEffects ?? []).some((e) => e.effect_type === 'anti_cura')
   for (const effect of actorEffects ?? []) {
     if (effect.effect_type === 'regeneracao') {
-      const newHp = Math.min(actorAttrs.hp_max, actorAttrs.hp_atual + 8)
-      await supabase
-        .from('character_attributes')
-        .update({ hp_atual: newHp })
-        .eq('character_id', actor.id)
-      actorAttrs.hp_atual = newHp
+      if (hasAntiCura) {
+        // anti_cura nega regeneração
+      } else {
+        const newHp = Math.min(actorAttrs.hp_max, actorAttrs.hp_atual + 8)
+        await supabase
+          .from('character_attributes')
+          .update({ hp_atual: newHp })
+          .eq('character_id', actor.id)
+        actorAttrs.hp_atual = newHp
+      }
     }
     if (effect.effect_type === 'recarga') {
       const newEter = Math.min(actorAttrs.eter_max, actorAttrs.eter_atual + 5)
@@ -411,9 +468,42 @@ export async function processTurn(
     }
   }
 
+  // Regeneração passiva de Maestria
+  if (actorMaestriaPassives.regenHpPorTurno > 0 && !hasAntiCura) {
+    const newHp = Math.min(actorAttrs.hp_max, actorAttrs.hp_atual + actorMaestriaPassives.regenHpPorTurno)
+    await supabase.from('character_attributes').update({ hp_atual: newHp }).eq('character_id', actor.id)
+    actorAttrs.hp_atual = newHp
+  }
+
   let damageDealt = 0
   let effectApplied: string | null = null
   let narrativeText = ''
+
+  // Aplica debuffs de atributo
+  const fraquezaActive = (actorEffects ?? []).some((e) => e.effect_type === 'fraqueza')
+  let effectiveAtaque = fraquezaActive ? Math.floor(actorAttrs.ataque * 0.8) : actorAttrs.ataque
+  effectiveAtaque += actorMaestriaPassives.danoBonus
+  const effectiveMagia = fraquezaActive ? Math.floor(actorAttrs.magia * 0.8) : actorAttrs.magia
+  const lentidaoActive = (opponentEffects ?? []).some((e) => e.effect_type === 'lentidao')
+  const fragilidadeActive = (opponentEffects ?? []).some((e) => e.effect_type === 'fragilidade')
+
+  // Passivas dinâmicas de Maestria
+  const targetIsPoisoned = (opponentEffects ?? []).some((e) => e.effect_type === 'veneno')
+  const danoBonusEnvenenado = targetIsPoisoned ? actorMaestriaPassives.danoBonusAlvoEnvenenado : 0
+  const currentRangeStateForPassive = await getCurrentRangeState(supabase, sessionId)
+  const danoBonusRange = currentRangeStateForPassive === 'curto' ? actorMaestriaPassives.danoBonusRangeCurto : 0
+
+  // Erosão passiva (Ruína) — acumula por golpe
+  const erosaoEffect = (opponentEffects ?? []).find((e) => e.effect_type === 'erosao_passiva')
+  const erosaoAcumulada = erosaoEffect ? (erosaoEffect.stacks ?? 0) : 0
+  const erosaoReducaoPercent = Math.min(40, erosaoAcumulada * (actorMaestriaPassives.reducaoDefAlvoPorGolpe || 3))
+
+  const effectiveDefesa = (() => {
+    let def = opponentAttrs.defesa
+    if (fragilidadeActive) def = Math.floor(def * 0.7)
+    if (erosaoReducaoPercent > 0) def = Math.floor(def * (1 - erosaoReducaoPercent / 100))
+    return def
+  })()
 
   // Processa ação
   if (action.type === 'render') {
@@ -480,9 +570,89 @@ export async function processTurn(
     }
   }
 
+  if (action.type === 'usar_item') {
+    // Busca item no inventário do ator
+    const { data: invItem } = await supabase
+      .from('inventory')
+      .select('id, quantity, items(name, item_type, metadata)')
+      .eq('character_id', actor.id)
+      .eq('item_id', action.itemId)
+      .maybeSingle()
+
+    if (!invItem || invItem.quantity < 1) {
+      return { success: false, error: 'Item não encontrado no inventário.' }
+    }
+
+    const itemData = invItem.items as Record<string, unknown> | null
+    if (!itemData || itemData.item_type !== 'consumivel') {
+      return { success: false, error: 'Este item não pode ser usado em combate.' }
+    }
+
+    const itemMetadata = (itemData.metadata as Record<string, unknown>) ?? {}
+    const itemName = itemData.name as string
+
+    let healHp = (itemMetadata.combat_heal_hp as number) ?? 0
+    let restoreEter = (itemMetadata.combat_restore_eter as number) ?? 0
+
+    // Fallback hardcoded enquanto metadata não está populada
+    if (itemName === 'Erva de Cura' && healHp === 0) healHp = 50
+    if (itemName === 'Poção de Éter' && restoreEter === 0) restoreEter = 30
+
+    if (healHp === 0 && restoreEter === 0) {
+      return { success: false, error: 'Este item não tem efeito em combate.' }
+    }
+
+    // Consome 1 unidade do item
+    if (invItem.quantity === 1) {
+      await supabase.from('inventory').delete().eq('id', invItem.id)
+    } else {
+      await supabase.from('inventory')
+        .update({ quantity: invItem.quantity - 1 })
+        .eq('id', invItem.id)
+    }
+
+    // Aplica efeitos
+    const itemUpdates: Record<string, number> = {}
+    let narrativeUseItem = `${actor.name} usou ${itemName}.`
+
+    if (healHp > 0) {
+      const newHp = Math.min(actorAttrs.hp_max, actorAttrs.hp_atual + healHp)
+      itemUpdates.hp_atual = newHp
+      actorAttrs.hp_atual = newHp
+      narrativeUseItem += ` +${healHp} HP.`
+    }
+    if (restoreEter > 0) {
+      const newEter = Math.min(actorAttrs.eter_max, actorAttrs.eter_atual + restoreEter)
+      itemUpdates.eter_atual = newEter
+      actorAttrs.eter_atual = newEter
+      narrativeUseItem += ` +${restoreEter} Éter.`
+    }
+
+    if (Object.keys(itemUpdates).length > 0) {
+      await supabase.from('character_attributes')
+        .update(itemUpdates as never)
+        .eq('character_id', actor.id)
+    }
+
+    await recordTurn(supabase, sessionId, session.current_turn,
+      actor.id, 'usar_item', 0, null, narrativeUseItem)
+    await advanceTurn(supabase, sessionId, session.current_turn, opponentId, actor.id)
+
+    return {
+      success: true,
+      turnResult: {
+        damageDealt: 0,
+        effectApplied: null,
+        combatEnded: false,
+        winnerId: null,
+        narrativeText: narrativeUseItem,
+      },
+    }
+  }
+
   if (action.type === 'ataque_basico' || action.type === 'timeout') {
     // Ataque básico: Base 8 + Ataque × 0.6, sem custo de Éter
-    const dodgeChance = calcDodgeChance(opponentAttrs.velocidade)
+    const dodgeChance = calcDodgeChance(opponentAttrs.velocidade) + (lentidaoActive ? 15 : 0) + opponentMaestriaPassives.chancEsquivaBonus
     const dodgeRoll = Math.random() * 100
     if (dodgeRoll <= dodgeChance) {
       narrativeText = 'Ataque básico desviado.'
@@ -491,9 +661,9 @@ export async function processTurn(
       const result = calcSkillDamage({
         baseDamage: 8,
         ataqueFactor: 0.6,
-        attackerAtaque: actorAttrs.ataque,
-        attackerMagia: actorAttrs.magia,
-        targetDefesa: opponentAttrs.defesa,
+        attackerAtaque: effectiveAtaque,
+        attackerMagia: effectiveMagia,
+        targetDefesa: effectiveDefesa,
       })
       damageDealt = Math.floor(result.afterDefense)
       narrativeText = action.type === 'timeout'
@@ -537,7 +707,7 @@ export async function processTurn(
       skillFormula = (skill.formula ?? {}) as Record<string, number>
     }
 
-    const dodgeChance = calcDodgeChance(opponentAttrs.velocidade)
+    const dodgeChance = calcDodgeChance(opponentAttrs.velocidade) + (lentidaoActive ? 15 : 0) + opponentMaestriaPassives.chancEsquivaBonus
     const dodgeRoll = Math.random() * 100
 
     if (dodgeRoll <= dodgeChance && !skillFormula.is_true_damage) {
@@ -549,9 +719,9 @@ export async function processTurn(
         ataqueFactor: skillFormula.ataque_factor,
         magiaFactor: skillFormula.magia_factor,
         defensaFactor: skillFormula.defesa_factor,
-        attackerAtaque: actorAttrs.ataque,
-        attackerMagia: actorAttrs.magia,
-        targetDefesa: opponentAttrs.defesa,
+        attackerAtaque: effectiveAtaque,
+        attackerMagia: effectiveMagia,
+        targetDefesa: effectiveDefesa,
         defensePenetration: skillFormula.defense_penetration_percent,
         isTrueDamage: !!skillFormula.is_true_damage,
       })
@@ -578,10 +748,11 @@ export async function processTurn(
       .eq('character_id', actor.id)
   }
 
-  // Verifica escudo etéreo do oponente
-  const shieldEffect = (opponentEffects ?? []).find(
-    (e) => e.effect_type === 'escudo_etereo'
-  )
+  // Verifica escudo etéreo do oponente (anti_cura nega escudo)
+  const opponentHasAntiCura = (opponentEffects ?? []).some((e) => e.effect_type === 'anti_cura')
+  const shieldEffect = !opponentHasAntiCura
+    ? (opponentEffects ?? []).find((e) => e.effect_type === 'escudo_etereo')
+    : undefined
   if (shieldEffect && damageDealt > 0) {
     const shieldValue = (shieldEffect.stacks ?? 1) * 20
     if (shieldValue >= damageDealt) {
@@ -625,6 +796,21 @@ export async function processTurn(
     }
   }
 
+  // Bônus de dano dinâmicos de Maestria
+  if (damageDealt > 0 && danoBonusEnvenenado > 0) {
+    damageDealt = Math.floor(damageDealt * (1 + danoBonusEnvenenado / 100))
+  }
+  if (damageDealt > 0 && danoBonusRange > 0) {
+    damageDealt = Math.floor(damageDealt * (1 + danoBonusRange / 100))
+  }
+
+  // Redução de dano passiva de Maestria do oponente
+  if (damageDealt > 0 && opponentMaestriaPassives.reducaoDanoPercent > 0) {
+    const passiveReduction = Math.floor(damageDealt * (opponentMaestriaPassives.reducaoDanoPercent / 100))
+    damageDealt = Math.max(1, damageDealt - passiveReduction)
+    if (passiveReduction > 0) narrativeText += ` (redução passiva: -${passiveReduction})`
+  }
+
   // Aplica dano ao oponente
   if (damageDealt > 0) {
     const newHp = Math.max(0, opponentAttrs.hp_atual - damageDealt)
@@ -633,6 +819,25 @@ export async function processTurn(
       .update({ hp_atual: newHp })
       .eq('character_id', opponentId)
 
+    // Reflexo de dano passivo do oponente
+    if (opponentMaestriaPassives.reflexoDanoPercent > 0) {
+      const reflectedDamage = Math.floor(damageDealt * (opponentMaestriaPassives.reflexoDanoPercent / 100))
+      if (reflectedDamage > 0) {
+        const newActorHpAfterReflect = Math.max(0, actorAttrs.hp_atual - reflectedDamage)
+        await supabase.from('character_attributes')
+          .update({ hp_atual: newActorHpAfterReflect }).eq('character_id', actor.id)
+        actorAttrs.hp_atual = newActorHpAfterReflect
+        narrativeText += ` Reflexo: ${reflectedDamage} devolvido.`
+        if (newActorHpAfterReflect <= 0) {
+          const reflectActionType = action.type === 'skill' ? 'skill' : 'ataque_basico'
+          const reflectSkillId = action.type === 'skill' ? action.skillId : undefined
+          await recordTurn(supabase, sessionId, session.current_turn,
+            actor.id, reflectActionType, damageDealt, effectApplied, narrativeText, undefined, reflectSkillId)
+          return await finishCombat(supabase, sessionId, opponentId, actor.id, 'hp_zero', session.modality)
+        }
+      }
+    }
+
     // Verifica derrota
     if (newHp <= 0) {
       const actionType = action.type === 'skill' ? 'skill' : (action.type === 'timeout' ? 'timeout' : 'ataque_basico')
@@ -640,6 +845,25 @@ export async function processTurn(
       await recordTurn(supabase, sessionId, session.current_turn, actor.id,
         actionType, damageDealt, effectApplied, narrativeText, undefined, skillId)
       return await finishCombat(supabase, sessionId, actor.id, opponentId, 'hp_zero', session.modality)
+    }
+  }
+
+  // Acumula erosão passiva (Ruína)
+  if (damageDealt > 0 && actorMaestriaPassives.reducaoDefAlvoPorGolpe > 0) {
+    if (erosaoEffect) {
+      await supabase.from('combat_effects')
+        .update({ stacks: Math.min(13, (erosaoEffect.stacks ?? 0) + 1) })
+        .eq('id', erosaoEffect.id)
+    } else {
+      await supabase.from('combat_effects').insert({
+        session_id: sessionId,
+        character_id: opponentId,
+        effect_type: 'erosao_passiva',
+        stacks: 1,
+        duration_turns: 999,
+        applied_at_turn: session.current_turn,
+        expires_at_turn: session.current_turn + 999,
+      })
     }
   }
 

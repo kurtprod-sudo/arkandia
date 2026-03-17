@@ -170,7 +170,7 @@ export async function startHuntingSession(
 export async function processHuntingAction(
   sessionId: string,
   userId: string,
-  action: { type: 'ataque_basico' | 'skill'; skillName?: string }
+  action: { type: 'ataque_basico' | 'skill' | 'usar_item'; skillName?: string; itemId?: string }
 ): Promise<{ success: boolean; error?: string; turnResult?: HuntingTurnResult; sessionFinished?: boolean }> {
   const supabase = await createClient()
 
@@ -217,6 +217,82 @@ export async function processHuntingAction(
   const npcMagia = npcType.base_magia as number
   const npcDefesa = npcType.base_defesa as number
   const npcVelocidade = npcType.base_velocidade as number
+
+  // ── USAR ITEM (não gera retaliação do NPC) ───────────────────────────────
+  if (action.type === 'usar_item' && action.itemId) {
+    const { data: invItem } = await supabase
+      .from('inventory')
+      .select('id, quantity, items(name, item_type, metadata)')
+      .eq('character_id', character.id)
+      .eq('item_id', action.itemId)
+      .maybeSingle()
+
+    if (!invItem || invItem.quantity < 1) {
+      return { success: false, error: 'Item não encontrado no inventário.' }
+    }
+
+    const itemData = invItem.items as Record<string, unknown> | null
+    if (!itemData || itemData.item_type !== 'consumivel') {
+      return { success: false, error: 'Este item não pode ser usado em combate.' }
+    }
+
+    const itemMeta = (itemData.metadata as Record<string, unknown>) ?? {}
+    const itemName = itemData.name as string
+    let healHp = (itemMeta.combat_heal_hp as number) ?? 0
+    let restoreEter = (itemMeta.combat_restore_eter as number) ?? 0
+
+    if (itemName === 'Erva de Cura' && healHp === 0) healHp = 50
+    if (itemName === 'Poção de Éter' && restoreEter === 0) restoreEter = 30
+
+    if (healHp === 0 && restoreEter === 0) {
+      return { success: false, error: 'Este item não tem efeito em combate.' }
+    }
+
+    if (invItem.quantity === 1) {
+      await supabase.from('inventory').delete().eq('id', invItem.id)
+    } else {
+      await supabase.from('inventory')
+        .update({ quantity: invItem.quantity - 1 })
+        .eq('id', invItem.id)
+    }
+
+    const itemUpdates: Record<string, number> = {}
+    let useNarrative = `${character.name} usou ${itemName}.`
+
+    if (healHp > 0) {
+      const newHp = Math.min(playerAttrs.hp_max, playerAttrs.hp_atual + healHp)
+      itemUpdates.hp_atual = newHp
+      playerAttrs.hp_atual = newHp
+      useNarrative += ` +${healHp} HP.`
+    }
+    if (restoreEter > 0) {
+      const newEter = Math.min(playerAttrs.eter_max, playerAttrs.eter_atual + restoreEter)
+      itemUpdates.eter_atual = newEter
+      playerAttrs.eter_atual = newEter
+      useNarrative += ` +${restoreEter} Éter.`
+    }
+
+    if (Object.keys(itemUpdates).length > 0) {
+      await supabase.from('character_attributes')
+        .update(itemUpdates as never)
+        .eq('character_id', character.id)
+    }
+
+    return {
+      success: true,
+      turnResult: {
+        actor: 'player',
+        actionType: 'usar_item',
+        damageDealt: 0,
+        effectApplied: null,
+        npcHpAfter: npcCurrentHp,
+        playerHpAfter: playerAttrs.hp_atual,
+        npcDefeated: false,
+        playerDefeated: false,
+        narrativeText: useNarrative,
+      },
+    }
+  }
 
   // ── TURNO DO JOGADOR ──────────────────────────────────────────────────────
   let playerDamage = 0

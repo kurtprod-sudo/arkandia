@@ -106,6 +106,7 @@ export default async function MarketPage() {
             resultItemRarity: (r.items as Record<string, unknown>)?.rarity as string ?? 'comum',
             resultQuantity: r.result_quantity ?? 1,
             ingredients: r.ingredients as Array<{ item_id: string; quantity: number }>,
+            craftingCost: ((r as unknown as Record<string, unknown>).crafting_cost as number) ?? 0,
             requiredLevel: r.required_level ?? 1,
           }))}
           inventory={(inventory ?? []).map((inv) => ({

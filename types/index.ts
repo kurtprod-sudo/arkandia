@@ -820,6 +820,7 @@ export interface CraftingRecipe {
   result_item_id: string
   result_quantity: number
   ingredients: Array<{ item_id: string; quantity: number }>
+  crafting_cost: number
   required_level: number
   is_active: boolean
   created_at: string

@@ -555,6 +555,28 @@ export async function craftItem(
     }
   }
 
+  // Verifica e debita custo em Libras
+  const craftingCost = ((recipe as unknown as Record<string, unknown>).crafting_cost as number) ?? 0
+  if (craftingCost > 0) {
+    const { data: wallet } = await supabase
+      .from('character_wallet')
+      .select('libras')
+      .eq('character_id', characterId)
+      .single()
+
+    if (!wallet || wallet.libras < craftingCost) {
+      return {
+        success: false,
+        error: `Libras insuficientes. Necessário: ${craftingCost}.`,
+      }
+    }
+
+    await supabase
+      .from('character_wallet')
+      .update({ libras: wallet.libras - craftingCost })
+      .eq('character_id', characterId)
+  }
+
   // Consome ingredientes
   for (const ingredient of ingredients) {
     await removeFromInventory(characterId, ingredient.item_id, ingredient.quantity)
