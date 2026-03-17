@@ -28,7 +28,12 @@ export default async function BattlePage() {
       <h1 className="text-sm font-display font-bold text-[var(--text-primary)] uppercase tracking-wider mb-1">
         Batalha
       </h1>
-      <ArkDivider variant="dark" className="mb-6" />
+      <ArkDivider variant="dark" className="mb-4" />
+      <div className="flex justify-end mb-3">
+        <Link href="/combat/history" className="text-xs font-body text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+          Ver histórico →
+        </Link>
+      </div>
       <div className="grid gap-3">
         {sections.map((s) => {
           const Icon = s.icon

@@ -116,6 +116,36 @@ export async function startExpedition(
     .single()
   if (!expType) return { success: false, error: 'Tipo de expedição não encontrado.' }
 
+  // Valida Capitania se a expedição usa tropas
+  if (expType.success_formula) {
+    const formula = expType.success_formula as Record<string, unknown>
+    const isTroopExpedition = formula.troop_expedition === true
+
+    if (isTroopExpedition) {
+      const troopsPayload = formula.required_troops as Record<string, number> | null
+
+      if (troopsPayload) {
+        const totalTroops = Object.values(troopsPayload).reduce((sum, qty) => sum + qty, 0)
+
+        const { data: attrs } = await supabase
+          .from('character_attributes')
+          .select('capitania')
+          .eq('character_id', characterId)
+          .single()
+
+        const capitania = attrs?.capitania ?? 0
+        const maxTroops = capitania * 5
+
+        if (totalTroops > maxTroops) {
+          return {
+            success: false,
+            error: `Capitania insuficiente. Você pode liderar até ${maxTroops} tropas (Capitania ${capitania}). Necessário: ${totalTroops}.`,
+          }
+        }
+      }
+    }
+  }
+
   // Valida reputação mínima para expedições de facção
   if (expType.required_faction_slug) {
     const minStage = expType.risk_level === 'perigoso' || expType.risk_level === 'extremo'

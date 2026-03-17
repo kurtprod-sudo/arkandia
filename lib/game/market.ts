@@ -575,5 +575,9 @@ export async function craftItem(
     narrativeText: `Item craftado: ${recipe.name}.`,
   })
 
+  // Completa daily task de crafting
+  const { completeTask } = await import('@/lib/game/daily')
+  await completeTask(characterId, 'craft_item').catch(() => {})
+
   return { success: true, resultItemId: recipe.result_item_id }
 }

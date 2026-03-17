@@ -3,6 +3,15 @@ import { createClient } from '@/lib/supabase/server'
 import ArkDivider from '@/components/ui/ArkDivider'
 import ArkBadge from '@/components/ui/ArkBadge'
 import EquipmentSilhouette from '@/components/character/EquipmentSilhouette'
+import SkillTreeSection from '@/components/character/SkillTreeSection'
+
+const SKILL_ESSENCIA_COST: Record<number, number> = {
+  1: 0, 2: 0,
+  3: 30, 4: 30,
+  5: 50, 6: 50,
+  7: 80,
+  8: 120,
+}
 
 export default async function BuildingPage() {
   const supabase = await createClient()
@@ -10,7 +19,7 @@ export default async function BuildingPage() {
   if (!user) redirect('/auth/login')
 
   const { data: charCheck } = await supabase
-    .from('characters').select('id').eq('user_id', user.id).maybeSingle()
+    .from('characters').select('id, class_id').eq('user_id', user.id).maybeSingle()
   if (!charCheck) redirect('/character/create')
 
   const characterId = charCheck.id
@@ -22,6 +31,8 @@ export default async function BuildingPage() {
     { data: inventoryRaw },
     { data: characterSkillsRaw },
     { data: characterMaestriasRaw },
+    { data: classSkillTreeRaw },
+    { data: essenciaWallet },
   ] = await Promise.all([
     supabase
       .from('character_building')
@@ -49,6 +60,20 @@ export default async function BuildingPage() {
       .from('character_maestrias')
       .select('maestria_id, maestrias(id, name, description, category)')
       .eq('character_id', characterId),
+    // Árvore de skills da classe (todas as 8)
+    charCheck.class_id
+      ? supabase
+          .from('skills')
+          .select('id, name, description, skill_type, tree_position, eter_cost, range_state, is_starting_skill')
+          .eq('class_id', charCheck.class_id)
+          .order('tree_position')
+      : Promise.resolve({ data: null }),
+    // Essência disponível
+    supabase
+      .from('character_wallet')
+      .select('essencia')
+      .eq('character_id', characterId)
+      .single(),
   ])
 
   // Transform building slots
@@ -128,6 +153,11 @@ export default async function BuildingPage() {
       required_level: (inv.items as Record<string, unknown>).required_level as number,
     },
   }))
+
+  // Skill tree data
+  const classSkillTree = classSkillTreeRaw ?? []
+  const acquiredSkillIds = new Set((characterSkillsRaw ?? []).map((cs) => cs.skill_id as string))
+  const essencia = (essenciaWallet as Record<string, unknown> | null)?.essencia as number ?? 0
 
   const SKILL_TYPE_BADGE: Record<string, 'crimson' | 'gold' | 'bronze'> = {
     ativa: 'crimson', passiva: 'gold', reativa: 'bronze',
@@ -217,6 +247,26 @@ export default async function BuildingPage() {
           </>
         )}
       </div>
+
+      {/* SEÇÃO 4 — Árvore de Skills */}
+      {classSkillTree.length > 0 && (
+        <SkillTreeSection
+          characterId={characterId}
+          classSkillTree={classSkillTree.map((s) => ({
+            id: s.id as string,
+            name: s.name as string,
+            description: s.description as string,
+            skill_type: s.skill_type as string,
+            tree_position: (s.tree_position as number) ?? 0,
+            eter_cost: (s.eter_cost as number) ?? 0,
+            range_state: s.range_state as string,
+            is_starting_skill: s.is_starting_skill as boolean,
+          }))}
+          acquiredSkillIds={Array.from(acquiredSkillIds)}
+          essencia={essencia}
+          costMap={SKILL_ESSENCIA_COST}
+        />
+      )}
     </div>
   )
 }
