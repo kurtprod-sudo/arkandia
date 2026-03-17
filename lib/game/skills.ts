@@ -74,12 +74,17 @@ export async function acquireSkill(
   // Verifica se skill pertence à classe do personagem
   const { data: skill } = await supabase
     .from('skills')
-    .select('id, class_id, name')
+    .select('id, class_id, name, tree_position, is_starting_skill')
     .eq('id', skillId)
     .single()
   if (!skill) return { success: false, error: 'Skill não encontrada.' }
   if (skill.class_id !== character.class_id) {
     return { success: false, error: 'Esta skill não pertence à sua classe.' }
+  }
+
+  // Skills iniciais são concedidas na criação — não podem ser adquiridas aqui
+  if (skill.is_starting_skill) {
+    return { success: false, error: 'Esta skill é concedida automaticamente na criação do personagem.' }
   }
 
   // Verifica se já tem a skill
@@ -91,21 +96,32 @@ export async function acquireSkill(
     .maybeSingle()
   if (existing) return { success: false, error: 'Você já possui esta skill.' }
 
-  // Verifica e debita Essência (custo fixo: 10 por skill — mover para seed SQL)
-  const SKILL_ESSENCIA_COST = 10
+  // Custo de Essência por posição na árvore — GDD_Balanceamento §10
+  const SKILL_ESSENCIA_COST_MAP: Record<number, number> = {
+    3: 30, 4: 30,
+    5: 50, 6: 50,
+    7: 80,
+    8: 120,
+  }
+  const treePosition = (skill.tree_position as number) ?? 0
+  const skillEssenciaCost = SKILL_ESSENCIA_COST_MAP[treePosition] ?? 0
+
   const { data: wallet } = await supabase
     .from('character_wallet')
     .select('essencia')
     .eq('character_id', characterId)
     .single()
-  if (!wallet || wallet.essencia < SKILL_ESSENCIA_COST) {
-    return { success: false, error: 'Essência insuficiente.' }
+  if (!wallet || wallet.essencia < skillEssenciaCost) {
+    return {
+      success: false,
+      error: `Essência insuficiente. Necessário: ${skillEssenciaCost}.`,
+    }
   }
 
   // Debita Essência
   const { error: walletError } = await supabase
     .from('character_wallet')
-    .update({ essencia: wallet.essencia - SKILL_ESSENCIA_COST })
+    .update({ essencia: wallet.essencia - skillEssenciaCost })
     .eq('character_id', characterId)
   if (walletError) return { success: false, error: 'Erro ao debitar Essência.' }
 
@@ -128,7 +144,7 @@ export async function acquireSkill(
   await createEvent(supabase, {
     type: 'skill_acquired',
     actorId: characterId,
-    metadata: { skill_id: skillId, skill_name: skill.name, essencia_cost: SKILL_ESSENCIA_COST },
+    metadata: { skill_id: skillId, skill_name: skill.name, essencia_cost: skillEssenciaCost },
     isPublic: false,
     narrativeText: maestriasUnlocked
       ? `${skill.name} dominada. O caminho das Maestrias se abre.`

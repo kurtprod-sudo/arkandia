@@ -156,6 +156,38 @@ export async function createCharacter(formData: FormData) {
     await supabase.from('character_building').insert(buildingInserts)
   }
 
+  // Concede item inicial da classe ao inventário
+  const CLASS_STARTING_WEAPON: Record<string, string> = {
+    'Espadachim': 'Espada de Bronze',
+    'Lanceiro':   'Lança de Bronze',
+    'Lutador':    'Manoplas de Bronze',
+    'Destruidor': 'Martelo de Bronze',
+    'Escudeiro':  'Espada Curta de Bronze',
+    'Assassino':  'Adaga de Bronze',
+    'Arqueiro':   'Arco Curto de Bronze',
+    'Atirador':   'Pistola Etérica de Bronze',
+    'Druida':     'Machado de Bronze',
+    'Bardo':      'Alaúde de Bronze',
+    'Mago':       'Cajado de Bronze',
+  }
+
+  const startingWeaponName = CLASS_STARTING_WEAPON[classData.name as string]
+  if (startingWeaponName) {
+    const { data: startingWeapon } = await supabase
+      .from('items')
+      .select('id')
+      .eq('name', startingWeaponName)
+      .maybeSingle()
+
+    if (startingWeapon) {
+      await supabase.from('inventory').insert({
+        character_id: character.id,
+        item_id: startingWeapon.id,
+        quantity: 1,
+      })
+    }
+  }
+
   // Registra evento
   const weaponType = (classData.weapon_type as string) ?? 'arma desconhecida'
   await createEvent(supabase, {

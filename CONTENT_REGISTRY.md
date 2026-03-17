@@ -1,7 +1,7 @@
 # CONTENT REGISTRY — Arkandia
 > Fonte de verdade para todo conteúdo seedado no banco.
 > Atualizar sempre que executar um seed SQL novo.
-> Última atualização: Março 2026
+> Última atualização: Março 2026 — Seeds A/B/C executados (266 equipamentos + 12 materiais)
 
 ---
 
@@ -54,39 +54,146 @@ Nunca referenciar item, skill, NPC ou zona que não esteja listado aqui.
 ## EQUIPAMENTOS
 
 > Tabela: items (item_type = 'equipamento')
-> Seeds: supabase/seeds/seed_armas.sql (pendente), seed_armaduras.sql (pendente)
+> Seeds: seed_armas.sql ✓, seed_armaduras.sql ✓, seed_acessorios.sql ✓
+
+### Regras de inserção (CRÍTICO)
+- Tabela items NÃO tem UNIQUE constraint em name
+- NUNCA usar ON CONFLICT (name) — gera erro
+- Padrão obrigatório: INSERT ... WHERE NOT EXISTS (SELECT 1 FROM items WHERE name = '...')
+- Para atualizar existentes: UPDATE items SET ... WHERE name = '...'
 
 ### Armas Iniciais por Classe (concedidas na criação do personagem)
 
-| Nome | Classe | Slot | Seed |
+| Classe | Arma inicial | Slot | Seed |
 |---|---|---|---|
-| — | — | — | pendente (seed_item_inicial.sql) |
+| Espadachim | Espada de Bronze | arma_principal | pendente (seed_item_inicial.sql) |
+| Lanceiro | Lança de Bronze | arma_principal | pendente |
+| Lutador | Manoplas de Bronze | arma_principal | pendente |
+| Destruidor | Martelo de Bronze | arma_principal | pendente |
+| Escudeiro | Espada Curta de Bronze | arma_principal | pendente |
+| Assassino | Adaga de Bronze | arma_principal | pendente |
+| Arqueiro | Arco Curto de Bronze | arma_principal | pendente |
+| Atirador | Pistola Etérica de Bronze | arma_principal | pendente |
+| Druida | Machado de Bronze | arma_principal | pendente |
+| Bardo | Alaúde de Bronze | arma_principal | pendente |
+| Mago | Cajado de Bronze | arma_principal | pendente |
 
-### Armas (slot: arma_principal)
+---
 
-> Pendente — aguardando geração via prompt A
+### Armas (slot: arma_principal) — 132 itens ✓
+> Seed: seed_armas.sql — executado
 
-### Armaduras (slot: armadura)
+**Estrutura:** 11 classes × 3 variações × 4 materiais (Bronze/Ferro/Aço/Prata)
+**Raridades:** Bronze=comum, Ferro=comum, Aço=incomum, Prata=raro
+**Levels:** Bronze=1, Ferro=3, Aço=6, Prata=10 (Montante/Glaive/Destruidor +1)
 
-> Pendente — aguardando geração via prompt B
+| Classe | Variações | Stats primário |
+|---|---|---|
+| Espadachim | Espada, Katana, Montante | ataque |
+| Lanceiro | Lança, Alabarda, Glaive | ataque (Alabarda: +vel 1) |
+| Lutador | Manoplas, Garras, Braçadeiras de Combate | ataque |
+| Destruidor | Martelo, Maça, Mangual | ataque |
+| Escudeiro | Espada Curta, Machado Curto, Maça Curta | ataque |
+| Assassino | Adaga, Kunai, Stiletto | ataque |
+| Arqueiro | Arco Curto, Arco Longo, Arco Composto | ataque |
+| Atirador | Pistola Etérica, Rifle Etérico, Espingarda Etérica | ataque |
+| Druida | Machado, Machadinha Dupla, Machado de Guerra | ataque |
+| Mago | Cajado, Varinha, Orbe | magia |
+| Bardo | Alaúde, Flauta de Combate, Tambor Etéreo | magia |
 
-### Elmos (slot: elmo)
+Nomes Prata têm identidade cultural (ex: "Espada Prateada de Ogygia", "Cajado Prateado de Serdin").
 
-> Pendente — aguardando geração via prompt B
+---
 
-### Calças (slot: calca)
+### Armaduras (slot: armadura) — 21 itens ✓
+> Seed: seed_armaduras.sql — executado
 
-> Pendente — aguardando geração via prompt B
+**Físicas (Bronze/Ferro/Aço/Prata):**
+- Armadura de [Material] — DEF puro
+- Armadura Reforçada de [Material] — DEF maior, required_level +1
+- Gibão de [Material] — DEF menor + VIT
 
-### Botas (slot: bota)
+**Mágicas (Tecido Etéreo/Seda Arcana/Couro Espiritual):**
+- Manto de [Material] — VIT puro
+- Túnica de [Material] — VIT + DEF 1
+- Vestes de [Material] — VIT maior, required_level +1
 
-> Pendente — aguardando geração via prompt B
+---
 
-### Acessórios (slot: acessorio_1 / acessorio_2)
+### Elmos (slot: elmo) — 21 itens ✓
+> Seed: seed_armaduras.sql — executado
 
-> Pendente — aguardando geração via prompt C
+**Físicos (Bronze/Ferro/Aço/Prata):**
+- Elmo de [Material] — DEF puro
+- Capacete de [Material] — DEF + VIT 1
+- Morrião de [Material] — DEF ligeiramente maior
 
-### Equipamentos de Exemplo (migration 025 — já existiam)
+**Mágicos (Tecido Etéreo/Seda Arcana/Couro Espiritual):**
+- Capuz de [Material] — VIT puro
+- Tiara de [Material] — VIT + PRE 1
+- Capuz Reforçado de [Material] — VIT maior
+
+---
+
+### Calças (slot: calca) — 14 itens ✓
+> Seed: seed_armaduras.sql — executado
+
+**Físicas (Bronze/Ferro/Aço/Prata):**
+- Grevas de [Material] — DEF + VEL
+- Calças de Combate de [Material] — DEF menor + VEL maior
+
+**Mágicas (Tecido Etéreo/Seda Arcana/Couro Espiritual):**
+- Calças de [Material] — DEF 1 + VEL
+- Saia de Combate de [Material] — VEL puro
+
+---
+
+### Botas (slot: bota) — 14 itens ✓
+> Seed: seed_armaduras.sql — executado
+
+**Físicas (Bronze/Ferro/Aço/Prata):**
+- Botas de [Material] — VEL puro
+- Botas de Combate de [Material] — VEL menor + PRE
+
+**Mágicas (Tecido Etéreo/Seda Arcana/Couro Espiritual):**
+- Sandálias de [Material] — VEL puro
+- Botas Etéreas de [Material] — VEL menor + PRE 1
+
+---
+
+### Acessórios (slot: acessorio_1) — 64 itens ✓
+> Seed: seed_acessorios.sql — executado
+> Nota: slot_type = 'acessorio_1' mas equipável em acessorio_2 também
+
+**Sistema de tiers:** Tier 1 (comum, lv1) → Reforçado (comum, lv4) → Etéreo (incomum, lv7) → Ancestral (raro, lv10)
+
+**Categoria 1 — Anéis de Ataque (16 itens):**
+- Anel de Combate [tier] — ATQ
+- Anel Arcano [tier] — MAG
+- Anel do Caçador [tier] — ATQ + PRE 1
+- Anel da Velocidade [tier] — ATQ + VEL 1
+
+**Categoria 2 — Amuletos de Defesa (16 itens):**
+- Amuleto de Proteção [tier] — DEF
+- Amuleto da Vitalidade [tier] — VIT
+- Amuleto da Tenacidade [tier] — TEN
+- Amuleto do Escudo [tier] — DEF + VIT 2
+
+**Categoria 3 — Colares de Suporte (16 itens):**
+- Colar da Precisão [tier] — PRE
+- Colar da Velocidade [tier] — VEL
+- Colar do Comandante [tier] — CAP
+- Colar Equilibrado [tier] — DEF + VEL
+
+**Categoria 4 — Híbridos (16 itens):**
+- Anel do Duelo [tier] — ATQ + DEF
+- Amuleto da Força Espiritual [tier] — MAG + VIT
+- Anel do Assassino [tier] — ATQ + TEN
+- Amuleto do Guardião [tier] — DEF + TEN
+
+---
+
+### Equipamentos legados (migration 025 — já existiam antes dos seeds)
 
 | Nome | Slot | Raridade | Stats | min_level |
 |---|---|---|---|---|
@@ -98,6 +205,10 @@ Nunca referenciar item, skill, NPC ou zona que não esteja listado aqui.
 | Botas de Viajante | bota | comum | VEL +2 | 1 |
 | Anel de Proteção | acessorio_1 | incomum | DEF +3 | 3 |
 | Amuleto de Força | acessorio_1 | incomum | ATQ +4 | 3 |
+
+> Atenção: esses itens têm nomes que podem colidir com os seeds novos.
+> "Espada de Ferro" já existia — o seed_armas.sql usa WHERE NOT EXISTS e não duplica.
+> "Elmo de Ferro", "Armadura de Couro", "Botas de Viajante" são únicos, sem conflito.
 
 ---
 
@@ -169,8 +280,10 @@ Nunca referenciar item, skill, NPC ou zona que não esteja listado aqui.
 *Fragmento de Lore, Essência Natural: itens referenciados mas ainda não seedados na tabela items
 *Pergaminho: referenciado como "Pergaminho de Classe de Prestígio" — agora seedado ✓
 
-> AÇÃO NECESSÁRIA: atualizar loot_tables das zonas para incluir
-> equipamentos após seed_armas.sql e seed_armaduras.sql serem executados
+> AÇÃO PENDENTE: criar seed_zonas_novas.sql para:
+> 1. Adicionar 2 zonas novas (nível 15–25 e 25+)
+> 2. Atualizar loot_tables das 5 zonas existentes para incluir drops de equipamentos
+> 3. Referências válidas para loot_tables: qualquer item listado neste registry
 
 ---
 
@@ -308,10 +421,25 @@ Nunca referenciar item, skill, NPC ou zona que não esteja listado aqui.
 | Arquivo | Conteúdo | Status |
 |---|---|---|
 | migrations 001–041 | Schema + seeds base | ✓ Executado |
-| seed_materiais.sql | 12 materiais base | ✓ Pronto para executar |
-| seed_armas.sql | 132 armas (11 classes × 3 variações × 4 materiais) | Pendente |
-| seed_armaduras.sql | Armaduras, elmos, calças, botas | Pendente |
-| seed_acessorios.sql | Anéis, amuletos, colares | Pendente |
-| seed_item_inicial.sql | Item inicial por classe + lógica createCharacter | Pendente |
+| seed_materiais_v3.sql | 12 materiais (4 UPDATE + 8 INSERT) | ✓ Executado |
+| seed_armas.sql | 132 armas (11 classes × 3 variações × 4 materiais) | ✓ Executado |
+| seed_armaduras.sql | 70 itens (armadura 21, elmo 21, calca 14, bota 14) | ✓ Executado |
+| seed_acessorios.sql | 64 acessórios (4 categorias × 4 variações × 4 tiers) | ✓ Executado |
+| seed_item_inicial.sql | Item Bronze por classe na criação do personagem | Pendente |
 | seed_zonas_novas.sql | 2 zonas novas (15–25, 25+) + loot_tables atualizadas | Pendente |
 | seed_skills_[classe].sql | 8 skills por classe | Pendente (11 seeds) |
+
+### Contagem total de itens no banco (estimada)
+
+| Categoria | Quantidade |
+|---|---|
+| Materiais | 12 |
+| Armas (arma_principal) | 132 + 3 legados = 135 |
+| Armaduras | 21 + 1 legado = 22 |
+| Elmos | 21 + 1 legado = 22 |
+| Calças | 14 |
+| Botas | 14 + 1 legado = 15 |
+| Acessórios | 64 + 2 legados = 66 |
+| Pergaminhos | 1 |
+| Outros (migration 013) | Erva de Cura, Poção de Éter, Fragmento de Lore, Equipamento Militar = 4 |
+| **Total estimado** | **~291 itens** |
