@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import ArkBadge from '@/components/ui/ArkBadge'
-import ArkButton from '@/components/ui/ArkButton'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -41,6 +40,40 @@ export default async function PublicCharacterPage({ params }: Props) {
   const society = character.societies as { name: string } | null
   const race = character.races as { name: string } | null
   const gameClass = character.classes as { name: string } | null
+
+  // Fetch building and rare achievements in parallel
+  const [
+    { data: buildingRaw },
+    { data: achievementsRaw },
+  ] = await Promise.all([
+    supabase
+      .from('character_building')
+      .select('slot, skills(id, name, skill_type, eter_cost, range_state)')
+      .eq('character_id', character.id)
+      .order('slot'),
+    supabase
+      .from('character_achievements')
+      .select('achievement_id, unlocked_at, achievements(title, description, rarity, icon)')
+      .eq('character_id', character.id)
+      .not('unlocked_at', 'is', null)
+      .order('unlocked_at', { ascending: false }),
+  ])
+
+  const building = (buildingRaw ?? []).map((b) => ({
+    slot: b.slot as number,
+    skill: b.skills ? {
+      name: (b.skills as Record<string, unknown>).name as string,
+      skill_type: (b.skills as Record<string, unknown>).skill_type as string,
+      eter_cost: (b.skills as Record<string, unknown>).eter_cost as number,
+    } : null,
+  }))
+
+  const rareAchievements = (achievementsRaw ?? [])
+    .filter((a) => {
+      const ach = a.achievements as Record<string, unknown> | null
+      return ach && ['raro', 'epico', 'lendario'].includes(ach.rarity as string)
+    })
+    .slice(0, 6)
 
   return (
     <main className="min-h-screen bg-[var(--ark-void)] text-[var(--text-primary)] flex items-center justify-center px-4">
@@ -90,12 +123,68 @@ export default async function PublicCharacterPage({ params }: Props) {
             />
           </div>
 
-          {/* Diário */}
-          <div className="text-center mt-6">
-            <Link href={`/diary/${character.id}`}>
-              <ArkButton variant="ghost" size="sm">
-                Ver Diário
-              </ArkButton>
+          {/* Building */}
+          {building.some((b) => b.skill) && (
+            <div className="mt-4 pt-4 border-t border-[var(--ark-border)]">
+              <p className="text-[9px] font-data text-[var(--text-ghost)] uppercase tracking-wider mb-2">Building</p>
+              <div className="grid grid-cols-3 gap-1.5">
+                {Array.from({ length: 6 }, (_, i) => {
+                  const slot = building.find((b) => b.slot === i + 1)
+                  const skill = slot?.skill ?? null
+                  return (
+                    <div
+                      key={i}
+                      className={`p-2 rounded-sm border text-center ${
+                        skill ? 'border-[var(--ark-border-bright)] bg-[var(--ark-bg)]' : 'border-[var(--ark-border)] opacity-30'
+                      }`}
+                    >
+                      {skill ? (
+                        <>
+                          <p className="text-[9px] font-data text-[var(--text-primary)] truncate">{skill.name}</p>
+                          <p className="text-[8px] font-data text-[var(--text-ghost)] mt-0.5">{skill.skill_type}</p>
+                        </>
+                      ) : (
+                        <p className="text-[9px] font-data text-[var(--text-ghost)]">—</p>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Conquistas raras */}
+          {rareAchievements.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-[var(--ark-border)]">
+              <p className="text-[9px] font-data text-[var(--text-ghost)] uppercase tracking-wider mb-2">Conquistas</p>
+              <div className="flex flex-wrap gap-1.5">
+                {rareAchievements.map((a) => {
+                  const ach = a.achievements as Record<string, unknown>
+                  const rarity = ach.rarity as string
+                  const color = rarity === 'lendario' ? 'text-[var(--ark-gold-bright)] border-[var(--ark-gold)]/40'
+                    : rarity === 'epico' ? 'text-attr-eter border-attr-eter/40'
+                    : 'text-[var(--text-secondary)] border-[var(--ark-border)]'
+                  return (
+                    <span
+                      key={a.achievement_id as string}
+                      title={ach.description as string}
+                      className={`text-[9px] font-data px-2 py-0.5 rounded-sm border ${color}`}
+                    >
+                      {ach.title as string}
+                    </span>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Diário + Rankings */}
+          <div className="flex justify-center gap-4 mt-6">
+            <Link href={`/diary/${character.id}`} className="text-xs font-data text-[var(--text-ghost)] hover:text-[var(--text-secondary)] transition-colors">
+              Ver Diário
+            </Link>
+            <Link href="/rankings" className="text-xs font-data text-[var(--text-ghost)] hover:text-[var(--text-secondary)] transition-colors">
+              Rankings →
             </Link>
           </div>
 

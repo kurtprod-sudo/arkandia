@@ -4,6 +4,7 @@ import ArkDivider from '@/components/ui/ArkDivider'
 import ArkBadge from '@/components/ui/ArkBadge'
 import EquipmentSilhouette from '@/components/character/EquipmentSilhouette'
 import SkillTreeSection from '@/components/character/SkillTreeSection'
+import MaestriaShopSection from '@/components/character/MaestriaShopSection'
 
 const SKILL_ESSENCIA_COST: Record<number, number> = {
   1: 0, 2: 0,
@@ -19,7 +20,7 @@ export default async function BuildingPage() {
   if (!user) redirect('/auth/login')
 
   const { data: charCheck } = await supabase
-    .from('characters').select('id, class_id').eq('user_id', user.id).maybeSingle()
+    .from('characters').select('id, class_id, resonance_archetype, resonance_level, is_resonance_unlocked').eq('user_id', user.id).maybeSingle()
   if (!charCheck) redirect('/character/create')
 
   const characterId = charCheck.id
@@ -33,6 +34,9 @@ export default async function BuildingPage() {
     { data: characterMaestriasRaw },
     { data: classSkillTreeRaw },
     { data: essenciaWallet },
+    { data: prestigioMaestriasRaw },
+    { data: ressonanciaMaestriasRaw },
+    { data: acquiredMaestriasRaw },
   ] = await Promise.all([
     supabase
       .from('character_building')
@@ -74,6 +78,27 @@ export default async function BuildingPage() {
       .select('essencia')
       .eq('character_id', characterId)
       .single(),
+    // Maestrias de Prestígio (da classe)
+    charCheck.class_id
+      ? supabase
+          .from('maestrias')
+          .select('id, name, description, category, restrictions, cost')
+          .eq('category', 'prestígio')
+          .eq('is_active', true)
+      : Promise.resolve({ data: null }),
+    // Maestrias de Ressonância (do arquétipo)
+    charCheck.resonance_archetype
+      ? supabase
+          .from('maestrias')
+          .select('id, name, description, category, restrictions, cost')
+          .eq('category', 'ressonância')
+          .eq('is_active', true)
+      : Promise.resolve({ data: null }),
+    // Maestrias já adquiridas
+    supabase
+      .from('character_maestrias')
+      .select('maestria_id')
+      .eq('character_id', characterId),
   ])
 
   // Transform building slots
@@ -158,6 +183,56 @@ export default async function BuildingPage() {
   const classSkillTree = classSkillTreeRaw ?? []
   const acquiredSkillIds = new Set((characterSkillsRaw ?? []).map((cs) => cs.skill_id as string))
   const essencia = (essenciaWallet as Record<string, unknown> | null)?.essencia as number ?? 0
+
+  // Maestria data
+  const hasUnlockedMaestrias = acquiredSkillIds.size >= 8
+  const acquiredMaestriaIds = new Set((acquiredMaestriasRaw ?? []).map((cm) => cm.maestria_id as string))
+
+  const prestigioMaestrias = (prestigioMaestriasRaw ?? [])
+    .filter((m) => {
+      const r = m.restrictions as Record<string, unknown> | null
+      if (!r) return true
+      if (r.class_id && r.class_id !== charCheck.class_id) return false
+      if (r.class_ids && !(r.class_ids as string[]).includes(charCheck.class_id as string)) return false
+      return true
+    })
+    .map((m) => {
+      const cost = (m.cost as Record<string, unknown>) ?? {}
+      return {
+        id: m.id as string,
+        name: m.name as string,
+        description: m.description as string,
+        category: 'prestígio' as const,
+        essenciaCost: (cost.essencia as number) ?? 0,
+        requiresItem: (cost.requires_item as string) ?? null,
+        minResonanceLevel: 0,
+        locked: false,
+      }
+    })
+
+  const ressonanciaMaestrias = (ressonanciaMaestriasRaw ?? [])
+    .filter((m) => {
+      const r = m.restrictions as Record<string, unknown> | null
+      if (!r) return true
+      if (r.resonance_type && r.resonance_type !== charCheck.resonance_archetype) return false
+      return true
+    })
+    .map((m) => {
+      const cost = (m.cost as Record<string, unknown>) ?? {}
+      const restrictions = (m.restrictions as Record<string, unknown>) ?? {}
+      const minResLevel = (restrictions.min_resonance_level as number) ?? 1
+      const locked = (charCheck.resonance_level ?? 1) < minResLevel
+      return {
+        id: m.id as string,
+        name: m.name as string,
+        description: m.description as string,
+        category: 'ressonância' as const,
+        essenciaCost: (cost.essencia as number) ?? 0,
+        requiresItem: null,
+        minResonanceLevel: minResLevel,
+        locked,
+      }
+    })
 
   const SKILL_TYPE_BADGE: Record<string, 'crimson' | 'gold' | 'bronze'> = {
     ativa: 'crimson', passiva: 'gold', reativa: 'bronze',
@@ -265,6 +340,18 @@ export default async function BuildingPage() {
           acquiredSkillIds={Array.from(acquiredSkillIds)}
           essencia={essencia}
           costMap={SKILL_ESSENCIA_COST}
+        />
+      )}
+
+      {/* SEÇÃO 5 — Maestrias */}
+      {hasUnlockedMaestrias && (
+        <MaestriaShopSection
+          characterId={characterId}
+          essencia={essencia}
+          prestigioMaestrias={prestigioMaestrias}
+          ressonanciaMaestrias={ressonanciaMaestrias}
+          acquiredIds={Array.from(acquiredMaestriaIds)}
+          resonanceArchetype={charCheck.resonance_archetype as string | null}
         />
       )}
     </div>

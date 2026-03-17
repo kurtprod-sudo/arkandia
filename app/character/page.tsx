@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { PROGRESSION_MILESTONES } from '@/lib/game/xp'
 import CharacterSheet from '@/components/character/CharacterSheet'
+import CopyProfileLink from '@/components/character/CopyProfileLink'
 import DistributePointsPanel from '@/components/character/DistributePointsPanel'
 import ResonanceEventModal from '@/components/character/ResonanceEventModal'
 import ResonancePanel from '@/components/character/ResonancePanel'
@@ -32,6 +33,8 @@ export default async function CharacterSheetPage() {
     { data: buildingRaw },
     { data: reputationsRaw },
     { data: characterTitlesRaw },
+    { data: profileData },
+    { data: characterSkillsRaw },
   ] = await Promise.all([
     supabase
       .from('characters')
@@ -62,6 +65,15 @@ export default async function CharacterSheetPage() {
       .select('*, title_definitions(name, description, category)')
       .eq('character_id', characterId)
       .order('granted_at', { ascending: false }),
+    supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', user.id)
+      .single(),
+    supabase
+      .from('character_skills')
+      .select('skill_id, skills(id, name, skill_type, description, eter_cost, range_state, tree_position)')
+      .eq('character_id', characterId),
   ])
 
   // Extract joined names before casting to Character type
@@ -155,6 +167,13 @@ export default async function CharacterSheetPage() {
       <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full bg-[var(--ark-gold)]/5 blur-[120px] pointer-events-none" />
 
       <div className="relative z-10">
+        {/* Copy profile link */}
+        {profileData?.username && (
+          <div className="max-w-5xl mx-auto mb-2 flex justify-end">
+            <CopyProfileLink username={profileData.username} />
+          </div>
+        )}
+
         <CharacterSheet
           character={character as unknown as import('@/types').Character}
           attrs={attrs}
@@ -168,6 +187,57 @@ export default async function CharacterSheetPage() {
           gemasBalance={wallet.premium_currency}
           titles={characterTitles}
         />
+
+        {/* Skills Adquiridas */}
+        {characterSkillsRaw && characterSkillsRaw.length > 0 && (
+          <div className="max-w-5xl mx-auto mt-6">
+            <div className="bg-[var(--ark-surface)] backdrop-blur-xl rounded-sm p-5 border border-[var(--ark-border)]">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-[10px] font-data text-[var(--text-label)] uppercase tracking-wider">
+                  Skills Adquiridas
+                </h2>
+                <span className="text-[10px] font-data text-[var(--text-ghost)]">
+                  {characterSkillsRaw.length}/8
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {characterSkillsRaw.map((cs) => {
+                  const skill = cs.skills as Record<string, unknown> | null
+                  if (!skill) return null
+                  const skillType = skill.skill_type as string
+                  const typeColor = skillType === 'ativa' ? 'text-[var(--ark-red-glow)]'
+                    : skillType === 'reativa' ? 'text-[var(--ark-gold)]'
+                    : 'text-[var(--text-label)]'
+                  return (
+                    <div key={cs.skill_id as string} className="p-3 bg-[var(--ark-bg)] border border-[var(--ark-border)] rounded-sm">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-xs font-data font-semibold text-[var(--text-primary)] truncate">
+                          {skill.name as string}
+                        </span>
+                        <span className={`text-[8px] font-data ${typeColor}`}>{skillType}</span>
+                      </div>
+                      <p className="text-[9px] font-body text-[var(--text-label)] line-clamp-2">
+                        {skill.description as string}
+                      </p>
+                      {(skill.eter_cost as number) > 0 && (
+                        <p className="text-[9px] font-data text-attr-eter mt-0.5">
+                          {skill.eter_cost as number} Éter · {skill.range_state as string}
+                        </p>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+              {characterSkillsRaw.length < 8 && (
+                <p className="text-[10px] font-data text-[var(--text-ghost)] text-center mt-3">
+                  <a href="/building" className="hover:text-[var(--text-secondary)] transition-colors">
+                    Adquirir mais skills na Building →
+                  </a>
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Distribute attribute points */}
         {attrs.attribute_points > 0 && (
